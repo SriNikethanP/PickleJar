@@ -22,57 +22,74 @@ export const listProducts = async ({
   nextPage: number | null;
   queryParams?: HttpTypes.FindParams & HttpTypes.StoreProductParams;
 }> => {
-  const limit = queryParams?.limit || 12;
-  const _pageParam = Math.max(pageParam, 1);
-  const offset = _pageParam === 1 ? 0 : (_pageParam - 1) * limit;
+  try {
+    const limit = queryParams?.limit || 12;
+    const _pageParam = Math.max(pageParam, 1);
+    const offset = _pageParam === 1 ? 0 : (_pageParam - 1) * limit;
 
-  const region = await getRegion("in");
+    const region = await getRegion("in");
 
-  if (!region) {
+    if (!region) {
+      return {
+        response: { products: [], count: 0 },
+        nextPage: null,
+      };
+    }
+
+    const headers = {
+      ...(await getAuthHeaders()),
+    };
+
+    const next = {
+      ...(await getCacheOptions("products")),
+    };
+
+    return sdk.client
+      .fetch<{ products: HttpTypes.StoreProduct[]; count: number }>(
+        `/store/products`,
+        {
+          method: "GET",
+          query: {
+            limit,
+            offset,
+            region_id: region?.id,
+            fields:
+              "*variants.calculated_price,+variants.inventory_quantity,+metadata,+tags",
+            ...queryParams,
+          },
+          headers,
+          next,
+          cache: "force-cache",
+        }
+      )
+      .then(({ products, count }) => {
+        const nextPage = count > offset + limit ? pageParam + 1 : null;
+
+        return {
+          response: {
+            products,
+            count,
+          },
+          nextPage: nextPage,
+          queryParams,
+        };
+      })
+      .catch((error) => {
+        console.error("Error fetching products:", error);
+        return {
+          response: { products: [], count: 0 },
+          nextPage: null,
+          queryParams,
+        };
+      });
+  } catch (error) {
+    console.error("Error in listProducts:", error);
     return {
       response: { products: [], count: 0 },
       nextPage: null,
+      queryParams,
     };
   }
-
-  const headers = {
-    ...(await getAuthHeaders()),
-  };
-
-  const next = {
-    ...(await getCacheOptions("products")),
-  };
-
-  return sdk.client
-    .fetch<{ products: HttpTypes.StoreProduct[]; count: number }>(
-      `/store/products`,
-      {
-        method: "GET",
-        query: {
-          limit,
-          offset,
-          region_id: region?.id,
-          fields:
-            "*variants.calculated_price,+variants.inventory_quantity,+metadata,+tags",
-          ...queryParams,
-        },
-        headers,
-        next,
-        cache: "force-cache",
-      }
-    )
-    .then(({ products, count }) => {
-      const nextPage = count > offset + limit ? pageParam + 1 : null;
-
-      return {
-        response: {
-          products,
-          count,
-        },
-        nextPage: nextPage,
-        queryParams,
-      };
-    });
 };
 
 /**
