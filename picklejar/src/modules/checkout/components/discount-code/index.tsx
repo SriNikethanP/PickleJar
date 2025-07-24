@@ -10,6 +10,7 @@ import { HttpTypes } from "@medusajs/types";
 import Trash from "@modules/common/icons/trash";
 import ErrorMessage from "../error-message";
 import { SubmitButton } from "../submit-button";
+import { toast } from "sonner";
 
 type DiscountCodeProps = {
   cart: HttpTypes.StoreCart & {
@@ -25,15 +26,20 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
     const validPromotions = promotions.filter(
       (promotion) => promotion.code !== code
     );
-
-    await applyPromotions(
-      validPromotions.filter((p) => p.code === undefined).map((p) => p.code!)
-    );
+    try {
+      await applyPromotions(
+        validPromotions.filter((p) => p.code === undefined).map((p) => p.code!)
+      );
+      toast.success("Promotion removed");
+    } catch (err) {
+      toast.error("Failed to remove promotion");
+    }
   };
 
   const addPromotionCode = async (formData: FormData) => {
     const code = formData.get("code");
     if (!code) {
+      toast.error("Please enter a code");
       return;
     }
     const input = document.getElementById(
@@ -43,9 +49,12 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
       .filter((p) => p.code === undefined)
       .map((p) => p.code!);
     codes.push(code.toString());
-
-    await applyPromotions(codes);
-
+    try {
+      await applyPromotions(codes);
+      toast.success("Promotion applied");
+    } catch (err) {
+      toast.error("Failed to apply promotion");
+    }
     if (input) {
       input.value = "";
     }

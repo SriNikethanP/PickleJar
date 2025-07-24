@@ -1,48 +1,60 @@
-"use client"
+"use client";
 
-import { Plus } from "@medusajs/icons"
-import { Button, Heading } from "@medusajs/ui"
-import { useEffect, useState, useActionState } from "react"
+import { Plus } from "@medusajs/icons";
+import { Button, Heading } from "@medusajs/ui";
+import { useEffect, useState, useActionState } from "react";
 
-import useToggleState from "@lib/hooks/use-toggle-state"
-import CountrySelect from "@modules/checkout/components/country-select"
-import Input from "@modules/common/components/input"
-import Modal from "@modules/common/components/modal"
-import { SubmitButton } from "@modules/checkout/components/submit-button"
-import { HttpTypes } from "@medusajs/types"
-import { addCustomerAddress } from "@lib/data/customer"
+import useToggleState from "@lib/hooks/use-toggle-state";
+import CountrySelect from "@modules/checkout/components/country-select";
+import Input from "@modules/common/components/input";
+import Modal from "@modules/common/components/modal";
+import { SubmitButton } from "@modules/checkout/components/submit-button";
+import { HttpTypes } from "@medusajs/types";
+import { addCustomerAddress } from "@lib/data/customer";
+import { toast } from "sonner";
 
 const AddAddress = ({
   addresses,
 }: {
-  addresses: HttpTypes.StoreCustomerAddress[]
+  addresses: HttpTypes.StoreCustomerAddress[];
 }) => {
-  const [successState, setSuccessState] = useState(false)
-  const { state, open, close: closeModal } = useToggleState(false)
+  const [successState, setSuccessState] = useState(false);
+  const { state, open, close: closeModal } = useToggleState(false);
 
-  const [formState, formAction] = useActionState(addCustomerAddress, {
-    isDefaultShipping: addresses.length === 0,
-    success: false,
-    error: null,
-  })
+  const [formState, formAction] = useActionState(
+    async (...args) => {
+      const result = await addCustomerAddress(...args);
+      if (result.success) {
+        toast.success("Address added successfully");
+      } else if (result.error) {
+        toast.error(result.error || "Failed to add address");
+      }
+      return result;
+    },
+    {
+      isDefaultShipping: addresses.length === 0,
+      success: false,
+      error: null,
+    }
+  );
 
   const close = () => {
-    setSuccessState(false)
-    closeModal()
-  }
+    setSuccessState(false);
+    closeModal();
+  };
 
   useEffect(() => {
     if (successState) {
-      close()
+      close();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [successState])
+  }, [successState]);
 
   useEffect(() => {
     if (formState.success) {
-      setSuccessState(true)
+      setSuccessState(true);
     }
-  }, [formState])
+  }, [formState]);
 
   return (
     <>
@@ -158,7 +170,7 @@ const AddAddress = ({
         </form>
       </Modal>
     </>
-  )
-}
+  );
+};
 
-export default AddAddress
+export default AddAddress;

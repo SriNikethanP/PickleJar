@@ -1,63 +1,82 @@
-"use client"
+"use client";
 
-import React, { useEffect, useState, useActionState } from "react"
-import { PencilSquare as Edit, Trash } from "@medusajs/icons"
-import { Button, Heading, Text, clx } from "@medusajs/ui"
+import React, { useEffect, useState, useActionState } from "react";
+import { PencilSquare as Edit, Trash } from "@medusajs/icons";
+import { Button, Heading, Text, clx } from "@medusajs/ui";
 
-import useToggleState from "@lib/hooks/use-toggle-state"
-import CountrySelect from "@modules/checkout/components/country-select"
-import Input from "@modules/common/components/input"
-import Modal from "@modules/common/components/modal"
-import Spinner from "@modules/common/icons/spinner"
-import { SubmitButton } from "@modules/checkout/components/submit-button"
-import { HttpTypes } from "@medusajs/types"
+import useToggleState from "@lib/hooks/use-toggle-state";
+import CountrySelect from "@modules/checkout/components/country-select";
+import Input from "@modules/common/components/input";
+import Modal from "@modules/common/components/modal";
+import Spinner from "@modules/common/icons/spinner";
+import { SubmitButton } from "@modules/checkout/components/submit-button";
+import { HttpTypes } from "@medusajs/types";
 import {
   deleteCustomerAddress,
   updateCustomerAddress,
-} from "@lib/data/customer"
+} from "@lib/data/customer";
+import { toast } from "sonner";
 
 type EditAddressProps = {
-  address: HttpTypes.StoreCustomerAddress
-  isActive?: boolean
-}
+  address: HttpTypes.StoreCustomerAddress;
+  isActive?: boolean;
+};
 
 const EditAddress: React.FC<EditAddressProps> = ({
   address,
   isActive = false,
 }) => {
-  const [removing, setRemoving] = useState(false)
-  const [successState, setSuccessState] = useState(false)
-  const { state, open, close: closeModal } = useToggleState(false)
+  const [removing, setRemoving] = useState(false);
+  const [successState, setSuccessState] = useState(false);
+  const { state, open, close: closeModal } = useToggleState(false);
 
-  const [formState, formAction] = useActionState(updateCustomerAddress, {
-    success: false,
-    error: null,
-    addressId: address.id,
-  })
+  const [formState, formAction] = useActionState(
+    async (...args) => {
+      const result = await updateCustomerAddress(...args);
+      if (result.success) {
+        toast.success("Address updated successfully");
+      } else if (result.error) {
+        toast.error(result.error || "Failed to update address");
+      }
+      return result;
+    },
+    {
+      success: false,
+      error: null,
+      addressId: address.id,
+    }
+  );
 
   const close = () => {
-    setSuccessState(false)
-    closeModal()
-  }
+    setSuccessState(false);
+    closeModal();
+  };
 
   useEffect(() => {
     if (successState) {
-      close()
+      close();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [successState])
+  }, [successState]);
 
   useEffect(() => {
     if (formState.success) {
-      setSuccessState(true)
+      setSuccessState(true);
     }
-  }, [formState])
+  }, [formState]);
 
   const removeAddress = async () => {
-    setRemoving(true)
-    await deleteCustomerAddress(address.id)
-    setRemoving(false)
-  }
+    setRemoving(true);
+    try {
+      await deleteCustomerAddress(address.id);
+      toast.success("Address removed successfully");
+      setRemoving(false);
+      close();
+    } catch (err) {
+      toast.error("Failed to remove address");
+      setRemoving(false);
+    }
+  };
 
   return (
     <>
@@ -230,7 +249,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
         </form>
       </Modal>
     </>
-  )
-}
+  );
+};
 
-export default EditAddress
+export default EditAddress;

@@ -1,25 +1,30 @@
-import { deleteLineItem } from "@lib/data/cart"
-import { Spinner, Trash } from "@medusajs/icons"
-import { clx } from "@medusajs/ui"
-import { useState } from "react"
+import { deleteLineItem } from "@lib/data/cart";
+import { Spinner, Trash } from "@medusajs/icons";
+import { clx } from "@medusajs/ui";
+import { useState } from "react";
+import { toast } from "sonner";
 
 const DeleteButton = ({
   id,
   children,
   className,
 }: {
-  id: string
-  children?: React.ReactNode
-  className?: string
+  id: string;
+  children?: React.ReactNode;
+  className?: string;
 }) => {
-  const [isDeleting, setIsDeleting] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async (id: string) => {
-    setIsDeleting(true)
-    await deleteLineItem(id).catch((err) => {
-      setIsDeleting(false)
-    })
-  }
+    setIsDeleting(true);
+    try {
+      await deleteLineItem(id);
+      toast.success("Item deleted successfully");
+    } catch (err) {
+      toast.error("Failed to delete item");
+    }
+    setIsDeleting(false);
+  };
 
   return (
     <div
@@ -36,7 +41,7 @@ const DeleteButton = ({
         <span>{children}</span>
       </button>
     </div>
-  )
-}
+  );
+};
 
-export default DeleteButton
+export default DeleteButton;

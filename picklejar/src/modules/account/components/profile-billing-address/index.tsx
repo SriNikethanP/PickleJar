@@ -1,58 +1,63 @@
-"use client"
+"use client";
 
-import React, { useEffect, useMemo, useActionState } from "react"
+import React, { useEffect, useMemo, useActionState } from "react";
 
-import Input from "@modules/common/components/input"
-import NativeSelect from "@modules/common/components/native-select"
+import Input from "@modules/common/components/input";
+import NativeSelect from "@modules/common/components/native-select";
+import { toast } from "sonner";
 
-import AccountInfo from "../account-info"
-import { HttpTypes } from "@medusajs/types"
-import { addCustomerAddress, updateCustomerAddress } from "@lib/data/customer"
+import AccountInfo from "../account-info";
+import { HttpTypes } from "@medusajs/types";
+import { addCustomerAddress, updateCustomerAddress } from "@lib/data/customer";
 
 type MyInformationProps = {
-  customer: HttpTypes.StoreCustomer
-}
+  customer: HttpTypes.StoreCustomer;
+};
 
-const ProfileBillingAddress: React.FC<MyInformationProps> = ({
-  customer,
-}) => {
-
-  const [successState, setSuccessState] = React.useState(false)
+const ProfileBillingAddress: React.FC<MyInformationProps> = ({ customer }) => {
+  const [successState, setSuccessState] = React.useState(false);
 
   const billingAddress = customer.addresses?.find(
     (addr) => addr.is_default_billing
-  )
+  );
 
   const initialState: Record<string, any> = {
     isDefaultBilling: true,
     isDefaultShipping: false,
     error: false,
     success: false,
-  }
+  };
 
   if (billingAddress) {
-    initialState.addressId = billingAddress.id
+    initialState.addressId = billingAddress.id;
   }
 
-  const [state, formAction] = useActionState(
-    billingAddress ? updateCustomerAddress : addCustomerAddress,
-    initialState
-  )
+  const [state, formAction] = useActionState(async (...args) => {
+    const result = await (billingAddress
+      ? updateCustomerAddress
+      : addCustomerAddress)(...args);
+    if (result.success) {
+      toast.success("Billing address updated successfully");
+    } else if (result.error) {
+      toast.error(result.error || "Failed to update billing address");
+    }
+    return result;
+  }, initialState);
 
   const clearState = () => {
-    setSuccessState(false)
-  }
+    setSuccessState(false);
+  };
 
   useEffect(() => {
-    setSuccessState(state.success)
-  }, [state])
+    setSuccessState(state.success);
+  }, [state]);
 
   const currentInfo = useMemo(() => {
     if (!billingAddress) {
-      return "No billing address"
+      return "No billing address";
     }
 
-    const country = "India"
+    const country = "India";
 
     return (
       <div className="flex flex-col font-semibold" data-testid="current-info">
@@ -69,8 +74,8 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
         </span>
         <span>{country}</span>
       </div>
-    )
-  }, [billingAddress])
+    );
+  }, [billingAddress]);
 
   return (
     <form action={formAction} onReset={() => clearState()} className="w-full">
@@ -152,7 +157,7 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
         </div>
       </AccountInfo>
     </form>
-  )
-}
+  );
+};
 
-export default ProfileBillingAddress
+export default ProfileBillingAddress;

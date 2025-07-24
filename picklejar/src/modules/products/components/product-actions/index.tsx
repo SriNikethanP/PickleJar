@@ -11,6 +11,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ProductPrice from "../product-price";
 import MobileActions from "./mobile-actions";
+import { toast } from "sonner";
 
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct;
@@ -106,11 +107,16 @@ export default function ProductActions({
 
     setIsAdding(true);
 
-    await addToCart({
-      variantId: selectedVariant.id,
-      quantity: 1,
-      countryCode,
-    });
+    try {
+      await addToCart({
+        variantId: selectedVariant.id,
+        quantity: 1,
+        countryCode,
+      });
+      toast.success("Added to cart");
+    } catch (err) {
+      toast.error("Failed to add to cart");
+    }
 
     setIsAdding(false);
   };
