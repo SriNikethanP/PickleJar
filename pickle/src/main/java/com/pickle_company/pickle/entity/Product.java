@@ -32,5 +32,9 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
+
+    @ManyToOne
+    @JoinColumn(name = "collection_id")
+    private Collection collection;
     private boolean active = true;
 }

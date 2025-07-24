@@ -1,86 +1,31 @@
 "use server";
 
-import { sdk } from "@lib/config";
-import { HttpTypes } from "@medusajs/types";
-import { getCacheOptions } from "./cookies";
+import axios from "axios";
 
-export const retrieveCollection = async (id: string) => {
-  try {
-    const next = {
-      ...(await getCacheOptions("collections")),
-    };
+const api = axios.create({
+  baseURL:
+    process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "http://localhost:8080/api/v1",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
-    return sdk.client
-      .fetch<{ collection: HttpTypes.StoreCollection }>(
-        `/store/collections/${id}`,
-        {
-          next,
-          cache: "force-cache",
-        }
-      )
-      .then(({ collection }) => collection)
-      .catch((error) => {
-        console.error("Error fetching collection:", error);
-        return null;
-      });
-  } catch (error) {
-    console.error("Error in retrieveCollection:", error);
-    return null;
-  }
+export type Collection = {
+  id: number;
+  title: string;
+  handle: string;
+  products: any[];
 };
 
-export const listCollections = async (
-  queryParams: Record<string, string> = {}
-): Promise<{ collections: HttpTypes.StoreCollection[]; count: number }> => {
-  try {
-    const next = {
-      ...(await getCacheOptions("collections")),
-    };
-
-    queryParams.limit = queryParams.limit || "100";
-    queryParams.offset = queryParams.offset || "0";
-
-    return sdk.client
-      .fetch<{ collections: HttpTypes.StoreCollection[]; count: number }>(
-        "/store/collections",
-        {
-          query: queryParams,
-          next,
-          cache: "force-cache",
-        }
-      )
-      .then(({ collections }) => ({ collections, count: collections.length }))
-      .catch((error) => {
-        console.error("Error fetching collections:", error);
-        return { collections: [], count: 0 };
-      });
-  } catch (error) {
-    console.error("Error in listCollections:", error);
-    return { collections: [], count: 0 };
-  }
+export const listCollections = async (): Promise<Collection[]> => {
+  // If you have a /collections endpoint, use it. Otherwise, extract from products or categories.
+  const res = await api.get("/collections");
+  return res.data;
 };
 
 export const getCollectionByHandle = async (
   handle: string
-): Promise<HttpTypes.StoreCollection> => {
-  try {
-    const next = {
-      ...(await getCacheOptions("collections")),
-    };
-
-    return sdk.client
-      .fetch<HttpTypes.StoreCollectionListResponse>(`/store/collections`, {
-        query: { handle, fields: "*products" },
-        next,
-        cache: "force-cache",
-      })
-      .then(({ collections }) => collections[0])
-      .catch((error) => {
-        console.error("Error fetching collection by handle:", error);
-        return null;
-      });
-  } catch (error) {
-    console.error("Error in getCollectionByHandle:", error);
-    return null;
-  }
+): Promise<Collection | null> => {
+  const res = await api.get("/collections", { params: { handle } });
+  return Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null;
 };
