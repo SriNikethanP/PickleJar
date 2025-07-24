@@ -5,6 +5,7 @@ import com.pickle_company.pickle.entity.Category;
 import com.pickle_company.pickle.entity.Product;
 import com.pickle_company.pickle.entity.Review;
 import com.pickle_company.pickle.mapper.ProductMapper;
+import com.pickle_company.pickle.mapper.ReviewMapper;
 import com.pickle_company.pickle.repository.CategoryRepository;
 import com.pickle_company.pickle.repository.ProductRepository;
 import com.pickle_company.pickle.repository.ReviewRepository;
@@ -21,14 +22,16 @@ public class ProductService {
     private final CategoryRepository categoryRepo;
     private final ProductMapper productMapper;
     private final ReviewRepository reviewRepo;
+    private final ReviewMapper reviewMapper;
 
     public ProductService(ProductRepository productRepo, CategoryRepository categoryRepo,
-                          ProductMapper productMapper, ReviewRepository reviewRepo) {
+                          ProductMapper productMapper, ReviewRepository reviewRepo, ReviewMapper reviewMapper) {
         this.productRepo = productRepo;
         this.categoryRepo = categoryRepo;
         this.productMapper = productMapper;
         this.reviewRepo = reviewRepo;
-    }
+        this.reviewMapper = reviewMapper;
+        }
 
     // Create/Update Product
     public ProductResponseDTO addOrUpdateProduct(ProductRequestDTO dto, Long productId) {
@@ -110,12 +113,11 @@ public class ProductService {
         Review review = Review.builder()
                 .product(product)
                 .username(reviewDTO.getUsername()) // in real-world, extract from JWT/Principal
-                .comment(reviewDTO.getComment())
                 .rating(reviewDTO.getRating())
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        return productMapper.reviewToDto(reviewRepo.save(review));
+        return reviewMapper.toDto(reviewRepo.save(review));
     }
 
     public void deleteProduct(Long productId) {

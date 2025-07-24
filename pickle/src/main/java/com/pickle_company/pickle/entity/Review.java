@@ -18,7 +18,6 @@ public class Review {
     private Product product;
 
     private String username; // Simpler than full User
-    private String comment;
     private int rating; // 1-5, for example
     private LocalDateTime createdAt;
 }
