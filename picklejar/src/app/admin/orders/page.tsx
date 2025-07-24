@@ -1,6 +1,11 @@
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { listOrders } from "@/lib/data/admin";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@lib/components/ui/card";
+import { Button } from "@lib/components/ui/button";
+import { listOrders } from "@lib/data/admin";
 
 export default async function AdminOrdersPage() {
   const orders = await listOrders();

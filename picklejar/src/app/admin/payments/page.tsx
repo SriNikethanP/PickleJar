@@ -1,7 +1,12 @@
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@lib/components/ui/card";
+import { Button } from "@lib/components/ui/button";
 import Link from "next/link";
-import { listPayments } from "@/lib/data/admin";
+import { listPayments } from "@lib/data/admin";
 
 export default async function AdminPaymentsPage() {
   const payments = await listPayments();

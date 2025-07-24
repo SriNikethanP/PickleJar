@@ -1,6 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@lib/components/ui/card";
 import dynamic from "next/dynamic";
-import { getAdminDashboardData } from "@/lib/data/admin";
+import { getAdminDashboardData } from "@lib/data/admin";
 
 const ECharts = dynamic(() => import("echarts-for-react"), { ssr: false });
 
