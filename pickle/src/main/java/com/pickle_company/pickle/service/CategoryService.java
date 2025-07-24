@@ -1,6 +1,7 @@
  package com.pickle_company.pickle.service;
 
 import com.pickle_company.pickle.dto.CategoryDTO;
+import com.pickle_company.pickle.entity.Category;
 import com.pickle_company.pickle.mapper.CategoryMapper;
 import com.pickle_company.pickle.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
