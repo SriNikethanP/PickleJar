@@ -1,7 +1,7 @@
 package com.pickle_company.pickle.service;
 
 import com.pickle_company.pickle.dto.LoginRequestDTO;
-import com.pickle_company.pickle.dto.OrderResponseDTO;
+import com.pickle_company.pickle.dto.OrderDTO;
 import com.pickle_company.pickle.dto.UserRegistrationDTO;
 import com.pickle_company.pickle.dto.UserResponseDTO;
 import com.pickle_company.pickle.entity.Order;
@@ -78,10 +78,10 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public List<OrderResponseDTO> getUserOrders(Long userId) {
-        List<Order> orders = orderRepository.findByUserId(userId);
-        return orders.stream().map(orderMapper::toOrderDto).collect(Collectors.toList());
-    }
+    public List<OrderDTO> getUserOrders(Long userId) {
+    List<Order> orders = orderRepository.findByUserId(userId);
+    return orders.stream().map(orderMapper::toOrderDto).collect(Collectors.toList());
+}
 
     public List<UserResponseDTO> getAllUsers() {
         List<User> allUsers = userRepository.findAll();

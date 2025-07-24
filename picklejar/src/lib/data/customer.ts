@@ -20,6 +20,34 @@ export type User = {
 };
 
 export const getAllUsers = async (): Promise<User[]> => {
-  const res = await api.get('/admin/users');
+  const res = await api.get("/admin/users");
   return res.data;
+};
+
+export const login = async (_: any, formData: FormData) => {
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+  try {
+    const res = await api.post("/auth/login", { email, password });
+    return res.data;
+  } catch (error: any) {
+    return error?.response?.data?.message || "Login failed";
+  }
+};
+
+export const signup = async (_: any, formData: FormData) => {
+  const userRegistrationDTO = {
+    firstName: formData.get("first_name") as string,
+    lastName: formData.get("last_name") as string,
+    email: formData.get("email") as string,
+    mobile: formData.get("phone") as string,
+    password: formData.get("password") as string,
+    confirmPassword: formData.get("password") as string,
+  };
+  try {
+    const res = await api.post("/auth/register", userRegistrationDTO);
+    return res.data;
+  } catch (error: any) {
+    return error?.response?.data?.message || "Registration failed";
+  }
 };

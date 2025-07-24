@@ -1,7 +1,7 @@
 package com.pickle_company.pickle.controller.v1;
 
 import com.pickle_company.pickle.dto.UserResponseDTO;
-import com.pickle_company.pickle.dto.OrderResponseDTO;
+import com.pickle_company.pickle.dto.OrderDTO;
 import com.pickle_company.pickle.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +33,7 @@ public class AdminUserController {
     }
 
     @GetMapping("/{id}/orders")
-    public List<OrderResponseDTO> getUserOrders(@PathVariable Long id) {
+    public List<OrderDTO> getUserOrders(@PathVariable Long id) {
         return userService.getUserOrders(id);
     }
 }
