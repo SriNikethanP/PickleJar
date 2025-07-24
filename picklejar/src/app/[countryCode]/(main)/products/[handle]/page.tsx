@@ -52,10 +52,10 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   }
 
   return {
-    title: `${product.title} | Medusa Store`,
+    title: `${product.title} | Pickle Jar`,
     description: `${product.title}`,
     openGraph: {
-      title: `${product.title} | Medusa Store`,
+      title: `${product.title} | Pickle Jar`,
       description: `${product.title}`,
       images: product.thumbnail ? [product.thumbnail] : [],
     },
@@ -73,9 +73,11 @@ export default async function ProductPage(props: Props) {
   const { response } = await listProducts({
     countryCode: "in",
     queryParams: { limit: 100 },
-  })
-  
-  const pricedProduct = response.products.find(p => p.handle === params.handle);
+  });
+
+  const pricedProduct = response.products.find(
+    (p) => p.handle === params.handle
+  );
 
   if (!pricedProduct) {
     notFound();

@@ -1,8 +1,8 @@
-import { Suspense } from "react"
+import { Suspense } from "react";
 
-import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import CartButton from "@modules/layout/components/cart-button"
-import SideMenu from "@modules/layout/components/side-menu"
+import LocalizedClientLink from "@modules/common/components/localized-client-link";
+import CartButton from "@modules/layout/components/cart-button";
+import SideMenu from "@modules/layout/components/side-menu";
 
 export default async function Nav() {
   return (
@@ -21,7 +21,7 @@ export default async function Nav() {
               className="txt-compact-xlarge-plus hover:text-ui-fg-base uppercase"
               data-testid="nav-store-link"
             >
-              Medusa Store
+              Pickle Jar
             </LocalizedClientLink>
           </div>
 
@@ -52,5 +52,5 @@ export default async function Nav() {
         </nav>
       </header>
     </div>
-  )
+  );
 }
