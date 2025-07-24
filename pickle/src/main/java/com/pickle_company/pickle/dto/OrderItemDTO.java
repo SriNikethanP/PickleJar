@@ -7,8 +7,8 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class OrderItemDTO {
-    private Long productId;
-    private String productName;
-    private double priceAtOrder;
+    private Long id;
+    private ProductResponseDTO product;
     private int quantity;
+    private double priceAtOrder;
 }
