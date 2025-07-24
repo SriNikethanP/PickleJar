@@ -1,4 +1,5 @@
 import axios from "axios";
+import type { Product } from "./products";
 
 const api = axios.create({
   baseURL:
@@ -11,11 +12,10 @@ const api = axios.create({
 export type Category = {
   id: number;
   name: string;
-  products: any[];
+  products: Product[];
 };
 
 export const listCategories = async (): Promise<Category[]> => {
-  // If you have a /categories endpoint, use it. Otherwise, extract from products.
   const res = await api.get("/categories");
   return res.data;
 };
@@ -25,6 +25,5 @@ export const getCategoryByHandle = async (
 ): Promise<Category | null> => {
   const categoryName = categoryHandle.join("/");
   const res = await api.get("/categories", { params: { name: categoryName } });
-  // If backend returns a list, return the first match
   return Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null;
 };
