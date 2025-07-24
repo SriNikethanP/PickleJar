@@ -1,67 +1,30 @@
-import { sdk } from "@lib/config";
-import { HttpTypes } from "@medusajs/types";
-import { getCacheOptions } from "./cookies";
+import axios from "axios";
 
-export const listCategories = async (query?: Record<string, any>) => {
-  try {
-    const next = {
-      ...(await getCacheOptions("categories")),
-    };
+const api = axios.create({
+  baseURL:
+    process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "http://localhost:8080/api/v1",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
-    const limit = query?.limit || 100;
-
-    return sdk.client
-      .fetch<{ product_categories: HttpTypes.StoreProductCategory[] }>(
-        "/store/product-categories",
-        {
-          query: {
-            fields:
-              "*category_children, *products, *parent_category, *parent_category.parent_category",
-            limit,
-            ...query,
-          },
-          next,
-          cache: "force-cache",
-        }
-      )
-      .then(({ product_categories }) => product_categories)
-      .catch((error) => {
-        console.error("Error fetching categories:", error);
-        return [];
-      });
-  } catch (error) {
-    console.error("Error in listCategories:", error);
-    return [];
-  }
+export type Category = {
+  id: number;
+  name: string;
+  products: any[];
 };
 
-export const getCategoryByHandle = async (categoryHandle: string[]) => {
-  try {
-    const handle = `${categoryHandle.join("/")}`;
+export const listCategories = async (): Promise<Category[]> => {
+  // If you have a /categories endpoint, use it. Otherwise, extract from products.
+  const res = await api.get("/categories");
+  return res.data;
+};
 
-    const next = {
-      ...(await getCacheOptions("categories")),
-    };
-
-    return sdk.client
-      .fetch<HttpTypes.StoreProductCategoryListResponse>(
-        `/store/product-categories`,
-        {
-          query: {
-            fields: "*category_children, *products",
-            handle,
-          },
-          next,
-          cache: "force-cache",
-        }
-      )
-      .then(({ product_categories }) => product_categories[0])
-      .catch((error) => {
-        console.error("Error fetching category by handle:", error);
-        return null;
-      });
-  } catch (error) {
-    console.error("Error in getCategoryByHandle:", error);
-    return null;
-  }
+export const getCategoryByHandle = async (
+  categoryHandle: string[]
+): Promise<Category | null> => {
+  const categoryName = categoryHandle.join("/");
+  const res = await api.get("/categories", { params: { name: categoryName } });
+  // If backend returns a list, return the first match
+  return Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null;
 };
