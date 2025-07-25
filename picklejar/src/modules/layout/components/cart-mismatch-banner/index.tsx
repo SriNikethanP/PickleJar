@@ -1,31 +1,34 @@
 "use client";
 
-import { transferCart } from "@lib/data/customer";
+import { assignCart } from "@lib/data/cart";
 import { ExclamationCircleSolid } from "@medusajs/icons";
-import { StoreCart, StoreCustomer } from "@medusajs/types";
 import { Button } from "@medusajs/ui";
 import { useState } from "react";
+import { toast } from "sonner";
 
 function CartMismatchBanner(props: {
-  customer: StoreCustomer;
-  cart: StoreCart;
+  customer: { id: number };
+  cart: { id: number; customer_id?: number };
 }) {
   const { customer, cart } = props;
   const [isPending, setIsPending] = useState(false);
   const [actionText, setActionText] = useState("Run transfer again");
 
   if (!customer || !!cart.customer_id) {
-    return;
+    return null;
   }
 
   const handleSubmit = async () => {
     try {
       setIsPending(true);
       setActionText("Transferring..");
-
-      await transferCart();
-    } catch {
+      await assignCart(cart.id, customer.id);
+      toast.success("Cart transferred successfully!");
+      setActionText("Transferred!");
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Failed to transfer cart.");
       setActionText("Run transfer again");
+    } finally {
       setIsPending(false);
     }
   };
@@ -37,9 +40,7 @@ function CartMismatchBanner(props: {
           <ExclamationCircleSolid className="inline" />
           Something went wrong when we tried to transfer your cart
         </span>
-
         <span>·</span>
-
         <Button
           variant="transparent"
           className="hover:bg-transparent active:bg-transparent focus:bg-transparent disabled:text-orange-500 text-orange-950 p-0 bg-transparent"

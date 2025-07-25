@@ -71,3 +71,8 @@ export const checkoutCart = async (userId: number) => {
   const res = await api.post("/cart/checkout", null, { params: { userId } });
   return res.data;
 };
+
+export const assignCart = async (cartId: number, customerId: number) => {
+  const res = await api.put("/cart/assign", { cartId, customerId });
+  return res.data;
+};

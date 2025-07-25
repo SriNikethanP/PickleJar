@@ -136,5 +136,15 @@ public class CartService {
     public CartResponseDTO removeItem(Long userId, Long cartItemId) {
         return updateItem(userId, new UpdateCartItemRequestDTO(cartItemId, 0));
     }
+
+    public CartResponseDTO assignCartToUser(Long cartId, Long userId) {
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new IllegalArgumentException("Cart not found: " + cartId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+        cart.setUser(user);
+        Cart savedCart = cartRepository.save(cart);
+        return cartMapper.toDto(savedCart);
+    }
 }
 

@@ -36,5 +36,11 @@ public class CartController {
     public ResponseEntity<CheckoutResponseDTO> checkout(@RequestParam Long userId) {
         return ResponseEntity.ok(cartService.checkout(userId));
     }
+
+    @PutMapping("/assign")
+    public ResponseEntity<CartResponseDTO> assignCartToUser(@RequestBody AssignCartRequest request) {
+        CartResponseDTO cartDTO = cartService.assignCartToUser(request.getCartId(), request.getCustomerId());
+        return ResponseEntity.ok(cartDTO);
+    }
 }
 
