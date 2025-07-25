@@ -1,5 +1,12 @@
 package com.pickle_company.pickle.controller.v1;
 
+
+
+import lombok.*;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class AssignCartRequest {
     private Long cartId;
     private Long customerId;

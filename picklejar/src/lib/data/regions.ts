@@ -1,5 +1,4 @@
-"use server";
-
+// REGIONS DISABLED: This file is commented out because regions are not used. Default country is India.
 import axios from "axios";
 
 const api = axios.create({
