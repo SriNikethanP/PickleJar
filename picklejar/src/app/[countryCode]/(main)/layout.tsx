@@ -14,8 +14,10 @@ export const metadata: Metadata = {
 };
 
 export default async function PageLayout(props: { children: React.ReactNode }) {
-  const customer = await retrieveCustomer();
-  const cart = await retrieveCart();
+  // Placeholder userId, replace with actual user/session logic
+  const userId = 1;
+  const customer = await retrieveCustomer(userId);
+  const cart = await retrieveCart(userId);
   let shippingOptions: StoreCartShippingOption[] = [];
 
   if (cart) {

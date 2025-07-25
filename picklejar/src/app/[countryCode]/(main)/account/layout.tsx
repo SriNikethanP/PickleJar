@@ -9,7 +9,9 @@ export default async function AccountPageLayout({
   dashboard?: React.ReactNode;
   login?: React.ReactNode;
 }) {
-  const customer = await retrieveCustomer().catch(() => null);
+  // Placeholder userId, replace with actual user/session logic
+  const userId = 1;
+  const customer = await retrieveCustomer(userId).catch(() => null);
 
   return (
     <AccountLayout customer={customer}>

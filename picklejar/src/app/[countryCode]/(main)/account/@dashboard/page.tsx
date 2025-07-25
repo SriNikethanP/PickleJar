@@ -11,7 +11,9 @@ export const metadata: Metadata = {
 };
 
 export default async function OverviewTemplate() {
-  const customer = await retrieveCustomer().catch(() => null);
+  // Placeholder userId, replace with actual user/session logic
+  const userId = 1;
+  const customer = await retrieveCustomer(userId).catch(() => null);
   const orders = (await listOrders().catch(() => null)) || null;
 
   if (!customer) {

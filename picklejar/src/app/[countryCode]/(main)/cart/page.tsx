@@ -10,12 +10,14 @@ export const metadata: Metadata = {
 };
 
 export default async function Cart() {
-  const cart = await retrieveCart().catch((error) => {
+  // Placeholder userId, replace with actual user/session logic
+  const userId = 1;
+  const cart = await retrieveCart(userId).catch((error) => {
     console.error(error);
     return notFound();
   });
 
-  const customer = await retrieveCustomer();
+  const customer = await retrieveCustomer(userId);
 
   return <CartTemplate cart={cart} customer={customer} />;
 }

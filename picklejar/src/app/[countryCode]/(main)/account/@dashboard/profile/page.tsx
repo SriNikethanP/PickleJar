@@ -14,7 +14,9 @@ export const metadata: Metadata = {
 };
 
 export default async function Profile() {
-  const customer = await retrieveCustomer();
+  // Placeholder userId, replace with actual user/session logic
+  const userId = 1;
+  const customer = await retrieveCustomer(userId);
 
   if (!customer) {
     notFound();
@@ -46,4 +48,3 @@ export default async function Profile() {
 const Divider = () => {
   return <div className="w-full h-px bg-gray-200" />;
 };
-``;

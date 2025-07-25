@@ -51,3 +51,8 @@ export const signup = async (_: any, formData: FormData) => {
     return error?.response?.data?.message || "Registration failed";
   }
 };
+
+export const retrieveCustomer = async (userId: number) => {
+  const res = await api.get("/admin/users", { params: { userId } });
+  return res.data;
+};

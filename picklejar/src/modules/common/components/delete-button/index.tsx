@@ -1,4 +1,4 @@
-import { deleteLineItem } from "@lib/data/cart";
+import { removeCartItem } from "@lib/data/cart";
 import { Spinner, Trash } from "@medusajs/icons";
 import { clx } from "@medusajs/ui";
 import { useState } from "react";
@@ -18,7 +18,8 @@ const DeleteButton = ({
   const handleDelete = async (id: string) => {
     setIsDeleting(true);
     try {
-      await deleteLineItem(id);
+      // You may need to pass userId as well, update as needed
+      await removeCartItem(/* userId */ 0, Number(id));
       toast.success("Item deleted successfully");
     } catch (err) {
       toast.error("Failed to delete item");

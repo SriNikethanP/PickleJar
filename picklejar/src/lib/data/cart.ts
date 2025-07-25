@@ -76,3 +76,14 @@ export const assignCart = async (cartId: number, customerId: number) => {
   const res = await api.put("/cart/assign", { cartId, customerId });
   return res.data;
 };
+
+export const retrieveCart = async (userId: number) => {
+  const res = await api.get("/cart", { params: { userId } });
+  return res.data;
+};
+
+export const listCartOptions = async () => {
+  // Placeholder: implement actual backend call if available
+  const res = await api.get("/shipping-options");
+  return res.data;
+};
