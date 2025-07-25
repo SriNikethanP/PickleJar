@@ -1,8 +1,8 @@
-import { HttpTypes } from "@medusajs/types"
-import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
+import { Product } from "@lib/data/products";
+import { SortOptions } from "@modules/store/components/refinement-list/sort-products";
 
-interface MinPricedProduct extends HttpTypes.StoreProduct {
-  _minPrice?: number
+interface MinPricedProduct extends Product {
+  _minPrice?: number;
 }
 
 /**
@@ -12,39 +12,26 @@ interface MinPricedProduct extends HttpTypes.StoreProduct {
  * @returns products sorted by price
  */
 export function sortProducts(
-  products: HttpTypes.StoreProduct[],
+  products: Product[],
   sortBy: SortOptions
-): HttpTypes.StoreProduct[] {
-  let sortedProducts = products as MinPricedProduct[]
+): Product[] {
+  let sortedProducts = products as MinPricedProduct[];
 
   if (["price_asc", "price_desc"].includes(sortBy)) {
     // Precompute the minimum price for each product
     sortedProducts.forEach((product) => {
-      if (product.variants && product.variants.length > 0) {
-        product._minPrice = Math.min(
-          ...product.variants.map(
-            (variant) => variant?.calculated_price?.calculated_amount || 0
-          )
-        )
-      } else {
-        product._minPrice = Infinity
-      }
-    })
+      product._minPrice = product.price;
+    });
 
     // Sort products based on the precomputed minimum prices
     sortedProducts.sort((a, b) => {
-      const diff = a._minPrice! - b._minPrice!
-      return sortBy === "price_asc" ? diff : -diff
-    })
+      const diff = a._minPrice! - b._minPrice!;
+      return sortBy === "price_asc" ? diff : -diff;
+    });
   }
 
-  if (sortBy === "created_at") {
-    sortedProducts.sort((a, b) => {
-      return (
-        new Date(b.created_at!).getTime() - new Date(a.created_at!).getTime()
-      )
-    })
-  }
+  // Product type does not have createdAt/created_at, so we skip created_at sorting
+  // If you add a date field to Product, you can implement date sorting here
 
-  return sortedProducts
+  return sortedProducts;
 }

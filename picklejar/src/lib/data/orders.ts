@@ -1,7 +1,6 @@
 "use server";
 
 import axios from "axios";
-import medusaError from "@lib/util/medusa-error";
 import { getAuthHeaders, getCacheOptions } from "./cookies";
 import { HttpTypes } from "@medusajs/types";
 
