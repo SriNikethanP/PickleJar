@@ -1,46 +1,33 @@
-// REGIONS DISABLED: This file is commented out because regions are not used. Default country is India.
-import axios from "axios";
-
-const api = axios.create({
-  baseURL:
-    process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "http://localhost:8080/api/v1",
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+// REGIONS DISABLED: Only India is supported. All region functions return India.
 
 export const listRegions = async () => {
-  try {
-    const res = await api.get("/regions");
-    return res.data.regions;
-  } catch (error) {
-    console.error("Error fetching regions:", error);
-    return [];
-  }
+  return [
+    {
+      id: "IN",
+      name: "India",
+      countries: [{ iso_2: "in", name: "India" }],
+    },
+  ];
 };
 
 export const retrieveRegion = async (id: string) => {
-  try {
-    const res = await api.get(`/regions/${id}`);
-    return res.data.region;
-  } catch (error) {
-    console.error("Error fetching region:", error);
-    return null;
+  if (id === "IN" || id === "in") {
+    return {
+      id: "IN",
+      name: "India",
+      countries: [{ iso_2: "in", name: "India" }],
+    };
   }
+  return null;
 };
 
 export const getRegion = async (countryCode: string) => {
-  try {
-    const regions = await listRegions();
-    if (!regions || regions.length === 0) {
-      return null;
-    }
-    const indiaRegion = regions.find((region: any) =>
-      region.countries?.some((country: any) => country.iso_2 === "in")
-    );
-    return indiaRegion || null;
-  } catch (e: any) {
-    console.error("Error in getRegion:", e);
-    return null;
+  if (countryCode.toLowerCase() === "in") {
+    return {
+      id: "IN",
+      name: "India",
+      countries: [{ iso_2: "in", name: "India" }],
+    };
   }
+  return null;
 };
