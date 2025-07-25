@@ -11,6 +11,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Do not redirect /admin or its subroutes
+  if (request.nextUrl.pathname.startsWith("/admin")) {
+    return NextResponse.next();
+  }
+
   const urlHasCountryCode =
     request.nextUrl.pathname.split("/")[1] === INDIA_COUNTRY_CODE;
 

@@ -3,6 +3,7 @@ package com.pickle_company.pickle.controller.v1;
 import com.pickle_company.pickle.dto.CartResponseDTO;
 import com.pickle_company.pickle.dto.CheckoutResponseDTO;
 import com.pickle_company.pickle.dto.UpdateCartItemRequestDTO;
+import com.pickle_company.pickle.entity.AssignCartRequest;
 import com.pickle_company.pickle.service.CartService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

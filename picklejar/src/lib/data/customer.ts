@@ -1,8 +1,8 @@
+"use server";
 import axios from "axios";
 
 const api = axios.create({
-  baseURL:
-    process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "http://localhost:8080/api/v1",
+  baseURL: process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "http://localhost:8080",
   headers: {
     "Content-Type": "application/json",
   },
@@ -20,7 +20,7 @@ export type User = {
 };
 
 export const getAllUsers = async (): Promise<User[]> => {
-  const res = await api.get("/admin/users");
+  const res = await api.get("api/v1/admin/users");
   return res.data;
 };
 
@@ -28,7 +28,7 @@ export const login = async (_: any, formData: FormData) => {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   try {
-    const res = await api.post("/auth/login", { email, password });
+    const res = await api.post("/api/v1/auth/login", { email, password });
     return res.data;
   } catch (error: any) {
     return error?.response?.data?.message || "Login failed";
@@ -45,7 +45,7 @@ export const signup = async (_: any, formData: FormData) => {
     confirmPassword: formData.get("password") as string,
   };
   try {
-    const res = await api.post("/auth/register", userRegistrationDTO);
+    const res = await api.post("/api/v1/auth/register", userRegistrationDTO);
     return res.data;
   } catch (error: any) {
     return error?.response?.data?.message || "Registration failed";
@@ -53,6 +53,6 @@ export const signup = async (_: any, formData: FormData) => {
 };
 
 export const retrieveCustomer = async (userId: number) => {
-  const res = await api.get("/admin/users", { params: { userId } });
+  const res = await api.get("/api/v1/users", { params: { userId } });
   return res.data;
 };

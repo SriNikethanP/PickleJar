@@ -87,4 +87,10 @@ public class UserService {
         List<User> allUsers = userRepository.findAll();
         return userMapper.toUserDtoList(allUsers);
     }
+
+    public UserResponseDTO getUserById(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+        return userMapper.toDto(user);
+    }
 }

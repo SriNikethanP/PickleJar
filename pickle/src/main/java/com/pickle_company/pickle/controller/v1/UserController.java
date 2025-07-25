@@ -8,26 +8,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+
 @RestController
-@RequestMapping("/api/v1/admin/users")
-public class AdminUserController {
-    private final UserService userService;
-    public AdminUserController(UserService userService) { this.userService = userService; }
+@RequestMapping("/api/v1/users")
+public class UserController {
+ private final UserService userService;
+    public UserController(UserService userService) { this.userService = userService; }
 
-    @GetMapping
-    public List<UserResponseDTO> getAllUsers() {
-        return userService.getAllUsers();
-    }
-
-    @GetMapping(params = "userId")
+     @GetMapping(params = "userId")
     public ResponseEntity<UserResponseDTO> getUserById(@RequestParam Long userId) {
         return ResponseEntity.ok(userService.getUserById(userId));
-    }
-
-    @PutMapping("/{id}/ban")
-    public ResponseEntity<?> banUser(@PathVariable Long id, @RequestParam boolean banned) {
-        userService.setUserBannedStatus(id, banned);
-        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{id}/reset-password")
@@ -42,4 +32,3 @@ public class AdminUserController {
         return userService.getUserOrders(id);
     }
 }
-

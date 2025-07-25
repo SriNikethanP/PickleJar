@@ -28,6 +28,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/products/**").permitAll()
                 .requestMatchers("/api/v1/categories/**").permitAll()
                 .requestMatchers("/api/v1/collections/**").permitAll()
+                .requestMatchers("/api/v1/users/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
                 // Admin endpoints require authentication

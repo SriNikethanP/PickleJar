@@ -13,19 +13,27 @@ export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
 };
 
+// Placeholder: Replace with real session/user logic
+function getUserIdFromSession(): number | null {
+  return null; // Return userId if logged in, otherwise null
+}
+
 export default async function PageLayout(props: { children: React.ReactNode }) {
-  // Placeholder userId, replace with actual user/session logic
-  const userId = 1;
-  const customer = await retrieveCustomer(userId);
-  const cart = await retrieveCart(userId);
+  const userId = getUserIdFromSession();
+  let customer = null;
+  let cart = null;
   let shippingOptions: StoreCartShippingOption[] = [];
 
-  if (cart) {
-    try {
-      const { shipping_options } = await listCartOptions();
-      shippingOptions = shipping_options;
-    } catch (error) {
-      console.error("Error fetching cart options:", error);
+  if (userId) {
+    customer = await retrieveCustomer(userId);
+    cart = await retrieveCart(userId);
+    if (cart) {
+      try {
+        const { shipping_options } = await listCartOptions();
+        shippingOptions = shipping_options;
+      } catch (error) {
+        console.error("Error fetching cart options:", error);
+      }
     }
   }
 
