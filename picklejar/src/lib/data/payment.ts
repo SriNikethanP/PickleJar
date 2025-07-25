@@ -1,35 +1,22 @@
-"use server"
+"use server";
 
-import { sdk } from "@lib/config"
-import { getAuthHeaders, getCacheOptions } from "./cookies"
-import { HttpTypes } from "@medusajs/types"
+import axios from "axios";
+import { getAuthHeaders, getCacheOptions } from "./cookies";
+import { HttpTypes } from "@medusajs/types";
+
+const api = axios.create({
+  baseURL:
+    process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "http://localhost:8080/api/v1",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
 export const listCartPaymentMethods = async (regionId: string) => {
-  const headers = {
-    ...(await getAuthHeaders()),
-  }
-
-  const next = {
-    ...(await getCacheOptions("payment_providers")),
-  }
-
-  return sdk.client
-    .fetch<HttpTypes.StorePaymentProviderListResponse>(
-      `/store/payment-providers`,
-      {
-        method: "GET",
-        query: { region_id: regionId },
-        headers,
-        next,
-        cache: "force-cache",
-      }
-    )
-    .then(({ payment_providers }) =>
-      payment_providers.sort((a, b) => {
-        return a.id > b.id ? 1 : -1
-      })
-    )
-    .catch(() => {
-      return null
-    })
-}
+  const res = await api.get("/payment-providers", {
+    params: { region_id: regionId },
+  });
+  return res.data.payment_providers.sort((a: any, b: any) =>
+    a.id > b.id ? 1 : -1
+  );
+};
