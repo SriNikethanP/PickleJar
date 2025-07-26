@@ -1,3 +1,5 @@
+"use client";
+import { useState, useCallback, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -12,11 +14,20 @@ import {
   TableHeader,
   TableRow,
 } from "@lib/components/ui/table";
-import { Button } from "@lib/components/ui/button";
+import AddProductDialog from "@modules/admin/components/inventory/AddProductDialog";
+import EditProductDialog from "@modules/admin/components/inventory/EditProductDialog";
 import { listInventory } from "@lib/data/admin";
 
-export default async function InventoryPage() {
-  const products = await listInventory();
+export default function InventoryPage() {
+  const [products, setProducts] = useState<any[]>([]);
+  const fetchProducts = useCallback(async () => {
+    const data = await listInventory();
+    setProducts(data);
+  }, []);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   return (
     <div className="space-y-6">
@@ -26,12 +37,11 @@ export default async function InventoryPage() {
           Manage product inventory and stock levels
         </p>
       </div>
-
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Product Inventory ({products.length})</CardTitle>
-            <Button>Add Product</Button>
+            <AddProductDialog onSuccess={fetchProducts} />
           </div>
         </CardHeader>
         <CardContent>
@@ -89,12 +99,10 @@ export default async function InventoryPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">
-                          Edit
-                        </Button>
-                        <Button variant="destructive" size="sm">
-                          Delete
-                        </Button>
+                        <EditProductDialog
+                          product={product}
+                          onSuccess={fetchProducts}
+                        />
                       </div>
                     </TableCell>
                   </TableRow>

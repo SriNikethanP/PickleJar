@@ -67,6 +67,47 @@ export const getOrderCount = async (userId: number) => {
     return 0;
   }
 };
+export const addProduct = async (product: any, images: File[] = []) => {
+  try {
+    const formData = new FormData();
+    formData.append("name", product.name);
+    formData.append("description", product.description);
+    formData.append("categoryName", product.categoryName);
+    formData.append("price", product.price);
+    formData.append("stock", product.stock);
+    images.forEach((img, idx) => formData.append("images", img));
+    const res = await api.post("/api/v1/products/admin", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Error adding product:", error);
+    throw error;
+  }
+};
+
+export const updateProduct = async (
+  id: number,
+  product: any,
+  images: File[] = []
+) => {
+  try {
+    const formData = new FormData();
+    formData.append("name", product.name);
+    formData.append("description", product.description);
+    formData.append("categoryName", product.categoryName);
+    formData.append("price", product.price);
+    formData.append("stock", product.stock);
+    images.forEach((img, idx) => formData.append("images", img));
+    const res = await api.put(`/api/v1/products/admin/${id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Error updating product:", error);
+    throw error;
+  }
+};
 
 export const listPayments = async () => {
   try {
