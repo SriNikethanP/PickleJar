@@ -1,4 +1,9 @@
 import axios from "axios";
+import {
+  uploadMultipleImagesToCloudinary,
+  CloudinaryUploadResult,
+} from "@lib/util/cloudinary";
+
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "http://localhost:8080",
 });
@@ -67,17 +72,29 @@ export const getOrderCount = async (userId: number) => {
     return 0;
   }
 };
+
 export const addProduct = async (product: any, images: File[] = []) => {
   try {
-    const formData = new FormData();
-    formData.append("name", product.name);
-    formData.append("description", product.description);
-    formData.append("categoryName", product.categoryName);
-    formData.append("price", product.price);
-    formData.append("stock", product.stock);
-    images.forEach((img, idx) => formData.append("images", img));
-    const res = await api.post("/api/v1/products/admin", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
+    let imageUrls: string[] = [];
+
+    // Upload images to Cloudinary if provided
+    if (images.length > 0) {
+      const cloudinaryResults = await uploadMultipleImagesToCloudinary(images);
+      imageUrls = cloudinaryResults.map((result) => result.secure_url);
+    }
+
+    // Send product data with Cloudinary URLs to backend
+    const productData = {
+      name: product.name,
+      description: product.description,
+      categoryName: product.categoryName,
+      price: product.price,
+      stock: product.stock,
+      imageUrls: imageUrls, // Send Cloudinary URLs instead of files
+    };
+
+    const res = await api.post("/api/v1/products/admin", productData, {
+      headers: { "Content-Type": "application/json" },
     });
     return res.data;
   } catch (error) {
@@ -92,15 +109,26 @@ export const updateProduct = async (
   images: File[] = []
 ) => {
   try {
-    const formData = new FormData();
-    formData.append("name", product.name);
-    formData.append("description", product.description);
-    formData.append("categoryName", product.categoryName);
-    formData.append("price", product.price);
-    formData.append("stock", product.stock);
-    images.forEach((img, idx) => formData.append("images", img));
-    const res = await api.put(`/api/v1/products/admin/${id}`, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
+    let imageUrls: string[] = [];
+
+    // Upload images to Cloudinary if provided
+    if (images.length > 0) {
+      const cloudinaryResults = await uploadMultipleImagesToCloudinary(images);
+      imageUrls = cloudinaryResults.map((result) => result.secure_url);
+    }
+
+    // Send product data with Cloudinary URLs to backend
+    const productData = {
+      name: product.name,
+      description: product.description,
+      categoryName: product.categoryName,
+      price: product.price,
+      stock: product.stock,
+      imageUrls: imageUrls, // Send Cloudinary URLs instead of files
+    };
+
+    const res = await api.put(`/api/v1/products/admin/${id}`, productData, {
+      headers: { "Content-Type": "application/json" },
     });
     return res.data;
   } catch (error) {
