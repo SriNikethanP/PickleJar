@@ -1,60 +1,86 @@
 import {
   Card,
+  CardContent,
   CardHeader,
   CardTitle,
-  CardContent,
 } from "@lib/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@lib/components/ui/table";
 import { Button } from "@lib/components/ui/button";
-import { listInventory } from "@lib/data/admin";
 
-export default async function AdminInventoryPage() {
-  const products = await listInventory();
+export default function InventoryPage() {
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-6">Inventory Management</h1>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Inventory</h1>
+        <p className="text-gray-600">
+          Manage product inventory and stock levels
+        </p>
+      </div>
+
       <Card>
         <CardHeader>
-          <CardTitle>Product Inventory</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Product Inventory</CardTitle>
+            <Button>Add Product</Button>
+          </div>
         </CardHeader>
         <CardContent>
-          <table className="w-full">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Stock</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((p: any) => (
-                <tr key={p.id}>
-                  <td>{p.name}</td>
-                  <td>{p.stock}</td>
-                  <td>
-                    {p.stock === 0 ? (
-                      <span className="text-red-600 font-semibold">
-                        Out of Stock
-                      </span>
-                    ) : p.stock < 10 ? (
-                      <span className="text-yellow-600 font-semibold">
-                        Low Stock
-                      </span>
-                    ) : (
-                      <span className="text-green-600 font-semibold">
-                        In Stock
-                      </span>
-                    )}
-                  </td>
-                  <td>
-                    <Button size="sm" variant="outline">
-                      Restock
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Product</TableHead>
+                <TableHead>SKU</TableHead>
+                <TableHead>Stock</TableHead>
+                <TableHead>Price</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell>
+                  <div className="flex items-center">
+                    <div className="h-10 w-10 flex-shrink-0">
+                      <div className="h-10 w-10 rounded-full bg-gray-200"></div>
+                    </div>
+                    <div className="ml-4">
+                      <div className="text-sm font-medium text-gray-900">
+                        Classic Pickle
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        Traditional recipe
+                      </div>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>PKL-001</TableCell>
+                <TableCell>45 units</TableCell>
+                <TableCell>₹150</TableCell>
+                <TableCell>
+                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                    In Stock
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <div className="flex space-x-2">
+                    <Button variant="outline" size="sm">
+                      Edit
                     </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    <Button variant="destructive" size="sm">
+                      Delete
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
     </div>

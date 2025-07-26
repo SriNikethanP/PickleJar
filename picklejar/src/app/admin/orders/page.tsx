@@ -1,53 +1,74 @@
 import {
   Card,
+  CardContent,
   CardHeader,
   CardTitle,
-  CardContent,
 } from "@lib/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@lib/components/ui/table";
 import { Button } from "@lib/components/ui/button";
-import { listOrders } from "@lib/data/admin";
 
-export default async function AdminOrdersPage() {
-  const orders = await listOrders();
+export default function OrdersPage() {
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-6">Order Management</h1>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
+        <p className="text-gray-600">Manage customer orders and fulfillment</p>
+      </div>
+
       <Card>
         <CardHeader>
-          <CardTitle>Orders</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Order Management</CardTitle>
+            <select className="border border-gray-300 rounded-md px-3 py-2">
+              <option>All Orders</option>
+              <option>Pending</option>
+              <option>Processing</option>
+              <option>Shipped</option>
+              <option>Delivered</option>
+            </select>
+          </div>
         </CardHeader>
         <CardContent>
-          <table className="w-full">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Customer</th>
-                <th>Total</th>
-                <th>Status</th>
-                <th>Placed At</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((o: any) => (
-                <tr key={o.id}>
-                  <td>{o.id}</td>
-                  <td>{o.user?.fullName}</td>
-                  <td>${o.totalAmount}</td>
-                  <td>{o.status}</td>
-                  <td>{o.placedAt?.slice(0, 10)}</td>
-                  <td>
-                    <Button size="sm" variant="outline">
-                      Update
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Order ID</TableHead>
+                <TableHead>Customer</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Total</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell className="font-medium">#ORD-001</TableCell>
+                <TableCell>John Doe</TableCell>
+                <TableCell>2024-01-15</TableCell>
+                <TableCell>₹450</TableCell>
+                <TableCell>
+                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                    Processing
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <div className="flex space-x-2">
+                    <Button variant="outline" size="sm">
+                      View
                     </Button>
-                    <Button size="sm" variant="destructive" className="ml-2">
-                      Refund
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    <Button size="sm">Ship</Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
     </div>
