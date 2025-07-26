@@ -10,5 +10,6 @@ import java.util.List;
 public class CategoryDTO {
     private Long id;
     private String name;
-    private List<ProductResponseDTO> products;
+    // Temporarily comment out products to avoid circular dependency issues
+    // private List<ProductResponseDTO> products;
 }

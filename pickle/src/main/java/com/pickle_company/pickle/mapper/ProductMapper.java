@@ -2,14 +2,45 @@ package com.pickle_company.pickle.mapper;
 
 import com.pickle_company.pickle.dto.ProductResponseDTO;
 import com.pickle_company.pickle.entity.Product;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.springframework.stereotype.Component;
 import java.util.List;
+import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring")
-public interface ProductMapper {
-    @Mapping(target = "categoryName", source = "category.name")
-    @Mapping(target = "averageRating", expression = "java(product.getReviews() == null || product.getReviews().isEmpty() ? 0.0 : product.getReviews().stream().mapToInt(r -> r.getRating()).average().orElse(0.0))")
-    ProductResponseDTO toDto(Product product);
-    List<ProductResponseDTO> toDto(List<Product> products);
+@Component
+public class ProductMapper {
+    
+    public ProductResponseDTO toDto(Product product) {
+        if (product == null) {
+            return null;
+        }
+        
+        double averageRating = 0.0;
+        if (product.getReviews() != null && !product.getReviews().isEmpty()) {
+            averageRating = product.getReviews().stream()
+                    .mapToInt(r -> r.getRating())
+                    .average()
+                    .orElse(0.0);
+        }
+        
+        return ProductResponseDTO.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .description(product.getDescription())
+                .imageUrls(product.getImageUrls())
+                .price(product.getPrice())
+                .stock(product.getStock())
+                .categoryName(product.getCategory() != null ? product.getCategory().getName() : null)
+                .averageRating(averageRating)
+                .build();
+    }
+    
+    public List<ProductResponseDTO> toDto(List<Product> products) {
+        if (products == null) {
+            return null;
+        }
+        
+        return products.stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
 }

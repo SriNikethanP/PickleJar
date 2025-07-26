@@ -1,31 +1,49 @@
 package com.pickle_company.pickle.mapper;
 
-
 import com.pickle_company.pickle.dto.CartResponseDTO;
 import com.pickle_company.pickle.dto.CartItemDTO;
 import com.pickle_company.pickle.entity.Cart;
 import com.pickle_company.pickle.entity.CartItem;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-
+import org.springframework.stereotype.Component;
 import java.util.List;
+import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring")
-public interface CartMapper {
+@Component
+public class CartMapper {
 
-    // Cart entity to CartResponseDTO
-    @Mapping(source = "id", target = "cartId")
-    @Mapping(source = "items", target = "items")
-    CartResponseDTO toDto(Cart cart);
+    public CartResponseDTO toDto(Cart cart) {
+        if (cart == null) {
+            return null;
+        }
+        
+        return CartResponseDTO.builder()
+                .cartId(cart.getId())
+                .items(toCartItemDtoList(cart.getItems()))
+                .build();
+    }
 
-    // Individual CartItem to CartItemDTO (with nested mappings)
-    @Mapping(source = "id", target = "cartItemId")
-    @Mapping(source = "product.id", target = "productId")
-    @Mapping(source = "product.name", target = "productName")
-    @Mapping(source = "product.price", target = "price")
-    CartItemDTO toCartItemDto(CartItem item);
+    public CartItemDTO toCartItemDto(CartItem item) {
+        if (item == null) {
+            return null;
+        }
+        
+        return CartItemDTO.builder()
+                .cartItemId(item.getId())
+                .productId(item.getProduct().getId())
+                .productName(item.getProduct().getName())
+                .price(item.getProduct().getPrice())
+                .quantity(item.getQuantity())
+                .build();
+    }
 
-    // List mapping (optional, for convenience)
-    List<CartItemDTO> toCartItemDtoList(List<CartItem> items);
+    public List<CartItemDTO> toCartItemDtoList(List<CartItem> items) {
+        if (items == null) {
+            return null;
+        }
+        
+        return items.stream()
+                .map(this::toCartItemDto)
+                .collect(Collectors.toList());
+    }
 }
 
