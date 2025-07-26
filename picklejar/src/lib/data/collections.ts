@@ -23,18 +23,19 @@ export type Collection = {
 
 export const listCollections = async (): Promise<Collection[]> => {
   try {
-    // If you have a /collections endpoint, use it. Otherwise, extract from products or categories.
     const res = await api.get("/collections");
-    return res.data.map((collection: any) => ({
-      id: collection.id.toString(),
-      title: collection.title,
-      handle: collection.handle,
-      products: collection.products || [],
-      metadata: collection.metadata || null,
-      created_at: collection.created_at || new Date().toISOString(),
-      updated_at: collection.updated_at || new Date().toISOString(),
-      deleted_at: collection.deleted_at || null,
-    }));
+    return Array.isArray(res.data)
+      ? res.data.map((collection: any) => ({
+          id: collection.id.toString(),
+          title: collection.title,
+          handle: collection.handle,
+          products: collection.products || [],
+          metadata: collection.metadata || null,
+          created_at: collection.created_at || new Date().toISOString(),
+          updated_at: collection.updated_at || new Date().toISOString(),
+          deleted_at: collection.deleted_at || null,
+        }))
+      : [];
   } catch (error) {
     console.error("Error fetching collections:", error);
     return [];
