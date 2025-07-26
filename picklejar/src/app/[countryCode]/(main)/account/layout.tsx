@@ -11,7 +11,13 @@ export default async function AccountPageLayout({
 }) {
   // Placeholder userId, replace with actual user/session logic
   const userId = 1;
-  const customer = await retrieveCustomer(userId).catch(() => null);
+  let customer = null;
+
+  try {
+    customer = await retrieveCustomer(userId);
+  } catch (error) {
+    console.error("Error fetching customer data:", error);
+  }
 
   return (
     <AccountLayout customer={customer}>

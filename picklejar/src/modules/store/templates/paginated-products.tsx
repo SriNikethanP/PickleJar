@@ -49,22 +49,57 @@ export default async function PaginatedProducts({
     queryParams["order"] = "created_at"
   }
 
-  const region = await getRegion(countryCode)
+  let region = null;
+  let products = [];
+  let count = 0;
 
-  if (!region) {
-    return null
+  try {
+    region = await getRegion(countryCode);
+
+    if (!region) {
+      return (
+        <div className="text-center py-12">
+          <h2 className="text-2xl font-semibold mb-4">Region Not Found</h2>
+          <p className="text-gray-600">
+            The requested region is not available.
+          </p>
+        </div>
+      );
+    }
+
+    const result = await listProductsWithSort({
+      page,
+      queryParams,
+      sortBy,
+      countryCode,
+    });
+
+    products = result.response.products || [];
+    count = result.response.count || 0;
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    return (
+      <div className="text-center py-12">
+        <h2 className="text-2xl font-semibold mb-4">Error Loading Products</h2>
+        <p className="text-gray-600">
+          There was an error loading the products. Please try again later.
+        </p>
+      </div>
+    );
   }
 
-  let {
-    response: { products, count },
-  } = await listProductsWithSort({
-    page,
-    queryParams,
-    sortBy,
-    countryCode,
-  })
-
   const totalPages = Math.ceil(count / PRODUCT_LIMIT)
+
+  if (products.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <h2 className="text-2xl font-semibold mb-4">No Products Found</h2>
+        <p className="text-gray-600">
+          No products match your current filters.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <>

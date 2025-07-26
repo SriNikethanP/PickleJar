@@ -13,8 +13,13 @@ const api = axios.create({
 });
 
 export const retrieveOrder = async (id: string) => {
-  const res = await api.get(`/orders/${id}`);
-  return res.data;
+  try {
+    const res = await api.get(`/orders/${id}`);
+    return res.data;
+  } catch (error) {
+    console.error("Error retrieving order:", error);
+    return null;
+  }
 };
 
 export const listOrders = async (
@@ -22,14 +27,19 @@ export const listOrders = async (
   offset: number = 0,
   filters?: Record<string, any>
 ) => {
-  const params: Record<string, any> = {
-    limit,
-    offset,
-    order: "-created_at",
-    ...filters,
-  };
-  const res = await api.get("/orders", { params });
-  return res.data;
+  try {
+    const params: Record<string, any> = {
+      limit,
+      offset,
+      order: "-created_at",
+      ...filters,
+    };
+    const res = await api.get("/orders", { params });
+    return res.data;
+  } catch (error) {
+    console.error("Error listing orders:", error);
+    return [];
+  }
 };
 
 export const createTransferRequest = async (

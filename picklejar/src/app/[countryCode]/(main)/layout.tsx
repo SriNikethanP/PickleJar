@@ -25,15 +25,21 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
   let shippingOptions: StoreCartShippingOption[] = [];
 
   if (userId) {
-    customer = await retrieveCustomer(userId);
-    cart = await retrieveCart(userId);
-    if (cart) {
-      try {
-        const { shipping_options } = await listCartOptions();
-        shippingOptions = shipping_options;
-      } catch (error) {
-        console.error("Error fetching cart options:", error);
+    try {
+      customer = await retrieveCustomer(userId);
+      cart = await retrieveCart(userId);
+
+      if (cart) {
+        try {
+          const { shipping_options } = await listCartOptions();
+          shippingOptions = shipping_options || [];
+        } catch (error) {
+          console.error("Error fetching cart options:", error);
+          shippingOptions = [];
+        }
       }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
     }
   }
 

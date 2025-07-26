@@ -1,7 +1,6 @@
 package com.pickle_company.pickle.service;
 
 import com.pickle_company.pickle.dto.PaymentDTO;
-import com.pickle_company.pickle.entity.Payment;
 import com.pickle_company.pickle.mapper.PaymentMapper;
 import com.pickle_company.pickle.repository.PaymentRepository;
 import org.springframework.stereotype.Service;

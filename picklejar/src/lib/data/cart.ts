@@ -1,3 +1,5 @@
+"use server";
+
 import axios from "axios";
 
 const api = axios.create({
@@ -26,64 +28,103 @@ export type Cart = {
   items: CartItem[];
 };
 
-export const getCartByUserId = async (userId: number): Promise<Cart> => {
-  const res = await api.get("/cart", { params: { userId } });
-  return res.data;
+export const getCartByUserId = async (userId: number): Promise<Cart | null> => {
+  try {
+    const res = await api.get("/cart", { params: { userId } });
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching cart by user ID:", error);
+    return null;
+  }
 };
 
 export const addToCart = async (
   userId: number,
   productId: number,
   quantity: number
-): Promise<Cart> => {
-  const res = await api.post(
-    "/cart",
-    { productId, quantity },
-    { params: { userId } }
-  );
-  return res.data;
+): Promise<Cart | null> => {
+  try {
+    const res = await api.post(
+      "/cart",
+      { productId, quantity },
+      { params: { userId } }
+    );
+    return res.data;
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+    return null;
+  }
 };
 
 export const updateCartItem = async (
   userId: number,
   cartItemId: number,
   quantity: number
-): Promise<Cart> => {
-  const res = await api.put(
-    "/cart/item",
-    { cartItemId, quantity },
-    { params: { userId } }
-  );
-  return res.data;
+): Promise<Cart | null> => {
+  try {
+    const res = await api.put(
+      "/cart/item",
+      { cartItemId, quantity },
+      { params: { userId } }
+    );
+    return res.data;
+  } catch (error) {
+    console.error("Error updating cart item:", error);
+    return null;
+  }
 };
 
 export const removeCartItem = async (
   userId: number,
   cartItemId: number
-): Promise<Cart> => {
-  const res = await api.delete("/cart/item", {
-    params: { userId, cartItemId },
-  });
-  return res.data;
+): Promise<Cart | null> => {
+  try {
+    const res = await api.delete("/cart/item", {
+      params: { userId, cartItemId },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Error removing cart item:", error);
+    return null;
+  }
 };
 
 export const checkoutCart = async (userId: number) => {
-  const res = await api.post("/cart/checkout", null, { params: { userId } });
-  return res.data;
+  try {
+    const res = await api.post("/cart/checkout", null, { params: { userId } });
+    return res.data;
+  } catch (error) {
+    console.error("Error checking out cart:", error);
+    return null;
+  }
 };
 
 export const assignCart = async (cartId: number, customerId: number) => {
-  const res = await api.put("/cart/assign", { cartId, customerId });
-  return res.data;
+  try {
+    const res = await api.put("/cart/assign", { cartId, customerId });
+    return res.data;
+  } catch (error) {
+    console.error("Error assigning cart:", error);
+    return null;
+  }
 };
 
-export const retrieveCart = async (userId: number) => {
-  const res = await api.get("/cart", { params: { userId } });
-  return res.data;
+export const retrieveCart = async (userId: number): Promise<Cart | null> => {
+  try {
+    const res = await api.get("/cart", { params: { userId } });
+    return res.data;
+  } catch (error) {
+    console.error("Error retrieving cart:", error);
+    return null;
+  }
 };
 
 export const listCartOptions = async () => {
-  // Placeholder: implement actual backend call if available
-  const res = await api.get("/shipping-options");
-  return res.data;
+  try {
+    const res = await api.get("/shipping-options");
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching cart options:", error);
+    return { shipping_options: [] };
+  }
 };

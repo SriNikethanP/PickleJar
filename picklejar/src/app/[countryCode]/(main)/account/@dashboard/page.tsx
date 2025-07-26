@@ -13,8 +13,16 @@ export const metadata: Metadata = {
 export default async function OverviewTemplate() {
   // Placeholder userId, replace with actual user/session logic
   const userId = 1;
-  const customer = await retrieveCustomer(userId).catch(() => null);
-  const orders = (await listOrders().catch(() => null)) || null;
+
+  let customer = null;
+  let orders = null;
+
+  try {
+    customer = await retrieveCustomer(userId);
+    orders = await listOrders();
+  } catch (error) {
+    console.error("Error fetching account data:", error);
+  }
 
   if (!customer) {
     notFound();

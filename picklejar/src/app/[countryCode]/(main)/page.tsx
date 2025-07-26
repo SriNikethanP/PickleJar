@@ -2,9 +2,9 @@ import { Metadata } from "next";
 
 import FeaturedProducts from "@modules/home/components/featured-products";
 import Hero from "@modules/home/components/hero";
-import { listCollections } from "@lib/data/collections";
+import { listCollections, Collection } from "@lib/data/collections";
 import { getRegion } from "@lib/data/regions";
-import { listProductsByCollection } from "@lib/data/products";
+import { listProductsByCollection, Product } from "@lib/data/products";
 
 export const metadata: Metadata = {
   title: "PickleJar - Fresh Pickles",
@@ -12,28 +12,56 @@ export const metadata: Metadata = {
     "A premium pickle e-commerce store with the freshest and tastiest pickles.",
 };
 
+type CollectionWithProducts = Collection & {
+  products: Product[];
+};
+
 export default async function Home(props: {
   params: Promise<{ countryCode: string }>;
 }) {
   const params = await props.params;
 
-  const region = await getRegion("in");
-  const collections = await listCollections();
+  let region = null;
+  let collections: Collection[] = [];
+  let collectionsWithProducts: CollectionWithProducts[] = [];
 
-  // Fetch products for each collection
-  const collectionsWithProducts = await Promise.all(
-    collections.map(async (collection) => ({
-      ...collection,
-      products: await listProductsByCollection(Number(collection.id)),
-    }))
-  );
+  try {
+    region = await getRegion("in");
+    collections = await listCollections();
+
+    // Fetch products for each collection
+    collectionsWithProducts = await Promise.all(
+      collections.map(async (collection) => {
+        try {
+          const products = await listProductsByCollection(
+            Number(collection.id)
+          );
+          return {
+            ...collection,
+            products,
+          };
+        } catch (error) {
+          console.error(
+            `Error fetching products for collection ${collection.id}:`,
+            error
+          );
+          return {
+            ...collection,
+            products: [],
+          };
+        }
+      })
+    );
+  } catch (error) {
+    console.error("Error fetching home page data:", error);
+  }
 
   // Check if we have real data (not mock data)
   const hasRealData =
     collectionsWithProducts &&
     collectionsWithProducts.length > 0 &&
     region &&
-    !collectionsWithProducts.some((collection: any) =>
+    !collectionsWithProducts.some((collection: CollectionWithProducts) =>
       collection.id.toString().startsWith("mock-")
     );
 
@@ -41,7 +69,7 @@ export default async function Home(props: {
     <>
       <Hero />
       <div className="py-12">
-        {hasRealData ? (
+        {hasRealData && region ? (
           <ul className="flex flex-col gap-x-6">
             <FeaturedProducts
               collections={collectionsWithProducts}

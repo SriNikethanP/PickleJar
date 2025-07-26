@@ -1,3 +1,5 @@
+"use server";
+
 import axios from "axios";
 
 const api = axios.create({
@@ -37,24 +39,73 @@ export const listProducts = async ({
   category?: string;
   inStock?: boolean;
 } = {}): Promise<{ products: Product[]; count: number }> => {
-  const params: Record<string, any> = {
-    page,
-    limit,
-    sortBy,
-    order,
-  };
-  if (name) params.name = name;
-  if (category) params.category = category;
-  if (typeof inStock === "boolean") params.inStock = inStock;
+  try {
+    const params: Record<string, any> = {
+      page,
+      limit,
+      sortBy,
+      order,
+    };
+    if (name) params.name = name;
+    if (category) params.category = category;
+    if (typeof inStock === "boolean") params.inStock = inStock;
 
-  const res = await api.get("/products/search", { params });
-  // Expecting backend to return { products: [...], count: number }
-  return res.data;
+    const res = await api.get("/products/search", { params });
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    return { products: [], count: 0 };
+  }
 };
 
 export const listProductsByCollection = async (
   collectionId: number
 ): Promise<Product[]> => {
-  const res = await api.get(`/collections/${collectionId}/products`);
-  return res.data;
+  try {
+    const res = await api.get(`/collections/${collectionId}/products`);
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching products by collection:", error);
+    return [];
+  }
+};
+
+export const listProductsWithSort = async ({
+  page,
+  queryParams,
+  sortBy,
+  countryCode,
+}: {
+  page: number;
+  queryParams: Record<string, any>;
+  sortBy?: string;
+  countryCode: string;
+}): Promise<{
+  response: { products: Product[]; count: number };
+}> => {
+  try {
+    const params = {
+      page,
+      limit: 12,
+      sortBy: sortBy || "createdAt",
+      order: "desc",
+      ...queryParams,
+    };
+
+    const res = await api.get("/products/search", { params });
+    return {
+      response: {
+        products: res.data.products || [],
+        count: res.data.count || 0,
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching products with sort:", error);
+    return {
+      response: {
+        products: [],
+        count: 0,
+      },
+    };
+  }
 };

@@ -13,10 +13,15 @@ const api = axios.create({
 });
 
 export const listCartPaymentMethods = async (regionId: string) => {
-  const res = await api.get("/payment-providers", {
-    params: { region_id: regionId },
-  });
-  return res.data.payment_providers.sort((a: any, b: any) =>
-    a.id > b.id ? 1 : -1
-  );
+  try {
+    const res = await api.get("/payment-providers", {
+      params: { region_id: regionId },
+    });
+    return res.data.payment_providers.sort((a: any, b: any) =>
+      a.id > b.id ? 1 : -1
+    );
+  } catch (error) {
+    console.error("Error fetching payment methods:", error);
+    return [];
+  }
 };

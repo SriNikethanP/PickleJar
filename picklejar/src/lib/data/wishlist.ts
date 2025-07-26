@@ -1,3 +1,5 @@
+"use server";
+
 import axios from "axios";
 
 const api = axios.create({
@@ -23,24 +25,39 @@ export type Wishlist = {
 export const addToWishlist = async (
   userId: number,
   productId: number
-): Promise<Wishlist> => {
-  const res = await api.post("/wishlist/add", null, {
-    params: { userId, productId },
-  });
-  return res.data;
+): Promise<Wishlist | null> => {
+  try {
+    const res = await api.post("/wishlist/add", null, {
+      params: { userId, productId },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Error adding to wishlist:", error);
+    return null;
+  }
 };
 
 export const removeFromWishlist = async (
   userId: number,
   productId: number
-): Promise<Wishlist> => {
-  const res = await api.delete("/wishlist/remove", {
-    params: { userId, productId },
-  });
-  return res.data;
+): Promise<Wishlist | null> => {
+  try {
+    const res = await api.delete("/wishlist/remove", {
+      params: { userId, productId },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Error removing from wishlist:", error);
+    return null;
+  }
 };
 
-export const getWishlist = async (userId: number): Promise<Wishlist> => {
-  const res = await api.get("/wishlist", { params: { userId } });
-  return res.data;
+export const getWishlist = async (userId: number): Promise<Wishlist | null> => {
+  try {
+    const res = await api.get("/wishlist", { params: { userId } });
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching wishlist:", error);
+    return null;
+  }
 };
