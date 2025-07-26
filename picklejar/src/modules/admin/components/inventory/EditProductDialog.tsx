@@ -8,10 +8,10 @@ import {
   DialogTrigger,
 } from "@lib/components/ui/dialog";
 import { Button } from "@lib/components/ui/button";
-import { updateProduct } from "@lib/data/admin";
+import { updateProduct, deleteProductImage } from "@lib/data/admin";
 import { toast } from "sonner";
 import { Input } from "@lib/components/ui/input";
-import { Upload, X } from "lucide-react";
+import { Upload, X, Trash2 } from "lucide-react";
 
 export default function EditProductDialog({
   product,
@@ -31,6 +31,9 @@ export default function EditProductDialog({
   });
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>(
+    product.imageUrls || []
+  );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -46,11 +49,22 @@ export default function EditProductDialog({
     setImagePreviews(files.map((file) => URL.createObjectURL(file)));
   };
 
-  const removeImage = (index: number) => {
+  const removeNewImage = (index: number) => {
     const newImages = images.filter((_, i) => i !== index);
     const newPreviews = imagePreviews.filter((_, i) => i !== index);
     setImages(newImages);
     setImagePreviews(newPreviews);
+  };
+
+  const removeExistingImage = async (imageUrl: string) => {
+    try {
+      await deleteProductImage(product.id, imageUrl);
+      setExistingImages((prev) => prev.filter((img) => img !== imageUrl));
+      toast.success("Image deleted successfully");
+    } catch (error) {
+      toast.error("Failed to delete image");
+      console.error("Error deleting image:", error);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -166,25 +180,59 @@ export default function EditProductDialog({
               />
             </label>
 
-            {/* Image Previews */}
+            {/* Existing Images */}
+            {existingImages.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Existing Images:
+                </p>
+                <div className="grid grid-cols-3 gap-2">
+                  {existingImages.map((imageUrl, idx) => (
+                    <div key={idx} className="relative group">
+                      <img
+                        src={imageUrl}
+                        alt={`Existing ${idx + 1}`}
+                        className="w-full h-20 object-cover rounded-lg border border-gray-200 dark:border-zinc-600"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeExistingImage(imageUrl)}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Delete image"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* New Image Previews */}
             {imagePreviews.length > 0 && (
-              <div className="grid grid-cols-3 gap-2">
-                {imagePreviews.map((src, idx) => (
-                  <div key={idx} className="relative group">
-                    <img
-                      src={src}
-                      alt={`Preview ${idx + 1}`}
-                      className="w-full h-20 object-cover rounded-lg border border-gray-200 dark:border-zinc-600"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(idx)}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  New Images:
+                </p>
+                <div className="grid grid-cols-3 gap-2">
+                  {imagePreviews.map((src, idx) => (
+                    <div key={idx} className="relative group">
+                      <img
+                        src={src}
+                        alt={`Preview ${idx + 1}`}
+                        className="w-full h-20 object-cover rounded-lg border border-gray-200 dark:border-zinc-600"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeNewImage(idx)}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Remove image"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>

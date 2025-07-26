@@ -1,8 +1,5 @@
 import axios from "axios";
-import {
-  uploadMultipleImagesToCloudinary,
-  CloudinaryUploadResult,
-} from "@lib/util/cloudinary";
+import { uploadMultipleImagesToCloudinary } from "@lib/util/cloudinary";
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "http://localhost:8080",
@@ -76,13 +73,11 @@ export const getOrderCount = async (userId: number) => {
 export const addProduct = async (product: any, images: File[] = []) => {
   try {
     let imageUrls: string[] = [];
-
     // Upload images to Cloudinary if provided
     if (images.length > 0) {
       const cloudinaryResults = await uploadMultipleImagesToCloudinary(images);
       imageUrls = cloudinaryResults.map((result) => result.secure_url);
     }
-
     // Send product data with Cloudinary URLs to backend
     const productData = {
       name: product.name,
@@ -92,7 +87,6 @@ export const addProduct = async (product: any, images: File[] = []) => {
       stock: product.stock,
       imageUrls: imageUrls, // Send Cloudinary URLs instead of files
     };
-
     const res = await api.post("/api/v1/products/admin", productData, {
       headers: { "Content-Type": "application/json" },
     });
@@ -110,13 +104,11 @@ export const updateProduct = async (
 ) => {
   try {
     let imageUrls: string[] = [];
-
     // Upload images to Cloudinary if provided
     if (images.length > 0) {
       const cloudinaryResults = await uploadMultipleImagesToCloudinary(images);
       imageUrls = cloudinaryResults.map((result) => result.secure_url);
     }
-
     // Send product data with Cloudinary URLs to backend
     const productData = {
       name: product.name,
@@ -126,13 +118,39 @@ export const updateProduct = async (
       stock: product.stock,
       imageUrls: imageUrls, // Send Cloudinary URLs instead of files
     };
-
     const res = await api.put(`/api/v1/products/admin/${id}`, productData, {
       headers: { "Content-Type": "application/json" },
     });
     return res.data;
   } catch (error) {
     console.error("Error updating product:", error);
+    throw error;
+  }
+};
+
+// Delete a product image from Cloudinary via backend
+export const deleteProductImage = async (
+  productId: number,
+  imageUrl: string
+) => {
+  try {
+    const res = await api.delete(`/api/v1/products/admin/${productId}/images`, {
+      data: { imageUrl },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Error deleting product image:", error);
+    throw error;
+  }
+};
+
+// Delete an entire product (which should also delete its images)
+export const deleteProduct = async (productId: number) => {
+  try {
+    const res = await api.delete(`/api/v1/products/admin/${productId}`);
+    return res.data;
+  } catch (error) {
+    console.error("Error deleting product:", error);
     throw error;
   }
 };
