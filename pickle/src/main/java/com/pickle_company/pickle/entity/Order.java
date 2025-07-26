@@ -21,6 +21,7 @@ public class Order {
     private User user;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<OrderItem> items = new ArrayList<>();
 
     private double totalAmount;

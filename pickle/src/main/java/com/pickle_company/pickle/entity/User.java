@@ -30,6 +30,8 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+
+    @Builder.Default
     private boolean banned = false;
 
     @Embedded

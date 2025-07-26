@@ -26,6 +26,7 @@ public class Product {
     @ElementCollection(fetch = FetchType.LAZY) // Simple for file URLs/paths
     @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
     @Column(name = "image_url")
+    @Builder.Default
     private List<String> imageUrls = new ArrayList<>();
 
     @Column(nullable = false)
@@ -36,6 +37,7 @@ public class Product {
 
     // Example: OneToMany
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<Review> reviews = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -47,5 +49,6 @@ public class Product {
     private Collection collection;
     
     @Column(nullable = false)
+    @Builder.Default
     private boolean active = true;
 }

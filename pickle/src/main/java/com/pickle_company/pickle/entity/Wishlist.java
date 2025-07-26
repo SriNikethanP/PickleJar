@@ -24,6 +24,7 @@ public class Wishlist {
             joinColumns = @JoinColumn(name = "wishlist_id"),
             inverseJoinColumns = @JoinColumn(name = "product_id")
     )
+    @Builder.Default
     private Set<Product> products = new HashSet<>();
 }
 
