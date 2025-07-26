@@ -13,8 +13,11 @@ import {
   TableRow,
 } from "@lib/components/ui/table";
 import { Button } from "@lib/components/ui/button";
+import { listOrders } from "@lib/data/admin";
 
-export default function OrdersPage() {
+export default async function OrdersPage() {
+  const orders = await listOrders();
+
   return (
     <div className="space-y-6">
       <div>
@@ -25,7 +28,7 @@ export default function OrdersPage() {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Order Management</CardTitle>
+            <CardTitle>Order Management ({orders.length})</CardTitle>
             <select className="border border-gray-300 rounded-md px-3 py-2">
               <option>All Orders</option>
               <option>Pending</option>
@@ -48,25 +51,52 @@ export default function OrdersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow>
-                <TableCell className="font-medium">#ORD-001</TableCell>
-                <TableCell>John Doe</TableCell>
-                <TableCell>2024-01-15</TableCell>
-                <TableCell>₹450</TableCell>
-                <TableCell>
-                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                    Processing
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <div className="flex space-x-2">
-                    <Button variant="outline" size="sm">
-                      View
-                    </Button>
-                    <Button size="sm">Ship</Button>
-                  </div>
-                </TableCell>
-              </TableRow>
+              {orders.length > 0 ? (
+                orders.map((order: any) => (
+                  <TableRow key={order.id}>
+                    <TableCell className="font-medium">#{order.id}</TableCell>
+                    <TableCell>
+                      {order.user?.fullName || order.user?.name || "Guest"}
+                    </TableCell>
+                    <TableCell>
+                      {order.placedAt
+                        ? new Date(order.placedAt).toLocaleDateString()
+                        : "N/A"}
+                    </TableCell>
+                    <TableCell>₹{order.totalAmount || 0}</TableCell>
+                    <TableCell>
+                      <span
+                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          order.status === "completed"
+                            ? "bg-green-100 text-green-800"
+                            : order.status === "processing"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
+                        {order.status || "Pending"}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button variant="outline" size="sm">
+                          View
+                        </Button>
+                        <Button size="sm">Ship</Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={6}
+                    className="text-center text-gray-500 py-8"
+                  >
+                    No orders found
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>

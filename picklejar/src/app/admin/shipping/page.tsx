@@ -5,8 +5,11 @@ import {
   CardTitle,
 } from "@lib/components/ui/card";
 import { Button } from "@lib/components/ui/button";
+import { listShipments } from "@lib/data/admin";
 
-export default function ShippingPage() {
+export default async function ShippingPage() {
+  const shipments = await listShipments();
+
   return (
     <div className="space-y-6">
       <div>
@@ -67,39 +70,49 @@ export default function ShippingPage() {
         {/* Delivery Tracking */}
         <Card>
           <CardHeader>
-            <CardTitle>Recent Deliveries</CardTitle>
+            <CardTitle>Recent Deliveries ({shipments.length})</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="border border-gray-200 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-sm font-medium text-gray-900">
-                    Order #ORD-001
-                  </h4>
-                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                    In Transit
-                  </span>
+              {shipments.length > 0 ? (
+                shipments.slice(0, 5).map((shipment: any) => (
+                  <div
+                    key={shipment.id}
+                    className="border border-gray-200 rounded-lg p-4"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-sm font-medium text-gray-900">
+                        Order #{shipment.orderId}
+                      </h4>
+                      <span
+                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          shipment.status === "Delivered"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-blue-100 text-blue-800"
+                        }`}
+                      >
+                        {shipment.status}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-500">
+                      {shipment.status === "Delivered"
+                        ? `Delivered on: ${new Date(
+                            shipment.deliveredAt
+                          ).toLocaleDateString()}`
+                        : `Expected delivery: ${new Date(
+                            shipment.shippedAt
+                          ).toLocaleDateString()}`}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Tracking: {shipment.trackingNumber}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center text-gray-500 py-8">
+                  No shipments found
                 </div>
-                <p className="text-sm text-gray-500">
-                  Expected delivery: 2024-01-18
-                </p>
-                <p className="text-sm text-gray-500">Tracking: TRK123456789</p>
-              </div>
-
-              <div className="border border-gray-200 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-sm font-medium text-gray-900">
-                    Order #ORD-002
-                  </h4>
-                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                    Delivered
-                  </span>
-                </div>
-                <p className="text-sm text-gray-500">
-                  Delivered on: 2024-01-16
-                </p>
-                <p className="text-sm text-gray-500">Tracking: TRK987654321</p>
-              </div>
+              )}
             </div>
           </CardContent>
         </Card>

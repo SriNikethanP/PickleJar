@@ -11,7 +11,14 @@ import dynamic from "next/dynamic";
 const ECharts = dynamic(() => import("echarts-for-react"), { ssr: false });
 
 interface AnalyticsClientProps {
-  data: any;
+  data: {
+    totalSales: number;
+    totalOrders: number;
+    totalCustomers: number;
+    categoryPieData: Array<{ value: number; name: string }>;
+    trendLabels: string[];
+    revenueTrend: number[];
+  };
 }
 
 export default function AnalyticsClient({ data }: AnalyticsClientProps) {
@@ -24,10 +31,10 @@ export default function AnalyticsClient({ data }: AnalyticsClientProps) {
             <CardTitle className="text-sm font-medium">Total Sales</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-indigo-600">₹125,000</div>
-            <p className="text-xs text-muted-foreground">
-              +12% from last month
-            </p>
+            <div className="text-2xl font-bold text-indigo-600">
+              ₹{data.totalSales.toLocaleString()}
+            </div>
+            <p className="text-xs text-muted-foreground">Total revenue</p>
           </CardContent>
         </Card>
 
@@ -36,8 +43,10 @@ export default function AnalyticsClient({ data }: AnalyticsClientProps) {
             <CardTitle className="text-sm font-medium">Orders</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">1,234</div>
-            <p className="text-xs text-muted-foreground">+8% from last month</p>
+            <div className="text-2xl font-bold text-green-600">
+              {data.totalOrders.toLocaleString()}
+            </div>
+            <p className="text-xs text-muted-foreground">Total orders</p>
           </CardContent>
         </Card>
 
@@ -46,20 +55,24 @@ export default function AnalyticsClient({ data }: AnalyticsClientProps) {
             <CardTitle className="text-sm font-medium">Customers</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">567</div>
+            <div className="text-2xl font-bold text-blue-600">
+              {data.totalCustomers.toLocaleString()}
+            </div>
             <p className="text-xs text-muted-foreground">
-              +15% from last month
+              Registered customers
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Products</CardTitle>
+            <CardTitle className="text-sm font-medium">Categories</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-purple-600">89</div>
-            <p className="text-xs text-muted-foreground">+3% from last month</p>
+            <div className="text-2xl font-bold text-purple-600">
+              {data.categoryPieData.length}
+            </div>
+            <p className="text-xs text-muted-foreground">Active categories</p>
           </CardContent>
         </Card>
       </div>
@@ -76,19 +89,16 @@ export default function AnalyticsClient({ data }: AnalyticsClientProps) {
                 tooltip: { trigger: "axis" },
                 xAxis: {
                   type: "category",
-                  data: data.trendLabels || [
-                    "Jan",
-                    "Feb",
-                    "Mar",
-                    "Apr",
-                    "May",
-                    "Jun",
-                  ],
+                  data:
+                    data.trendLabels.length > 0
+                      ? data.trendLabels
+                      : ["No data"],
                 },
                 yAxis: { type: "value" },
                 series: [
                   {
-                    data: data.revenueTrend || [820, 932, 901, 934, 1290, 1330],
+                    data:
+                      data.revenueTrend.length > 0 ? data.revenueTrend : [0],
                     type: "line",
                     smooth: true,
                     areaStyle: {
@@ -127,12 +137,10 @@ export default function AnalyticsClient({ data }: AnalyticsClientProps) {
                     type: "pie",
                     radius: ["40%", "70%"],
                     center: ["50%", "60%"],
-                    data: data.categoryPieData || [
-                      { value: 1048, name: "Pickles" },
-                      { value: 735, name: "Sauces" },
-                      { value: 580, name: "Spices" },
-                      { value: 484, name: "Chutneys" },
-                    ],
+                    data:
+                      data.categoryPieData.length > 0
+                        ? data.categoryPieData
+                        : [{ value: 1, name: "No data" }],
                     emphasis: {
                       itemStyle: {
                         shadowBlur: 10,

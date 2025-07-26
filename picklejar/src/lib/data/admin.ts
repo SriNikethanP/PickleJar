@@ -1,74 +1,105 @@
 import axios from "axios";
 const api = axios.create({
-  baseURL:
-    process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "http://localhost:8080/api/v1",
+  baseURL: process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "http://localhost:8080",
 });
 
 export const getAdminDashboardData = async () => {
-  const [sales, orders, customers, pie, trend] = await Promise.all([
-    api.get("/admin/reports/total-sales"),
-    api.get("/admin/reports/total-orders"),
-    api.get("/admin/reports/total-customers"),
-    api.get("/admin/reports/category-distribution"),
-    api.get("/admin/reports/revenue-trend"),
-  ]);
-  return {
-    totalSales: sales.data,
-    totalOrders: orders.data,
-    totalCustomers: customers.data,
-    categoryPieData: pie.data, // [{ value, name }]
-    trendLabels: trend.data.map((d: any) => d.date),
-    revenueTrend: trend.data.map((d: any) => d.revenue),
-  };
+  try {
+    const [sales, orders, customers, pie, trend] = await Promise.all([
+      api.get("/api/v1/admin/reports/total-sales"),
+      api.get("/api/v1/admin/reports/total-orders"),
+      api.get("/api/v1/admin/reports/total-customers"),
+      api.get("/api/v1/admin/reports/category-distribution"),
+      api.get("/api/v1/admin/reports/revenue-trend"),
+    ]);
+
+    return {
+      totalSales: sales.data,
+      totalOrders: orders.data,
+      totalCustomers: customers.data,
+      categoryPieData: pie.data, // [{ value, name }]
+      trendLabels: trend.data.map((d: any) => d.date),
+      revenueTrend: trend.data.map((d: any) => d.revenue),
+    };
+  } catch (error) {
+    console.error("Error fetching admin dashboard data:", error);
+    // Return fallback data if API fails
+    return {
+      totalSales: 0,
+      totalOrders: 0,
+      totalCustomers: 0,
+      categoryPieData: [],
+      trendLabels: [],
+      revenueTrend: [],
+    };
+  }
 };
 
 export const listOrders = async () => {
-  const res = await api.get("/orders");
-  return res.data;
+  try {
+    const res = await api.get("/api/v1/orders");
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    return [];
+  }
 };
 
 export const listCustomers = async () => {
-  const res = await api.get("/admin/users");
-  return res.data;
+  try {
+    const res = await api.get("/api/v1/admin/users");
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching customers:", error);
+    return [];
+  }
 };
 
 export const getOrderCount = async (userId: number) => {
-  const res = await api.get(`/admin/users/${userId}/orders`);
-  return res.data.length;
+  try {
+    const res = await api.get(`/api/v1/admin/users/${userId}/orders`);
+    return res.data.length;
+  } catch (error) {
+    console.error("Error fetching order count:", error);
+    return 0;
+  }
 };
 
 export const listPayments = async () => {
-  const res = await api.get("/payments");
-  return res.data;
+  try {
+    const res = await api.get("/api/v1/payments");
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching payments:", error);
+    return [];
+  }
 };
 
 export const listShipments = async () => {
-  // TODO: Replace with real API call
-  return [
-    {
-      id: 1,
-      orderId: 101,
-      carrier: "FedEx",
-      trackingNumber: "123456",
-      status: "Shipped",
-      shippedAt: "2024-05-01",
-      deliveredAt: null,
-    },
-    {
-      id: 2,
-      orderId: 102,
-      carrier: "UPS",
-      trackingNumber: "654321",
-      status: "Delivered",
-      shippedAt: "2024-04-28",
-      deliveredAt: "2024-05-02",
-    },
-  ];
+  try {
+    // For now, we'll use orders data to simulate shipments
+    const orders = await listOrders();
+    return orders.map((order: any, index: number) => ({
+      id: index + 1,
+      orderId: order.id,
+      carrier: "Standard Delivery",
+      trackingNumber: `TRK${order.id.toString().padStart(6, "0")}`,
+      status: order.status === "completed" ? "Delivered" : "In Transit",
+      shippedAt: order.placedAt,
+      deliveredAt: order.status === "completed" ? order.placedAt : null,
+    }));
+  } catch (error) {
+    console.error("Error fetching shipments:", error);
+    return [];
+  }
 };
 
 export const listInventory = async () => {
-  const { products } = await api
-    .get("/products/search")
-    .then((res) => res.data);
-  return products;
+  try {
+    const res = await api.get("/api/v1/products");
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching inventory:", error);
+    return [];
+  }
 };
