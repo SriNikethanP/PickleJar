@@ -17,16 +17,16 @@ export default async function Home(props: {
   const params = await props.params;
 
   const region = await getRegion("in");
-  const { collections } = await listCollections({
-    fields: "id, handle, title",
-  });
+  const collections = await listCollections();
 
   // Check if we have real data (not mock data)
   const hasRealData =
     collections &&
     collections.length > 0 &&
     region &&
-    !collections.some((collection) => collection.id.startsWith("mock-"));
+    !collections.some((collection: any) =>
+      collection.id.toString().startsWith("mock-")
+    );
 
   return (
     <>

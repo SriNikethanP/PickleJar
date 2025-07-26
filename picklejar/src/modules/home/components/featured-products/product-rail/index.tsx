@@ -1,6 +1,6 @@
 import { listProducts } from "@lib/data/products";
-import { HttpTypes } from "@medusajs/types";
 import { Text } from "@medusajs/ui";
+import { Collection } from "@lib/data/collections";
 
 import InteractiveLink from "@modules/common/components/interactive-link";
 import ProductPreview from "@modules/products/components/product-preview";
@@ -9,21 +9,27 @@ export default async function ProductRail({
   collection,
   region,
 }: {
-  collection: HttpTypes.StoreCollection;
-  region: HttpTypes.StoreRegion;
+  collection: Collection;
+  region: {
+    id: string;
+    name: string;
+    currency_code: string;
+    countries: {
+      id: string;
+      iso_2: string;
+      iso_3: string;
+      num_code: string;
+      name: string;
+    }[];
+  };
 }) {
   try {
-    const {
-      response: { products: pricedProducts },
-    } = await listProducts({
-      countryCode: "in",
-      queryParams: {
-        limit: 100,
-      },
+    const { products } = await listProducts({
+      limit: 100,
     });
 
-    const collectionProducts = pricedProducts
-      ?.filter((product) => product.collection_id === collection.id)
+    const collectionProducts = products
+      ?.filter((product: any) => product.collection_id === collection.id)
       .slice(0, 6);
 
     if (!collectionProducts?.length) {
@@ -39,7 +45,7 @@ export default async function ProductRail({
           </InteractiveLink>
         </div>
         <ul className="grid grid-cols-2 small:grid-cols-3 gap-x-6 gap-y-24 small:gap-y-36">
-          {collectionProducts.map((product) => (
+          {collectionProducts.map((product: any) => (
             <li key={product.id}>
               <ProductPreview product={product} region={region} isFeatured />
             </li>

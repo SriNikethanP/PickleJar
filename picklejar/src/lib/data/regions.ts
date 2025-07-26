@@ -5,7 +5,16 @@ export const listRegions = async () => {
     {
       id: "IN",
       name: "India",
-      countries: [{ iso_2: "in", name: "India" }],
+      currency_code: "INR",
+      countries: [
+        {
+          id: "in",
+          iso_2: "in",
+          iso_3: "ind",
+          num_code: "356",
+          name: "India",
+        },
+      ],
     },
   ];
 };
@@ -15,7 +24,16 @@ export const retrieveRegion = async (id: string) => {
     return {
       id: "IN",
       name: "India",
-      countries: [{ iso_2: "in", name: "India" }],
+      currency_code: "INR",
+      countries: [
+        {
+          id: "in",
+          iso_2: "in",
+          iso_3: "ind",
+          num_code: "356",
+          name: "India",
+        },
+      ],
     };
   }
   return null;
@@ -26,7 +44,16 @@ export const getRegion = async (countryCode: string) => {
     return {
       id: "IN",
       name: "India",
-      countries: [{ iso_2: "in", name: "India" }],
+      currency_code: "INR",
+      countries: [
+        {
+          id: "in",
+          iso_2: "in",
+          iso_3: "ind",
+          num_code: "356",
+          name: "India",
+        },
+      ],
     };
   }
   return null;
