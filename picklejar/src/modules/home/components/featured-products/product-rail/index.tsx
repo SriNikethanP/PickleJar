@@ -1,4 +1,4 @@
-import { listProducts } from "@lib/data/products";
+import { listProductsByCollection } from "@lib/data/products";
 import { Text } from "@medusajs/ui";
 import { Collection } from "@lib/data/collections";
 
@@ -24,13 +24,8 @@ export default async function ProductRail({
   };
 }) {
   try {
-    const { products } = await listProducts({
-      limit: 100,
-    });
-
-    const collectionProducts = products
-      ?.filter((product: any) => product.collection_id === collection.id)
-      .slice(0, 6);
+    const products = await listProductsByCollection(Number(collection.id));
+    const collectionProducts = products?.slice(0, 6);
 
     if (!collectionProducts?.length) {
       return null;
@@ -40,9 +35,7 @@ export default async function ProductRail({
       <div className="content-container py-12 small:py-24">
         <div className="flex justify-between mb-8">
           <Text className="txt-xlarge">{collection.title}</Text>
-          <InteractiveLink href={`/collections/${collection.handle}`}>
-            View all
-          </InteractiveLink>
+          {/* No handle, so just link to /collections or remove this link */}
         </div>
         <ul className="grid grid-cols-2 small:grid-cols-3 gap-x-6 gap-y-24 small:gap-y-36">
           {collectionProducts.map((product: any) => (

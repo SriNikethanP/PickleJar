@@ -2,11 +2,13 @@ package com.pickle_company.pickle.service;
 
 import com.pickle_company.pickle.dto.*;
 import com.pickle_company.pickle.entity.Category;
+import com.pickle_company.pickle.entity.Collection;
 import com.pickle_company.pickle.entity.Product;
 import com.pickle_company.pickle.entity.Review;
 import com.pickle_company.pickle.mapper.ProductMapper;
 import com.pickle_company.pickle.mapper.ReviewMapper;
 import com.pickle_company.pickle.repository.CategoryRepository;
+import com.pickle_company.pickle.repository.CollectionRepository;
 import com.pickle_company.pickle.repository.ProductRepository;
 import com.pickle_company.pickle.repository.ReviewRepository;
 import org.springframework.stereotype.Service;
@@ -20,14 +22,17 @@ import java.util.stream.Collectors;
 public class ProductService {
     private final ProductRepository productRepo;
     private final CategoryRepository categoryRepo;
+    private final CollectionRepository collectionRepo;
     private final ProductMapper productMapper;
     private final ReviewRepository reviewRepo;
     private final ReviewMapper reviewMapper;
 
     public ProductService(ProductRepository productRepo, CategoryRepository categoryRepo,
-                          ProductMapper productMapper, ReviewRepository reviewRepo, ReviewMapper reviewMapper) {
+                          CollectionRepository collectionRepo, ProductMapper productMapper, 
+                          ReviewRepository reviewRepo, ReviewMapper reviewMapper) {
         this.productRepo = productRepo;
         this.categoryRepo = categoryRepo;
+        this.collectionRepo = collectionRepo;
         this.productMapper = productMapper;
         this.reviewRepo = reviewRepo;
         this.reviewMapper = reviewMapper;
@@ -35,8 +40,18 @@ public class ProductService {
 
     // Create/Update Product
     public ProductResponseDTO addOrUpdateProduct(ProductRequestDTO dto, Long productId) {
-        Category category = categoryRepo.findByName(dto.getCategoryName())
-                .orElseGet(() -> categoryRepo.save(Category.builder().name(dto.getCategoryName()).build()));
+        Category category = null;
+        if (dto.getCategoryId() != null) {
+            category = categoryRepo.findById(dto.getCategoryId()).orElse(null);
+        } else if (dto.getCategoryName() != null) {
+            category = categoryRepo.findByName(dto.getCategoryName())
+                    .orElseGet(() -> categoryRepo.save(Category.builder().name(dto.getCategoryName()).build()));
+        }
+
+        Collection collection = null;
+        if (dto.getCollectionId() != null) {
+            collection = collectionRepo.findById(dto.getCollectionId()).orElse(null);
+        }
 
         Product product;
         if (productId != null) {
@@ -50,6 +65,7 @@ public class ProductService {
         product.setStock(dto.getStock());
         product.setActive(dto.isActive());
         product.setCategory(category);
+        product.setCollection(collection);
         // For images: handled via file upload, so don't set imageUrls here.
 
         Product saved = productRepo.save(product);
@@ -126,6 +142,13 @@ public class ProductService {
 
     public List<ProductResponseDTO> getAllProducts() {
         return productRepo.findAll()
+                .stream()
+                .map(productMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<ProductResponseDTO> getProductsByCollectionId(Long collectionId) {
+        return productRepo.findByCollection_Id(collectionId)
                 .stream()
                 .map(productMapper::toDto)
                 .collect(Collectors.toList());

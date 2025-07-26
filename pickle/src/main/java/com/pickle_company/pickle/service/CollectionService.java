@@ -21,38 +21,30 @@ public class CollectionService {
         return collectionMapper.toDtoList(collectionRepository.findAll());
     }
 
-    public CollectionDTO getByHandle(String handle) {
-        return collectionRepository.findByHandle(handle)
-                .map(collectionMapper::toDto)
-                .orElse(null);
-    }
-    
     public CollectionDTO getById(Long id) {
         return collectionRepository.findById(id)
                 .map(collectionMapper::toDto)
                 .orElse(null);
     }
-    
+
     public CollectionDTO createCollection(CollectionDTO collectionDTO) {
         Collection collection = Collection.builder()
                 .title(collectionDTO.getTitle())
-                .handle(collectionDTO.getHandle())
                 .build();
         Collection saved = collectionRepository.save(collection);
         return collectionMapper.toDto(saved);
     }
-    
+
     public CollectionDTO updateCollection(Long id, CollectionDTO collectionDTO) {
         return collectionRepository.findById(id)
                 .map(existingCollection -> {
                     existingCollection.setTitle(collectionDTO.getTitle());
-                    existingCollection.setHandle(collectionDTO.getHandle());
                     Collection updated = collectionRepository.save(existingCollection);
                     return collectionMapper.toDto(updated);
                 })
                 .orElse(null);
     }
-    
+
     public boolean deleteCollection(Long id) {
         if (collectionRepository.existsById(id)) {
             collectionRepository.deleteById(id);

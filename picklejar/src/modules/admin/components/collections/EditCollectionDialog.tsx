@@ -25,7 +25,6 @@ export default function EditCollectionDialog({
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     title: collection.title || "",
-    handle: collection.handle || "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,7 +35,7 @@ export default function EditCollectionDialog({
     e.preventDefault();
     setLoading(true);
     try {
-      await updateCollection(collection.id, form);
+      await updateCollection(collection.id, { title: form.title });
       toast.success("Collection updated successfully");
       setOpen(false);
       onSuccess();
@@ -63,14 +62,6 @@ export default function EditCollectionDialog({
             name="title"
             placeholder="Collection Title"
             value={form.title}
-            onChange={handleChange}
-            required
-            className="w-full"
-          />
-          <Input
-            name="handle"
-            placeholder="Collection Handle"
-            value={form.handle}
             onChange={handleChange}
             required
             className="w-full"

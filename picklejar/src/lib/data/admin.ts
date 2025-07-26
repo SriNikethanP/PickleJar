@@ -180,11 +180,15 @@ export const getCollection = async (id: number) => {
   }
 };
 
-export const createCollection = async (collection: any) => {
+export const createCollection = async (collection: { title: string }) => {
   try {
-    const res = await api.post("/api/v1/admin/collections", collection, {
-      headers: { "Content-Type": "application/json" },
-    });
+    const res = await api.post(
+      "/api/v1/admin/collections",
+      { title: collection.title },
+      {
+        headers: { "Content-Type": "application/json" },
+      }
+    );
     return res.data;
   } catch (error) {
     console.error("Error creating collection:", error);
@@ -192,11 +196,18 @@ export const createCollection = async (collection: any) => {
   }
 };
 
-export const updateCollection = async (id: number, collection: any) => {
+export const updateCollection = async (
+  id: number,
+  collection: { title: string }
+) => {
   try {
-    const res = await api.put(`/api/v1/admin/collections/${id}`, collection, {
-      headers: { "Content-Type": "application/json" },
-    });
+    const res = await api.put(
+      `/api/v1/admin/collections/${id}`,
+      { title: collection.title },
+      {
+        headers: { "Content-Type": "application/json" },
+      }
+    );
     return res.data;
   } catch (error) {
     console.error("Error updating collection:", error);

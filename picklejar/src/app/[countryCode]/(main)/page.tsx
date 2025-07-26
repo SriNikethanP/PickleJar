@@ -4,6 +4,7 @@ import FeaturedProducts from "@modules/home/components/featured-products";
 import Hero from "@modules/home/components/hero";
 import { listCollections } from "@lib/data/collections";
 import { getRegion } from "@lib/data/regions";
+import { listProductsByCollection } from "@lib/data/products";
 
 export const metadata: Metadata = {
   title: "PickleJar - Fresh Pickles",
@@ -19,12 +20,20 @@ export default async function Home(props: {
   const region = await getRegion("in");
   const collections = await listCollections();
 
+  // Fetch products for each collection
+  const collectionsWithProducts = await Promise.all(
+    collections.map(async (collection) => ({
+      ...collection,
+      products: await listProductsByCollection(Number(collection.id)),
+    }))
+  );
+
   // Check if we have real data (not mock data)
   const hasRealData =
-    collections &&
-    collections.length > 0 &&
+    collectionsWithProducts &&
+    collectionsWithProducts.length > 0 &&
     region &&
-    !collections.some((collection: any) =>
+    !collectionsWithProducts.some((collection: any) =>
       collection.id.toString().startsWith("mock-")
     );
 
@@ -34,7 +43,10 @@ export default async function Home(props: {
       <div className="py-12">
         {hasRealData ? (
           <ul className="flex flex-col gap-x-6">
-            <FeaturedProducts collections={collections} region={region} />
+            <FeaturedProducts
+              collections={collectionsWithProducts}
+              region={region}
+            />
           </ul>
         ) : (
           <div className="text-center">

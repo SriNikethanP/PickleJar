@@ -51,3 +51,10 @@ export const listProducts = async ({
   // Expecting backend to return { products: [...], count: number }
   return res.data;
 };
+
+export const listProductsByCollection = async (
+  collectionId: number
+): Promise<Product[]> => {
+  const res = await api.get(`/collections/${collectionId}/products`);
+  return res.data;
+};

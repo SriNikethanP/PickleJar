@@ -23,7 +23,6 @@ export default function AddCollectionDialog({
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     title: "",
-    handle: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,10 +33,10 @@ export default function AddCollectionDialog({
     e.preventDefault();
     setLoading(true);
     try {
-      await createCollection(form);
+      await createCollection({ title: form.title });
       toast.success("Collection created successfully");
       setOpen(false);
-      setForm({ title: "", handle: "" });
+      setForm({ title: "" });
       onSuccess();
     } catch (error) {
       toast.error("Failed to create collection");
@@ -63,14 +62,6 @@ export default function AddCollectionDialog({
             name="title"
             placeholder="Collection Title"
             value={form.title}
-            onChange={handleChange}
-            required
-            className="w-full"
-          />
-          <Input
-            name="handle"
-            placeholder="Collection Handle (e.g., featured-products)"
-            value={form.handle}
             onChange={handleChange}
             required
             className="w-full"

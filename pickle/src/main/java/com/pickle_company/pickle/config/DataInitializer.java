@@ -48,25 +48,21 @@ public class DataInitializer implements CommandLineRunner {
         if (collectionRepository.count() == 0) {
             Collection featuredProducts = Collection.builder()
                     .title("Featured Products")
-                    .handle("featured-products")
                     .build();
             collectionRepository.save(featuredProducts);
 
             Collection newArrivals = Collection.builder()
                     .title("New Arrivals")
-                    .handle("new-arrivals")
                     .build();
             collectionRepository.save(newArrivals);
 
             Collection bestSellers = Collection.builder()
                     .title("Best Sellers")
-                    .handle("best-sellers")
                     .build();
             collectionRepository.save(bestSellers);
 
             Collection seasonal = Collection.builder()
                     .title("Seasonal Collection")
-                    .handle("seasonal-collection")
                     .build();
             collectionRepository.save(seasonal);
 
