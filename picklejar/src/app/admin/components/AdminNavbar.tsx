@@ -10,6 +10,8 @@ import {
   CreditCard,
   Truck,
   Home,
+  FolderOpen,
+  Tag,
 } from "lucide-react";
 
 const navItems = [
@@ -32,6 +34,16 @@ const navItems = [
     href: "/admin/inventory",
     label: "Inventory",
     icon: Package,
+  },
+  {
+    href: "/admin/collections",
+    label: "Collections",
+    icon: FolderOpen,
+  },
+  {
+    href: "/admin/categories",
+    label: "Categories",
+    icon: Tag,
   },
   {
     href: "/admin/orders",

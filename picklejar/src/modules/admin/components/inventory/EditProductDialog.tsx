@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +8,12 @@ import {
   DialogTrigger,
 } from "@lib/components/ui/dialog";
 import { Button } from "@lib/components/ui/button";
-import { updateProduct, deleteProductImage } from "@lib/data/admin";
+import {
+  updateProduct,
+  deleteProductImage,
+  listCategories,
+  listCollections,
+} from "@lib/data/admin";
 import { toast } from "sonner";
 import { Input } from "@lib/components/ui/input";
 import { Upload, X, Trash2 } from "lucide-react";
@@ -22,12 +27,16 @@ export default function EditProductDialog({
 }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [collections, setCollections] = useState<any[]>([]);
   const [form, setForm] = useState({
     name: product.name || "",
     description: product.description || "",
     price: product.price || "",
     stock: product.stock || "",
     categoryName: product.categoryName || "",
+    categoryId: product.categoryId || "",
+    collectionId: product.collectionId || "",
   });
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -35,7 +44,25 @@ export default function EditProductDialog({
     product.imageUrls || []
   );
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [categoriesData, collectionsData] = await Promise.all([
+          listCategories(),
+          listCollections(),
+        ]);
+        setCategories(categoriesData);
+        setCollections(collectionsData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -81,6 +108,10 @@ export default function EditProductDialog({
           ...form,
           price: Number(form.price),
           stock: Number(form.stock),
+          categoryId: form.categoryId ? Number(form.categoryId) : undefined,
+          collectionId: form.collectionId
+            ? Number(form.collectionId)
+            : undefined,
         },
         images
       );
@@ -125,117 +156,131 @@ export default function EditProductDialog({
             className="w-full"
           />
           <Input
-            name="categoryName"
-            placeholder="Category"
-            value={form.categoryName}
-            onChange={handleChange}
-            required
-            className="w-full"
-          />
-          <Input
             name="price"
-            placeholder="Price"
             type="number"
+            step="0.01"
+            placeholder="Price"
             value={form.price}
             onChange={handleChange}
             required
-            min="0"
-            step="0.01"
             className="w-full"
           />
           <Input
             name="stock"
-            placeholder="Stock Quantity"
             type="number"
+            placeholder="Stock"
             value={form.stock}
             onChange={handleChange}
             required
-            min="0"
             className="w-full"
           />
 
-          {/* Custom File Upload */}
+          {/* Category Selection */}
+          <select
+            name="categoryId"
+            value={form.categoryId}
+            onChange={handleChange}
+            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Select Category</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+
+          {/* Collection Selection */}
+          <select
+            name="collectionId"
+            value={form.collectionId}
+            onChange={handleChange}
+            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Select Collection (Optional)</option>
+            {collections.map((collection) => (
+              <option key={collection.id} value={collection.id}>
+                {collection.title}
+              </option>
+            ))}
+          </select>
+
+          {/* Existing Images */}
+          {existingImages.length > 0 && (
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Existing Images
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {existingImages.map((imageUrl, index) => (
+                  <div key={index} className="relative">
+                    <img
+                      src={imageUrl}
+                      alt={`Existing ${index + 1}`}
+                      className="w-full h-20 object-cover rounded"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeExistingImage(imageUrl)}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* New Image Upload */}
           <div className="space-y-2">
-            <label
-              htmlFor="product-images-edit"
-              className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 dark:border-zinc-600 dark:bg-zinc-800 dark:hover:bg-zinc-700 transition-colors"
-            >
-              <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                <Upload className="w-8 h-8 mb-2 text-gray-500 dark:text-gray-400" />
-                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                  <span className="font-semibold">Click to upload</span> or drag
-                  and drop
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  PNG, JPG, GIF up to 3 files (optional)
-                </p>
-              </div>
-              <input
-                id="product-images-edit"
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleImageChange}
-                className="hidden"
-              />
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Add New Images (1-3 images)
             </label>
-
-            {/* Existing Images */}
-            {existingImages.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Existing Images:
-                </p>
-                <div className="grid grid-cols-3 gap-2">
-                  {existingImages.map((imageUrl, idx) => (
-                    <div key={idx} className="relative group">
-                      <img
-                        src={imageUrl}
-                        alt={`Existing ${idx + 1}`}
-                        className="w-full h-20 object-cover rounded-lg border border-gray-200 dark:border-zinc-600"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeExistingImage(imageUrl)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Delete image"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
+            <div className="flex items-center justify-center w-full">
+              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <Upload className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" />
+                  <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                    <span className="font-semibold">Click to upload</span> or
+                    drag and drop
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    PNG, JPG, GIF up to 10MB
+                  </p>
                 </div>
-              </div>
-            )}
-
-            {/* New Image Previews */}
-            {imagePreviews.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  New Images:
-                </p>
-                <div className="grid grid-cols-3 gap-2">
-                  {imagePreviews.map((src, idx) => (
-                    <div key={idx} className="relative group">
-                      <img
-                        src={src}
-                        alt={`Preview ${idx + 1}`}
-                        className="w-full h-20 object-cover rounded-lg border border-gray-200 dark:border-zinc-600"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeNewImage(idx)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Remove image"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+                <input
+                  type="file"
+                  className="hidden"
+                  multiple
+                  accept="image/*"
+                  onChange={handleImageChange}
+                />
+              </label>
+            </div>
           </div>
+
+          {/* New Image Previews */}
+          {imagePreviews.length > 0 && (
+            <div className="grid grid-cols-3 gap-2">
+              {imagePreviews.map((preview, index) => (
+                <div key={index} className="relative">
+                  <img
+                    src={preview}
+                    alt={`New Preview ${index + 1}`}
+                    className="w-full h-20 object-cover rounded"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeNewImage(index)}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
 
           <Button type="submit" disabled={loading} className="w-full">
             {loading ? "Updating..." : "Update Product"}

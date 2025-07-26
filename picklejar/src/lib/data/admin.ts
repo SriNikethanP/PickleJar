@@ -83,6 +83,8 @@ export const addProduct = async (product: any, images: File[] = []) => {
       name: product.name,
       description: product.description,
       categoryName: product.categoryName,
+      categoryId: product.categoryId,
+      collectionId: product.collectionId,
       price: product.price,
       stock: product.stock,
       imageUrls: imageUrls, // Send Cloudinary URLs instead of files
@@ -114,6 +116,8 @@ export const updateProduct = async (
       name: product.name,
       description: product.description,
       categoryName: product.categoryName,
+      categoryId: product.categoryId,
+      collectionId: product.collectionId,
       price: product.price,
       stock: product.stock,
       imageUrls: imageUrls, // Send Cloudinary URLs instead of files
@@ -151,6 +155,116 @@ export const deleteProduct = async (productId: number) => {
     return res.data;
   } catch (error) {
     console.error("Error deleting product:", error);
+    throw error;
+  }
+};
+
+// Collection Management
+export const listCollections = async () => {
+  try {
+    const res = await api.get("/api/v1/admin/collections");
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching collections:", error);
+    return [];
+  }
+};
+
+export const getCollection = async (id: number) => {
+  try {
+    const res = await api.get(`/api/v1/admin/collections/${id}`);
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching collection:", error);
+    throw error;
+  }
+};
+
+export const createCollection = async (collection: any) => {
+  try {
+    const res = await api.post("/api/v1/admin/collections", collection, {
+      headers: { "Content-Type": "application/json" },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Error creating collection:", error);
+    throw error;
+  }
+};
+
+export const updateCollection = async (id: number, collection: any) => {
+  try {
+    const res = await api.put(`/api/v1/admin/collections/${id}`, collection, {
+      headers: { "Content-Type": "application/json" },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Error updating collection:", error);
+    throw error;
+  }
+};
+
+export const deleteCollection = async (id: number) => {
+  try {
+    const res = await api.delete(`/api/v1/admin/collections/${id}`);
+    return res.data;
+  } catch (error) {
+    console.error("Error deleting collection:", error);
+    throw error;
+  }
+};
+
+// Category Management
+export const listCategories = async () => {
+  try {
+    const res = await api.get("/api/v1/admin/categories");
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    return [];
+  }
+};
+
+export const getCategory = async (id: number) => {
+  try {
+    const res = await api.get(`/api/v1/admin/categories/${id}`);
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching category:", error);
+    throw error;
+  }
+};
+
+export const createCategory = async (category: any) => {
+  try {
+    const res = await api.post("/api/v1/admin/categories", category, {
+      headers: { "Content-Type": "application/json" },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Error creating category:", error);
+    throw error;
+  }
+};
+
+export const updateCategory = async (id: number, category: any) => {
+  try {
+    const res = await api.put(`/api/v1/admin/categories/${id}`, category, {
+      headers: { "Content-Type": "application/json" },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Error updating category:", error);
+    throw error;
+  }
+};
+
+export const deleteCategory = async (id: number) => {
+  try {
+    const res = await api.delete(`/api/v1/admin/categories/${id}`);
+    return res.data;
+  } catch (error) {
+    console.error("Error deleting category:", error);
     throw error;
   }
 };

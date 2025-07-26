@@ -26,4 +26,36 @@ public class CategoryService {
                 .map(categoryMapper::toDto)
                 .orElse(null);
     }
+    
+    public CategoryDTO getById(Long id) {
+        return categoryRepository.findById(id)
+                .map(categoryMapper::toDto)
+                .orElse(null);
+    }
+    
+    public CategoryDTO createCategory(CategoryDTO categoryDTO) {
+        Category category = Category.builder()
+                .name(categoryDTO.getName())
+                .build();
+        Category saved = categoryRepository.save(category);
+        return categoryMapper.toDto(saved);
+    }
+    
+    public CategoryDTO updateCategory(Long id, CategoryDTO categoryDTO) {
+        return categoryRepository.findById(id)
+                .map(existingCategory -> {
+                    existingCategory.setName(categoryDTO.getName());
+                    Category updated = categoryRepository.save(existingCategory);
+                    return categoryMapper.toDto(updated);
+                })
+                .orElse(null);
+    }
+    
+    public boolean deleteCategory(Long id) {
+        if (categoryRepository.existsById(id)) {
+            categoryRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
 }

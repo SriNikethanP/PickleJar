@@ -16,6 +16,8 @@ public class ProductRequestDTO {
     private int stock;
     private boolean active;
     private String categoryName;
+    private Long categoryId;
+    private Long collectionId;
 }
 
 
