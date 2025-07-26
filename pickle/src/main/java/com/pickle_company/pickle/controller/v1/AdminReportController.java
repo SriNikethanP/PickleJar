@@ -50,4 +50,9 @@ public class AdminReportController {
     public int getTotalCustomers() {
         return reportService.getTotalCustomers();
     }
+
+    @GetMapping("/monthly-revenue-timeline")
+    public List<Map<String, Object>> getMonthlyRevenueTimeline() {
+        return reportService.getMonthlyRevenueTimeline();
+    }
 }

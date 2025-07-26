@@ -66,45 +66,6 @@ export default function AdminDashboardClient({ data }: { data: any }) {
     ],
   };
 
-  const revenueOption = {
-    title: {
-      text: "Revenue Trend",
-      left: "center",
-    },
-    tooltip: { trigger: "axis" },
-    xAxis: {
-      type: "category",
-      data:
-        data.trendLabels && data.trendLabels.length > 0
-          ? data.trendLabels
-          : ["No data"],
-    },
-    yAxis: { type: "value" },
-    series: [
-      {
-        data:
-          data.revenueTrend && data.revenueTrend.length > 0
-            ? data.revenueTrend
-            : [0],
-        type: "line",
-        smooth: true,
-        areaStyle: {
-          color: {
-            type: "linear",
-            x: 0,
-            y: 0,
-            x2: 0,
-            y2: 1,
-            colorStops: [
-              { offset: 0, color: "#60a5fa" },
-              { offset: 1, color: "#dbeafe" },
-            ],
-          },
-        },
-      },
-    ],
-  };
-
   return (
     <div className="p-8 space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -153,7 +114,41 @@ export default function AdminDashboardClient({ data }: { data: any }) {
             <CardTitle>Revenue Trend</CardTitle>
           </CardHeader>
           <CardContent>
-            <ECharts option={revenueOption} style={{ height: 400 }} />
+            <ECharts
+              option={{
+                tooltip: { trigger: "axis" },
+                xAxis: {
+                  type: "category",
+                  data:
+                    data.trendLabels.length > 0
+                      ? data.trendLabels
+                      : ["No data"],
+                },
+                yAxis: { type: "value" },
+                series: [
+                  {
+                    data:
+                      data.revenueTrend.length > 0 ? data.revenueTrend : [0],
+                    type: "line",
+                    smooth: true,
+                    areaStyle: {
+                      color: {
+                        type: "linear",
+                        x: 0,
+                        y: 0,
+                        x2: 0,
+                        y2: 1,
+                        colorStops: [
+                          { offset: 0, color: "#60a5fa" },
+                          { offset: 1, color: "#dbeafe" },
+                        ],
+                      },
+                    },
+                  },
+                ],
+              }}
+              style={{ height: 300 }}
+            />
           </CardContent>
         </Card>
       </div>

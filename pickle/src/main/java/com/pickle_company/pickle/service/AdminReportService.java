@@ -85,6 +85,20 @@ public class AdminReportService {
     public int getTotalCustomers() {
         return (int) userRepository.count();
     }
+
+    public List<Map<String, Object>> getMonthlyRevenueTimeline() {
+        // Returns [{year: 2023, month: 1, revenue: 1234.56}, ...]
+        List<Object[]> results = orderRepository.findMonthlyRevenue();
+        List<Map<String, Object>> timeline = new java.util.ArrayList<>();
+        for (Object[] row : results) {
+            Map<String, Object> entry = new HashMap<>();
+            entry.put("year", row[0]);
+            entry.put("month", row[1]);
+            entry.put("revenue", row[2]);
+            timeline.add(entry);
+        }
+        return timeline;
+    }
 }
 
 

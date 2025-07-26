@@ -18,10 +18,115 @@ interface AnalyticsClientProps {
     categoryPieData: Array<{ value: number; name: string }>;
     trendLabels: string[];
     revenueTrend: number[];
+    revenueTimeline: Array<{ year: number; month: number; revenue: number }>;
+  };
+}
+
+const revenueOption = (data: AnalyticsClientProps["data"]) => ({
+  title: {
+    text: "Revenue Trend",
+    left: "center",
+  },
+  tooltip: { trigger: "axis" },
+  xAxis: {
+    type: "category",
+    data:
+      data.trendLabels && data.trendLabels.length > 0
+        ? data.trendLabels
+        : ["No data"],
+  },
+  yAxis: { type: "value" },
+  series: [
+    {
+      data:
+        data.revenueTrend && data.revenueTrend.length > 0
+          ? data.revenueTrend
+          : [0],
+      type: "line",
+      smooth: true,
+      areaStyle: {
+        color: {
+          type: "linear",
+          x: 0,
+          y: 0,
+          x2: 0,
+          y2: 1,
+          colorStops: [
+            { offset: 0, color: "#60a5fa" },
+            { offset: 1, color: "#dbeafe" },
+          ],
+        },
+      },
+    },
+  ],
+});
+
+function getMonthlyTimelineOption(timeline: any[]) {
+  // Group by year
+  const grouped: Record<string, { month: string; revenue: number }[]> = {};
+  timeline.forEach(({ year, month, revenue }) => {
+    const y = String(year);
+    const m = String(month).padStart(2, "0");
+    if (!grouped[y]) grouped[y] = [];
+    grouped[y].push({ month: m, revenue: Number(revenue) });
+  });
+  const years = Object.keys(grouped).sort();
+  const months = [
+    "01",
+    "02",
+    "03",
+    "04",
+    "05",
+    "06",
+    "07",
+    "08",
+    "09",
+    "10",
+    "11",
+    "12",
+  ];
+  const options = years.map((year) => ({
+    title: { text: `${year} Monthly Revenue` },
+    series: [
+      {
+        data: months.map(
+          (m) => grouped[year].find((d) => d.month === m)?.revenue ?? 0
+        ),
+        type: "bar",
+        itemStyle: { color: "#60a5fa" },
+      },
+    ],
+  }));
+  return {
+    baseOption: {
+      timeline: {
+        axisType: "category",
+        autoPlay: false,
+        playInterval: 1500,
+        data: years,
+        label: {
+          formatter: (s: string) => s,
+        },
+      },
+      title: { left: "center" },
+      tooltip: { trigger: "axis" },
+      xAxis: [
+        {
+          type: "category",
+          data: months.map((m) => `${m}`),
+          axisLabel: { formatter: (v: string) => `Month ${v}` },
+        },
+      ],
+      yAxis: [{ type: "value", name: "Revenue" }],
+      series: [{ name: "Revenue", type: "bar" }],
+    },
+    options,
   };
 }
 
 export default function AnalyticsClient({ data }: AnalyticsClientProps) {
+  const timelineOption = getMonthlyTimelineOption(data.revenueTimeline || []);
+
   return (
     <>
       {/* Metrics Cards */}
@@ -81,44 +186,10 @@ export default function AnalyticsClient({ data }: AnalyticsClientProps) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Revenue Trend</CardTitle>
+            <CardTitle>Monthly Revenue Timeline</CardTitle>
           </CardHeader>
           <CardContent>
-            <ECharts
-              option={{
-                tooltip: { trigger: "axis" },
-                xAxis: {
-                  type: "category",
-                  data:
-                    data.trendLabels.length > 0
-                      ? data.trendLabels
-                      : ["No data"],
-                },
-                yAxis: { type: "value" },
-                series: [
-                  {
-                    data:
-                      data.revenueTrend.length > 0 ? data.revenueTrend : [0],
-                    type: "line",
-                    smooth: true,
-                    areaStyle: {
-                      color: {
-                        type: "linear",
-                        x: 0,
-                        y: 0,
-                        x2: 0,
-                        y2: 1,
-                        colorStops: [
-                          { offset: 0, color: "#60a5fa" },
-                          { offset: 1, color: "#dbeafe" },
-                        ],
-                      },
-                    },
-                  },
-                ],
-              }}
-              style={{ height: 300 }}
-            />
+            <ECharts option={timelineOption} style={{ height: 400 }} />
           </CardContent>
         </Card>
 

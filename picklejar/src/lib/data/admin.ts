@@ -5,12 +5,13 @@ const api = axios.create({
 
 export const getAdminDashboardData = async () => {
   try {
-    const [sales, orders, customers, pie, trend] = await Promise.all([
+    const [sales, orders, customers, pie, trend, timeline] = await Promise.all([
       api.get("/api/v1/admin/reports/total-sales"),
       api.get("/api/v1/admin/reports/total-orders"),
       api.get("/api/v1/admin/reports/total-customers"),
       api.get("/api/v1/admin/reports/category-distribution"),
       api.get("/api/v1/admin/reports/revenue-trend"),
+      api.get("/api/v1/admin/reports/monthly-revenue-timeline"),
     ]);
 
     return {
@@ -20,6 +21,7 @@ export const getAdminDashboardData = async () => {
       categoryPieData: pie.data, // [{ value, name }]
       trendLabels: trend.data.map((d: any) => d.date),
       revenueTrend: trend.data.map((d: any) => d.revenue),
+      revenueTimeline: timeline.data,
     };
   } catch (error) {
     console.error("Error fetching admin dashboard data:", error);
@@ -31,6 +33,7 @@ export const getAdminDashboardData = async () => {
       categoryPieData: [],
       trendLabels: [],
       revenueTrend: [],
+      revenueTimeline: [],
     };
   }
 };
