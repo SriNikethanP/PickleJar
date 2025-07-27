@@ -15,7 +15,7 @@ export async function generateStaticParams() {
     return products
       .map((product: Product) => ({
         countryCode: "in",
-        handle: product.name.toLowerCase(),
+        handle: product.name.toLowerCase().replace(/\s+/g, "-"),
       }))
       .filter((param: { countryCode: string; handle: string }) => param.handle);
   } catch (error) {
@@ -40,7 +40,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const products = await getAllProducts();
 
   const product = products.find(
-    (p: Product) => p.name.toLowerCase() === handle
+    (p: Product) => p.name.toLowerCase().replace(/\s+/g, "-") === handle
   );
 
   if (!product) {
@@ -48,12 +48,19 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   }
 
   return {
-    title: `${product.title} | Pickle Jar`,
-    description: `${product.title}`,
+    title: `${product.name} | Pickle Jar`,
+    description:
+      product.description ||
+      `${product.name} - Fresh and delicious pickles from Pickle Jar`,
     openGraph: {
-      title: `${product.title} | Pickle Jar`,
-      description: `${product.title}`,
-      images: product.thumbnail ? [product.thumbnail] : [],
+      title: `${product.name} | Pickle Jar`,
+      description:
+        product.description ||
+        `${product.name} - Fresh and delicious pickles from Pickle Jar`,
+      images:
+        product.imageUrls && product.imageUrls.length > 0
+          ? [product.imageUrls[0]]
+          : [],
     },
   };
 }
@@ -68,15 +75,13 @@ export default async function ProductPage(props: Props) {
 
   const products = await getAllProducts();
 
-  const pricedProduct = products.find(
-    (p: Product) => p.name.toLowerCase() === params.handle
+  const product = products.find(
+    (p: Product) => p.name.toLowerCase().replace(/\s+/g, "-") === params.handle
   );
 
-  if (!pricedProduct) {
+  if (!product) {
     notFound();
   }
 
-  return (
-    <ProductTemplate product={pricedProduct} region={region} countryCode="in" />
-  );
+  return <ProductTemplate product={product} region={region} countryCode="in" />;
 }

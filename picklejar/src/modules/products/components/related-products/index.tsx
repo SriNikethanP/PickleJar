@@ -26,18 +26,18 @@ const RelatedProducts = async ({
   }
 
   return (
-    <div className="flex flex-col gap-y-8">
-      <div>
-        <h2 className="text-2xl font-bold">Related Products</h2>
+    <div className="space-y-8">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          Related Products
+        </h2>
+        <p className="text-gray-600">You might also like these products</p>
       </div>
-      <div className="grid grid-cols-2 small:grid-cols-4 gap-x-4 gap-y-8">
-        {relatedProducts.map((product) => (
-          <LocalizedClientLink
-            key={product.id}
-            href={`/${countryCode}/products/${product.name.toLowerCase()}`}
-          >
-            <ProductPreview product={product} region={null} />
-          </LocalizedClientLink>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {relatedProducts.map((relatedProduct) => (
+          <div key={relatedProduct.id} className="flex justify-center">
+            <ProductPreview product={relatedProduct} region={null} />
+          </div>
         ))}
       </div>
     </div>
