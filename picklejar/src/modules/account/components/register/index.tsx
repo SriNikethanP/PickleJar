@@ -1,19 +1,19 @@
-"use client"
+"use client";
 
-import { useActionState } from "react"
-import Input from "@modules/common/components/input"
-import { LOGIN_VIEW } from "@modules/account/templates/login-template"
-import ErrorMessage from "@modules/checkout/components/error-message"
-import { SubmitButton } from "@modules/checkout/components/submit-button"
-import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { signup } from "@lib/data/customer"
+import { useActionState } from "react";
+import Input from "@modules/common/components/input";
+import { LOGIN_VIEW } from "@modules/account/templates/login-template";
+import ErrorMessage from "@modules/checkout/components/error-message";
+import { SubmitButton } from "@modules/checkout/components/submit-button";
+import LocalizedClientLink from "@modules/common/components/localized-client-link";
+import { signup } from "@lib/data/customer";
 
 type Props = {
-  setCurrentView: (view: LOGIN_VIEW) => void
-}
+  setCurrentView: (view: LOGIN_VIEW) => void;
+};
 
 const Register = ({ setCurrentView }: Props) => {
-  const [message, formAction] = useActionState(signup, null)
+  const [message, formAction] = useActionState(signup, null);
 
   return (
     <div
@@ -30,18 +30,11 @@ const Register = ({ setCurrentView }: Props) => {
       <form className="w-full flex flex-col" action={formAction}>
         <div className="flex flex-col w-full gap-y-2">
           <Input
-            label="First name"
-            name="first_name"
+            label="Full name"
+            name="full_name"
             required
-            autoComplete="given-name"
-            data-testid="first-name-input"
-          />
-          <Input
-            label="Last name"
-            name="last_name"
-            required
-            autoComplete="family-name"
-            data-testid="last-name-input"
+            autoComplete="name"
+            data-testid="full-name-input"
           />
           <Input
             label="Email"
@@ -65,6 +58,14 @@ const Register = ({ setCurrentView }: Props) => {
             type="password"
             autoComplete="new-password"
             data-testid="password-input"
+          />
+          <Input
+            label="Confirm Password"
+            name="confirm_password"
+            required
+            type="password"
+            autoComplete="new-password"
+            data-testid="confirm-password-input"
           />
         </div>
         <ErrorMessage error={message} data-testid="register-error" />
@@ -100,7 +101,7 @@ const Register = ({ setCurrentView }: Props) => {
         .
       </span>
     </div>
-  )
-}
+  );
+};
 
-export default Register
+export default Register;

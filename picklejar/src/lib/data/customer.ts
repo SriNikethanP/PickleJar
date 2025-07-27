@@ -47,12 +47,11 @@ export const login = async (_: any, formData: FormData) => {
 
 export const signup = async (_: any, formData: FormData) => {
   const userRegistrationDTO = {
-    firstName: formData.get("first_name") as string,
-    lastName: formData.get("last_name") as string,
+    fullName: formData.get("full_name") as string,
     email: formData.get("email") as string,
     mobile: formData.get("phone") as string,
     password: formData.get("password") as string,
-    confirmPassword: formData.get("password") as string,
+    confirmPassword: formData.get("confirm_password") as string,
   };
   try {
     const res = await api.post("/auth/register", userRegistrationDTO);
