@@ -1,10 +1,9 @@
 package com.pickle_company.pickle.entity;
 
-
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.*;
+
 
 @Entity
 @Table(name = "products")

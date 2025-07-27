@@ -112,6 +112,28 @@ export const updateLineItem = async ({
   return result;
 };
 
+// Wrapper function for adding to cart (compatible with Medusa interface)
+export const addToCartWrapper = async ({
+  productId,
+  quantity,
+  countryCode,
+}: {
+  productId: number;
+  quantity: number;
+  countryCode: string;
+}) => {
+  const userId = getUserIdFromSession();
+  if (!userId) {
+    throw new Error("User not authenticated");
+  }
+
+  const result = await addToCart(userId, productId, quantity);
+  if (!result) {
+    throw new Error("Failed to add to cart");
+  }
+  return result;
+};
+
 export const removeCartItem = async (
   userId: number,
   cartItemId: number

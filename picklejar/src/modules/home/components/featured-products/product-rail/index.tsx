@@ -1,15 +1,19 @@
-import { listProductsByCollection } from "@lib/data/products";
 import { Text } from "@medusajs/ui";
 import { Collection } from "@lib/data/collections";
+import { Product } from "@lib/data/products";
 
 import InteractiveLink from "@modules/common/components/interactive-link";
 import ProductPreview from "@modules/products/components/product-preview";
+
+type CollectionWithProducts = Collection & {
+  products: Product[];
+};
 
 export default async function ProductRail({
   collection,
   region,
 }: {
-  collection: Collection;
+  collection: CollectionWithProducts;
   region: {
     id: string;
     name: string;
@@ -24,8 +28,7 @@ export default async function ProductRail({
   };
 }) {
   try {
-    const products = await listProductsByCollection(Number(collection.id));
-    const collectionProducts = products?.slice(0, 6);
+    const collectionProducts = collection.products?.slice(0, 6);
 
     if (!collectionProducts?.length) {
       return null;
@@ -38,7 +41,7 @@ export default async function ProductRail({
           {/* No handle, so just link to /collections or remove this link */}
         </div>
         <ul className="grid grid-cols-2 small:grid-cols-3 gap-x-6 gap-y-24 small:gap-y-36">
-          {collectionProducts.map((product: any) => (
+          {collectionProducts.map((product: Product) => (
             <li key={product.id}>
               <ProductPreview product={product} region={region} isFeatured />
             </li>

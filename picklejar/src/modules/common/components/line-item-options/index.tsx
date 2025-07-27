@@ -1,26 +1,16 @@
-import { HttpTypes } from "@medusajs/types"
-import { Text } from "@medusajs/ui"
+import { Product } from "@lib/data/products";
 
 type LineItemOptionsProps = {
-  variant: HttpTypes.StoreProductVariant | undefined
-  "data-testid"?: string
-  "data-value"?: HttpTypes.StoreProductVariant
-}
+  product: Product;
+  "data-value"?: Product;
+};
 
-const LineItemOptions = ({
-  variant,
-  "data-testid": dataTestid,
-  "data-value": dataValue,
-}: LineItemOptionsProps) => {
+const LineItemOptions = ({ product }: LineItemOptionsProps) => {
   return (
-    <Text
-      data-testid={dataTestid}
-      data-value={dataValue}
-      className="inline-block txt-medium text-ui-fg-subtle w-full overflow-hidden text-ellipsis"
-    >
-      Variant: {variant?.title}
-    </Text>
-  )
-}
+    <div className="text-small-regular text-gray-700">
+      <span>{product.name}</span>
+    </div>
+  );
+};
 
-export default LineItemOptions
+export default LineItemOptions;

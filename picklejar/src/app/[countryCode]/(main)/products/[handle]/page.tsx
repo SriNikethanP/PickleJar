@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { listProducts } from "@lib/data/products";
+import { getAllProducts, Product } from "@lib/data/products";
 import { getRegion } from "@lib/data/regions";
 import ProductTemplate from "@modules/products/templates";
 
@@ -10,17 +10,14 @@ type Props = {
 
 export async function generateStaticParams() {
   try {
-    const { response } = await listProducts({
-      countryCode: "in",
-      queryParams: { limit: 100, fields: "handle" },
-    });
+    const products = await getAllProducts();
 
-    return response.products
-      .map((product) => ({
+    return products
+      .map((product: Product) => ({
         countryCode: "in",
-        handle: product.handle,
+        handle: product.name.toLowerCase(),
       }))
-      .filter((param) => param.handle);
+      .filter((param: { countryCode: string; handle: string }) => param.handle);
   } catch (error) {
     console.error(
       `Failed to generate static paths for product pages: ${
@@ -40,12 +37,11 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     notFound();
   }
 
-  const { response } = await listProducts({
-    countryCode: "in",
-    queryParams: { limit: 100 },
-  });
+  const products = await getAllProducts();
 
-  const product = response.products.find((p) => p.handle === handle);
+  const product = products.find(
+    (p: Product) => p.name.toLowerCase() === handle
+  );
 
   if (!product) {
     notFound();
@@ -70,13 +66,10 @@ export default async function ProductPage(props: Props) {
     notFound();
   }
 
-  const { response } = await listProducts({
-    countryCode: "in",
-    queryParams: { limit: 100 },
-  });
+  const products = await getAllProducts();
 
-  const pricedProduct = response.products.find(
-    (p) => p.handle === params.handle
+  const pricedProduct = products.find(
+    (p: Product) => p.name.toLowerCase() === params.handle
   );
 
   if (!pricedProduct) {

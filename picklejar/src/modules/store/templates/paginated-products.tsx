@@ -1,56 +1,22 @@
-import { listProductsWithSort } from "@lib/data/products"
-import { getRegion } from "@lib/data/regions"
-import ProductPreview from "@modules/products/components/product-preview"
-import { Pagination } from "@modules/store/components/pagination"
-import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
+import { getAllProducts, Product } from "@lib/data/products";
+import { getRegion } from "@lib/data/regions";
+import ProductPreview from "@modules/products/components/product-preview";
+import { Pagination } from "@modules/store/components/pagination";
+import { SortOptions } from "@modules/store/components/refinement-list/sort-products";
 
-const PRODUCT_LIMIT = 12
-
-type PaginatedProductsParams = {
-  limit: number
-  collection_id?: string[]
-  category_id?: string[]
-  id?: string[]
-  order?: string
-}
-
+const PRODUCT_LIMIT = 12;
+type Products = Product[];
 export default async function PaginatedProducts({
   sortBy,
   page,
-  collectionId,
-  categoryId,
-  productsIds,
   countryCode,
 }: {
-  sortBy?: SortOptions
-  page: number
-  collectionId?: string
-  categoryId?: string
-  productsIds?: string[]
-  countryCode: string
+  sortBy?: SortOptions;
+  page: number;
+  countryCode: string;
 }) {
-  const queryParams: PaginatedProductsParams = {
-    limit: 12,
-  }
-
-  if (collectionId) {
-    queryParams["collection_id"] = [collectionId]
-  }
-
-  if (categoryId) {
-    queryParams["category_id"] = [categoryId]
-  }
-
-  if (productsIds) {
-    queryParams["id"] = productsIds
-  }
-
-  if (sortBy === "created_at") {
-    queryParams["order"] = "created_at"
-  }
-
   let region = null;
-  let products = [];
+  let products: Product[] = [];
   let count = 0;
 
   try {
@@ -67,15 +33,32 @@ export default async function PaginatedProducts({
       );
     }
 
-    const result = await listProductsWithSort({
-      page,
-      queryParams,
-      sortBy,
-      countryCode,
-    });
+    // Map sortBy to the correct parameters for listProducts
+    let sortByParam: "updatedAt" | "price" = "updatedAt";
+    let order: "asc" | "desc" = "desc";
 
-    products = result.response.products || [];
-    count = result.response.count || 0;
+    switch (sortBy) {
+      case "latest":
+        sortByParam = "updatedAt";
+        order = "desc";
+        break;
+      case "price_asc":
+        sortByParam = "price";
+        order = "asc";
+        break;
+      case "price_desc":
+        sortByParam = "price";
+        order = "desc";
+        break;
+      default:
+        sortByParam = "updatedAt";
+        order = "desc";
+    }
+
+    const result = await getAllProducts();
+
+    products = result || [];
+    count = result.length || 0;
   } catch (error) {
     console.error("Error fetching products:", error);
     return (
@@ -88,15 +71,13 @@ export default async function PaginatedProducts({
     );
   }
 
-  const totalPages = Math.ceil(count / PRODUCT_LIMIT)
+  const totalPages = Math.ceil(count / PRODUCT_LIMIT);
 
   if (products.length === 0) {
     return (
       <div className="text-center py-12">
         <h2 className="text-2xl font-semibold mb-4">No Products Found</h2>
-        <p className="text-gray-600">
-          No products match your current filters.
-        </p>
+        <p className="text-gray-600">No products are currently available.</p>
       </div>
     );
   }
@@ -107,12 +88,12 @@ export default async function PaginatedProducts({
         className="grid grid-cols-2 w-full small:grid-cols-3 medium:grid-cols-4 gap-x-6 gap-y-8"
         data-testid="products-list"
       >
-        {products.map((p) => {
+        {products.map((product) => {
           return (
-            <li key={p.id}>
-              <ProductPreview product={p} region={region} />
+            <li key={product.id}>
+              <ProductPreview product={product} region={region} />
             </li>
-          )
+          );
         })}
       </ul>
       {totalPages > 1 && (
@@ -123,5 +104,5 @@ export default async function PaginatedProducts({
         />
       )}
     </>
-  )
+  );
 }

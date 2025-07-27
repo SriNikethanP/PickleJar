@@ -1,43 +1,37 @@
-import { Text } from "@medusajs/ui"
-import { getProductPrice } from "@lib/util/get-product-price"
-import { HttpTypes } from "@medusajs/types"
-import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import Thumbnail from "../thumbnail"
-import PreviewPrice from "./price"
+import { Text } from "@medusajs/ui";
+import { Product } from "@lib/data/products";
+import LocalizedClientLink from "@modules/common/components/localized-client-link";
+import Thumbnail from "../thumbnail";
 
 export default async function ProductPreview({
   product,
   isFeatured,
   region,
 }: {
-  product: HttpTypes.StoreProduct
-  isFeatured?: boolean
-  region: HttpTypes.StoreRegion
+  product: Product;
+  isFeatured?: boolean;
+  region?: any;
 }) {
-  
-
-  const { cheapestPrice } = getProductPrice({
-    product,
-  })
-
   return (
-    <LocalizedClientLink href={`/products/${product.handle}`} className="group">
+    <LocalizedClientLink href={`/products/${product.id}`} className="group">
       <div data-testid="product-wrapper">
         <Thumbnail
-          thumbnail={product.thumbnail}
-          images={product.images}
+          thumbnail={product.imageUrls?.[0] || null}
+          images={product.imageUrls?.map((url) => ({ url })) || []}
           size="full"
           isFeatured={isFeatured}
         />
         <div className="flex txt-compact-medium mt-4 justify-between">
           <Text className="text-ui-fg-subtle" data-testid="product-title">
-            {product.title}
+            {product.name}
           </Text>
           <div className="flex items-center gap-x-2">
-            {cheapestPrice && <PreviewPrice price={cheapestPrice} />}
+            <span className="text-ui-fg-base font-semibold">
+              INR{product.price.toFixed(2)}
+            </span>
           </div>
         </div>
       </div>
     </LocalizedClientLink>
-  )
+  );
 }

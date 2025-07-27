@@ -1,11 +1,16 @@
 import ProductRail from "@modules/home/components/featured-products/product-rail";
 import { Collection } from "@lib/data/collections";
+import { Product } from "@lib/data/products";
+
+type CollectionWithProducts = Collection & {
+  products: Product[];
+};
 
 export default async function FeaturedProducts({
   collections,
   region,
 }: {
-  collections: Collection[];
+  collections: CollectionWithProducts[];
   region: {
     id: string;
     name: string;
