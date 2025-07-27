@@ -13,10 +13,22 @@ export const metadata: Metadata = {
   description: "View and edit your Pickle Jar profile.",
 };
 
+// Placeholder: Replace with real session/user logic
+function getUserIdFromSession(): number | null {
+  return null; // Return userId if logged in, otherwise null
+}
+
 export default async function Profile() {
-  // Placeholder userId, replace with actual user/session logic
-  const userId = 1;
-  const customer = await retrieveCustomer(userId);
+  const userId = getUserIdFromSession();
+  let customer = null;
+
+  if (userId) {
+    try {
+      customer = await retrieveCustomer(userId);
+    } catch (error) {
+      console.error("Error fetching customer data:", error);
+    }
+  }
 
   if (!customer) {
     notFound();

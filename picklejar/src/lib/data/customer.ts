@@ -1,5 +1,8 @@
 "use server";
 import axios from "axios";
+import { removeAuthToken } from "./cookies";
+import { redirect } from "next/navigation";
+import { getAuthHeaders } from "./cookies";
 
 const api = axios.create({
   baseURL:
@@ -22,7 +25,8 @@ export type User = {
 
 export const getAllUsers = async (): Promise<User[]> => {
   try {
-    const res = await api.get("/admin/users");
+    const authHeaders = await getAuthHeaders();
+    const res = await api.get("/admin/users", { headers: authHeaders });
     return res.data;
   } catch (error) {
     console.error("Error fetching all users:", error);
@@ -62,10 +66,28 @@ export const retrieveCustomer = async (
   userId: number
 ): Promise<User | null> => {
   try {
-    const res = await api.get("/users", { params: { userId } });
+    const authHeaders = await getAuthHeaders();
+    const res = await api.get("/users", {
+      params: { userId },
+      headers: authHeaders,
+    });
     return res.data;
   } catch (error) {
     console.error("Error retrieving customer:", error);
     return null;
+  }
+};
+
+export const signout = async (countryCode: string) => {
+  try {
+    // Remove the authentication token
+    await removeAuthToken();
+
+    // Redirect to home page
+    redirect(`/${countryCode}`);
+  } catch (error) {
+    console.error("Error during signout:", error);
+    // Fallback redirect
+    redirect(`/${countryCode}`);
   }
 };

@@ -10,18 +10,23 @@ export const metadata: Metadata = {
   description: "Overview of your account activity.",
 };
 
-export default async function OverviewTemplate() {
-  // Placeholder userId, replace with actual user/session logic
-  const userId = 1;
+// Placeholder: Replace with real session/user logic
+function getUserIdFromSession(): number | null {
+  return null; // Return userId if logged in, otherwise null
+}
 
+export default async function OverviewTemplate() {
+  const userId = getUserIdFromSession();
   let customer = null;
   let orders = null;
 
-  try {
-    customer = await retrieveCustomer(userId);
-    orders = await listOrders();
-  } catch (error) {
-    console.error("Error fetching account data:", error);
+  if (userId) {
+    try {
+      customer = await retrieveCustomer(userId);
+      orders = await listOrders();
+    } catch (error) {
+      console.error("Error fetching account data:", error);
+    }
   }
 
   if (!customer) {

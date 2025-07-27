@@ -2,6 +2,11 @@ import { retrieveCustomer } from "@lib/data/customer";
 import { Toaster } from "@medusajs/ui";
 import AccountLayout from "@modules/account/templates/account-layout";
 
+// Placeholder: Replace with real session/user logic
+function getUserIdFromSession(): number | null {
+  return null; // Return userId if logged in, otherwise null
+}
+
 export default async function AccountPageLayout({
   dashboard,
   login,
@@ -9,14 +14,15 @@ export default async function AccountPageLayout({
   dashboard?: React.ReactNode;
   login?: React.ReactNode;
 }) {
-  // Placeholder userId, replace with actual user/session logic
-  const userId = 1;
+  const userId = getUserIdFromSession();
   let customer = null;
 
-  try {
-    customer = await retrieveCustomer(userId);
-  } catch (error) {
-    console.error("Error fetching customer data:", error);
+  if (userId) {
+    try {
+      customer = await retrieveCustomer(userId);
+    } catch (error) {
+      console.error("Error fetching customer data:", error);
+    }
   }
 
   return (

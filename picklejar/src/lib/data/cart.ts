@@ -1,6 +1,7 @@
 "use server";
 
 import axios from "axios";
+import { getAuthHeaders } from "./cookies";
 
 const api = axios.create({
   baseURL:
@@ -30,7 +31,11 @@ export type Cart = {
 
 export const getCartByUserId = async (userId: number): Promise<Cart | null> => {
   try {
-    const res = await api.get("/cart", { params: { userId } });
+    const authHeaders = await getAuthHeaders();
+    const res = await api.get("/cart", {
+      params: { userId },
+      headers: authHeaders,
+    });
     return res.data;
   } catch (error) {
     console.error("Error fetching cart by user ID:", error);
@@ -44,10 +49,14 @@ export const addToCart = async (
   quantity: number
 ): Promise<Cart | null> => {
   try {
+    const authHeaders = await getAuthHeaders();
     const res = await api.post(
       "/cart",
       { productId, quantity },
-      { params: { userId } }
+      {
+        params: { userId },
+        headers: authHeaders,
+      }
     );
     return res.data;
   } catch (error) {
@@ -62,10 +71,14 @@ export const updateCartItem = async (
   quantity: number
 ): Promise<Cart | null> => {
   try {
+    const authHeaders = await getAuthHeaders();
     const res = await api.put(
       "/cart/item",
       { cartItemId, quantity },
-      { params: { userId } }
+      {
+        params: { userId },
+        headers: authHeaders,
+      }
     );
     return res.data;
   } catch (error) {
@@ -79,8 +92,10 @@ export const removeCartItem = async (
   cartItemId: number
 ): Promise<Cart | null> => {
   try {
+    const authHeaders = await getAuthHeaders();
     const res = await api.delete("/cart/item", {
       params: { userId, cartItemId },
+      headers: authHeaders,
     });
     return res.data;
   } catch (error) {
@@ -91,7 +106,11 @@ export const removeCartItem = async (
 
 export const checkoutCart = async (userId: number) => {
   try {
-    const res = await api.post("/cart/checkout", null, { params: { userId } });
+    const authHeaders = await getAuthHeaders();
+    const res = await api.post("/cart/checkout", null, {
+      params: { userId },
+      headers: authHeaders,
+    });
     return res.data;
   } catch (error) {
     console.error("Error checking out cart:", error);
@@ -101,7 +120,14 @@ export const checkoutCart = async (userId: number) => {
 
 export const assignCart = async (cartId: number, customerId: number) => {
   try {
-    const res = await api.put("/cart/assign", { cartId, customerId });
+    const authHeaders = await getAuthHeaders();
+    const res = await api.put(
+      "/cart/assign",
+      { cartId, customerId },
+      {
+        headers: authHeaders,
+      }
+    );
     return res.data;
   } catch (error) {
     console.error("Error assigning cart:", error);
@@ -111,7 +137,11 @@ export const assignCart = async (cartId: number, customerId: number) => {
 
 export const retrieveCart = async (userId: number): Promise<Cart | null> => {
   try {
-    const res = await api.get("/cart", { params: { userId } });
+    const authHeaders = await getAuthHeaders();
+    const res = await api.get("/cart", {
+      params: { userId },
+      headers: authHeaders,
+    });
     return res.data;
   } catch (error) {
     console.error("Error retrieving cart:", error);
@@ -121,7 +151,10 @@ export const retrieveCart = async (userId: number): Promise<Cart | null> => {
 
 export const listCartOptions = async () => {
   try {
-    const res = await api.get("/shipping-options");
+    const authHeaders = await getAuthHeaders();
+    const res = await api.get("/shipping-options", {
+      headers: authHeaders,
+    });
     return res.data;
   } catch (error) {
     console.error("Error fetching cart options:", error);
