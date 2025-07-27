@@ -1,9 +1,10 @@
 "use client";
 
 import { useActionState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import Input from "@modules/common/components/input";
 import { LOGIN_VIEW } from "@modules/account/templates/login-template";
-import ErrorMessage from "@modules/checkout/components/error-message";
 import { SubmitButton } from "@modules/checkout/components/submit-button";
 import LocalizedClientLink from "@modules/common/components/localized-client-link";
 import { signup } from "@lib/data/customer";
@@ -12,8 +13,119 @@ type Props = {
   setCurrentView: (view: LOGIN_VIEW) => void;
 };
 
+// Validation functions
+const validateFullName = (name: string): string | null => {
+  if (!name.trim()) return "Full name is required";
+  if (name.trim().length < 2) return "Full name must be at least 2 characters";
+  if (name.trim().length > 50)
+    return "Full name must be less than 50 characters";
+  if (!/^[a-zA-Z\s]+$/.test(name.trim()))
+    return "Full name can only contain letters and spaces";
+  return null;
+};
+
+const validateEmail = (email: string): string | null => {
+  if (!email.trim()) return "Email is required";
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) return "Please enter a valid email address";
+  return null;
+};
+
+const validateMobile = (mobile: string): string | null => {
+  if (!mobile.trim()) return "Mobile number is required";
+  const mobileRegex = /^[0-9]{10}$/;
+  if (!mobileRegex.test(mobile.replace(/\s/g, "")))
+    return "Please enter a valid 10-digit mobile number";
+  return null;
+};
+
+const validatePassword = (password: string): string | null => {
+  if (!password) return "Password is required";
+  if (password.length < 6) return "Password must be at least 6 characters";
+  if (password.length > 50) return "Password must be less than 50 characters";
+  return null;
+};
+
+const validateConfirmPassword = (
+  password: string,
+  confirmPassword: string
+): string | null => {
+  if (!confirmPassword) return "Please confirm your password";
+  if (password !== confirmPassword) return "Passwords do not match";
+  return null;
+};
+
 const Register = ({ setCurrentView }: Props) => {
   const [message, formAction] = useActionState(signup, null);
+  const [formData, setFormData] = useState({
+    full_name: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirm_password: "",
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Handle success message and redirect to login
+  useEffect(() => {
+    if (message) {
+      if (message === "Registration successful! Please sign in.") {
+        toast.success("Registration successful! Please sign in.");
+        // Show success message briefly, then redirect to login
+        const timer = setTimeout(() => {
+          setCurrentView(LOGIN_VIEW.SIGN_IN);
+        }, 2000);
+
+        return () => clearTimeout(timer);
+      } else {
+        toast.error(message);
+      }
+    }
+  }, [message, setCurrentView]);
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    // Validate each field
+    const fullNameError = validateFullName(formData.full_name);
+    if (fullNameError) newErrors.full_name = fullNameError;
+
+    const emailError = validateEmail(formData.email);
+    if (emailError) newErrors.email = emailError;
+
+    const mobileError = validateMobile(formData.phone);
+    if (mobileError) newErrors.phone = mobileError;
+
+    const passwordError = validatePassword(formData.password);
+    if (passwordError) newErrors.password = passwordError;
+
+    const confirmPasswordError = validateConfirmPassword(
+      formData.password,
+      formData.confirm_password
+    );
+    if (confirmPasswordError) newErrors.confirm_password = confirmPasswordError;
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (formDataObj: FormData) => {
+    if (!validateForm()) {
+      toast.error("Please fix the errors in the form");
+      return;
+    }
+
+    // If validation passes, proceed with the form action
+    formAction(formDataObj);
+  };
 
   return (
     <div
@@ -27,48 +139,65 @@ const Register = ({ setCurrentView }: Props) => {
         Create your Pickle Jar Member profile, and get access to an enhanced
         shopping experience.
       </p>
-      <form className="w-full flex flex-col" action={formAction}>
+      <form className="w-full flex flex-col" action={handleSubmit}>
         <div className="flex flex-col w-full gap-y-2">
           <Input
             label="Full name"
             name="full_name"
+            value={formData.full_name}
+            onChange={(e) => handleInputChange("full_name", e.target.value)}
             required
             autoComplete="name"
             data-testid="full-name-input"
+            error={errors.full_name}
           />
           <Input
             label="Email"
             name="email"
-            required
             type="email"
+            value={formData.email}
+            onChange={(e) => handleInputChange("email", e.target.value)}
+            required
             autoComplete="email"
             data-testid="email-input"
+            error={errors.email}
           />
           <Input
             label="Phone"
             name="phone"
             type="tel"
+            value={formData.phone}
+            onChange={(e) => handleInputChange("phone", e.target.value)}
             autoComplete="tel"
             data-testid="phone-input"
+            error={errors.phone}
           />
           <Input
             label="Password"
             name="password"
-            required
             type="password"
+            value={formData.password}
+            onChange={(e) => handleInputChange("password", e.target.value)}
+            required
             autoComplete="new-password"
             data-testid="password-input"
+            error={errors.password}
           />
           <Input
             label="Confirm Password"
             name="confirm_password"
-            required
             type="password"
+            value={formData.confirm_password}
+            onChange={(e) =>
+              handleInputChange("confirm_password", e.target.value)
+            }
+            required
             autoComplete="new-password"
             data-testid="confirm-password-input"
+            error={errors.confirm_password}
           />
         </div>
-        <ErrorMessage error={message} data-testid="register-error" />
+
         <span className="text-center text-ui-fg-base text-small-regular mt-6">
           By creating an account, you agree to Pickle Jar&apos;s{" "}
           <LocalizedClientLink

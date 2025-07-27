@@ -1,16 +1,84 @@
 import { login } from "@lib/data/customer";
 import { LOGIN_VIEW } from "@modules/account/templates/login-template";
-import ErrorMessage from "@modules/checkout/components/error-message";
 import { SubmitButton } from "@modules/checkout/components/submit-button";
 import Input from "@modules/common/components/input";
 import { useActionState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 type Props = {
   setCurrentView: (view: LOGIN_VIEW) => void;
+  onSuccessfulLogin?: () => void;
 };
 
-const Login = ({ setCurrentView }: Props) => {
+// Validation functions
+const validateEmail = (email: string): string | null => {
+  if (!email.trim()) return "Email is required";
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) return "Please enter a valid email address";
+  return null;
+};
+
+const validatePassword = (password: string): string | null => {
+  if (!password) return "Password is required";
+  if (password.length < 1) return "Password is required";
+  return null;
+};
+
+const Login = ({ setCurrentView, onSuccessfulLogin }: Props) => {
   const [message, formAction] = useActionState(login, null);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Handle login messages with toast notifications
+  useEffect(() => {
+    if (message) {
+      if (message === "Login successful") {
+        toast.success("Login successful! Welcome back.");
+        // Call the onSuccessfulLogin callback to redirect
+        if (onSuccessfulLogin) {
+          onSuccessfulLogin();
+        }
+      } else {
+        toast.error(message);
+      }
+    }
+  }, [message, onSuccessfulLogin]);
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    // Validate each field
+    const emailError = validateEmail(formData.email);
+    if (emailError) newErrors.email = emailError;
+
+    const passwordError = validatePassword(formData.password);
+    if (passwordError) newErrors.password = passwordError;
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (formDataObj: FormData) => {
+    if (!validateForm()) {
+      toast.error("Please fix the errors in the form");
+      return;
+    }
+
+    // If validation passes, proceed with the form action
+    formAction(formDataObj);
+  };
 
   return (
     <div
@@ -21,27 +89,32 @@ const Login = ({ setCurrentView }: Props) => {
       <p className="text-center text-base-regular text-ui-fg-base mb-8">
         Sign in to access an enhanced shopping experience.
       </p>
-      <form className="w-full" action={formAction}>
+      <form className="w-full" action={handleSubmit}>
         <div className="flex flex-col w-full gap-y-2">
           <Input
             label="Email"
             name="email"
             type="email"
+            value={formData.email}
+            onChange={(e) => handleInputChange("email", e.target.value)}
             title="Enter a valid email address."
             autoComplete="email"
             required
             data-testid="email-input"
+            error={errors.email}
           />
           <Input
             label="Password"
             name="password"
             type="password"
+            value={formData.password}
+            onChange={(e) => handleInputChange("password", e.target.value)}
             autoComplete="current-password"
             required
             data-testid="password-input"
+            error={errors.password}
           />
         </div>
-        <ErrorMessage error={message} data-testid="login-error-message" />
         <SubmitButton data-testid="sign-in-button" className="w-full mt-6">
           Log in
         </SubmitButton>

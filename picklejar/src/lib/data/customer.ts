@@ -39,9 +39,15 @@ export const login = async (_: any, formData: FormData) => {
   const password = formData.get("password") as string;
   try {
     const res = await api.post("/auth/login", { email, password });
-    return res.data;
+    // Return success message instead of the user object
+    return "Login successful";
   } catch (error: any) {
-    return error?.response?.data?.message || "Login failed";
+    // Show the actual error message from the backend
+    if (error?.response?.data?.message) {
+      return error.response.data.message;
+    }
+    // Fallback for network errors or other issues
+    return "Login failed. Please try again.";
   }
 };
 
@@ -53,11 +59,23 @@ export const signup = async (_: any, formData: FormData) => {
     password: formData.get("password") as string,
     confirmPassword: formData.get("confirm_password") as string,
   };
+
+  // Validate that passwords match
+  if (userRegistrationDTO.password !== userRegistrationDTO.confirmPassword) {
+    return "Passwords do not match";
+  }
+
   try {
     const res = await api.post("/auth/register", userRegistrationDTO);
-    return res.data;
+    // Return success message instead of the user object
+    return "Registration successful! Please sign in.";
   } catch (error: any) {
-    return error?.response?.data?.message || "Registration failed";
+    // Show the actual error message from the backend
+    if (error?.response?.data?.message) {
+      return error.response.data.message;
+    }
+    // Fallback for network errors or other issues
+    return "Registration failed. Please try again.";
   }
 };
 

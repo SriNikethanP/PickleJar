@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Register from "@modules/account/components/register";
 import Login from "@modules/account/components/login";
 
@@ -12,11 +12,21 @@ export enum LOGIN_VIEW {
 
 const LoginTemplate = () => {
   const [currentView, setCurrentView] = useState(LOGIN_VIEW.REGISTER);
+  const router = useRouter();
+
+  // Handle successful login redirect
+  const handleSuccessfulLogin = () => {
+    // Redirect to home page
+    router.push("/");
+  };
 
   return (
     <div className="w-full flex justify-start px-8 py-8">
       {currentView === LOGIN_VIEW.SIGN_IN ? (
-        <Login setCurrentView={setCurrentView} />
+        <Login
+          setCurrentView={setCurrentView}
+          onSuccessfulLogin={handleSuccessfulLogin}
+        />
       ) : (
         <Register setCurrentView={setCurrentView} />
       )}

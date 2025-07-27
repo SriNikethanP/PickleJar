@@ -1,37 +1,41 @@
-import { Label } from "@medusajs/ui"
-import React, { useEffect, useImperativeHandle, useState } from "react"
+import { Label } from "@medusajs/ui";
+import React, { useEffect, useImperativeHandle, useState } from "react";
 
-import Eye from "@modules/common/icons/eye"
-import EyeOff from "@modules/common/icons/eye-off"
+import Eye from "@modules/common/icons/eye";
+import EyeOff from "@modules/common/icons/eye-off";
 
 type InputProps = Omit<
   Omit<React.InputHTMLAttributes<HTMLInputElement>, "size">,
   "placeholder"
 > & {
-  label: string
-  errors?: Record<string, unknown>
-  touched?: Record<string, unknown>
-  name: string
-  topLabel?: string
-}
+  label: string;
+  errors?: Record<string, unknown>;
+  touched?: Record<string, unknown>;
+  name: string;
+  topLabel?: string;
+  error?: string;
+};
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ type, name, label, touched, required, topLabel, ...props }, ref) => {
-    const inputRef = React.useRef<HTMLInputElement>(null)
-    const [showPassword, setShowPassword] = useState(false)
-    const [inputType, setInputType] = useState(type)
+  (
+    { type, name, label, touched, required, topLabel, error, ...props },
+    ref
+  ) => {
+    const inputRef = React.useRef<HTMLInputElement>(null);
+    const [showPassword, setShowPassword] = useState(false);
+    const [inputType, setInputType] = useState(type);
 
     useEffect(() => {
       if (type === "password" && showPassword) {
-        setInputType("text")
+        setInputType("text");
       }
 
       if (type === "password" && !showPassword) {
-        setInputType("password")
+        setInputType("password");
       }
-    }, [type, showPassword])
+    }, [type, showPassword]);
 
-    useImperativeHandle(ref, () => inputRef.current!)
+    useImperativeHandle(ref, () => inputRef.current!);
 
     return (
       <div className="flex flex-col w-full">
@@ -44,7 +48,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             name={name}
             placeholder=" "
             required={required}
-            className="pt-4 pb-1 block w-full h-11 px-4 mt-0 bg-ui-bg-field border rounded-md appearance-none focus:outline-none focus:ring-0 focus:shadow-borders-interactive-with-active border-ui-border-base hover:bg-ui-bg-field-hover"
+            className={`pt-4 pb-1 block w-full h-11 px-4 mt-0 bg-ui-bg-field border rounded-md appearance-none focus:outline-none focus:ring-0 focus:shadow-borders-interactive-with-active border-ui-border-base hover:bg-ui-bg-field-hover ${
+              error ? "border-red-500" : ""
+            }`}
             {...props}
             ref={inputRef}
           />
@@ -66,11 +72,16 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             </button>
           )}
         </div>
+        {error && (
+          <div className="pt-2 text-red-500 text-small-regular">
+            <span>{error}</span>
+          </div>
+        )}
       </div>
-    )
+    );
   }
-)
+);
 
-Input.displayName = "Input"
+Input.displayName = "Input";
 
-export default Input
+export default Input;
