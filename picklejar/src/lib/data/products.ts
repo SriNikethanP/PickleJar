@@ -34,3 +34,15 @@ export const getAllProducts = async (): Promise<Product[]> => {
     return [];
   }
 };
+
+export const listProductsByCollection = async (
+  collectionId: number
+): Promise<Product[]> => {
+  try {
+    const res = await api.get(`/collections/${collectionId}/products`);
+    return res.data;
+  } catch (error: any) {
+    console.error("Error fetching products by collection:", error);
+    return [];
+  }
+};

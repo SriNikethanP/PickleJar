@@ -4,6 +4,7 @@ import { Product } from "@lib/data/products";
 
 import InteractiveLink from "@modules/common/components/interactive-link";
 import ProductPreview from "@modules/products/components/product-preview";
+import { ArrowRightIcon } from "lucide-react";
 
 type CollectionWithProducts = Collection & {
   products: Product[];
@@ -35,18 +36,31 @@ export default async function ProductRail({
     }
 
     return (
-      <div className="content-container py-12 small:py-24">
-        <div className="flex justify-between mb-8">
-          <Text className="txt-xlarge">{collection.title}</Text>
-          {/* No handle, so just link to /collections or remove this link */}
+      <div className="w-full">
+        {/* Collection Header */}
+        <div className="text-center mb-6 lg:mb-8">
+          <h3 className="text-xl lg:text-2xl font-semibold text-black mb-4">
+            {collection.title}
+          </h3>
         </div>
-        <ul className="grid grid-cols-2 small:grid-cols-3 gap-x-6 gap-y-24 small:gap-y-36">
+
+        {/* Products Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 lg:gap-12">
           {collectionProducts.map((product: Product) => (
-            <li key={product.id}>
-              <ProductPreview product={product} region={region} isFeatured />
-            </li>
+            <div key={product.id} className="group">
+              <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden">
+                <ProductPreview product={product} region={region} isFeatured />
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
+
+        {/* View All Button */}
+        <div className="text-center mt-12 lg:mt-16">
+          <button className="inline-flex items-cente text-black text-xs font-normal  hover:text-md duration-300 transform hover:-translate-y-1">
+            View All {collection.title} →
+          </button>
+        </div>
       </div>
     );
   } catch (error) {
