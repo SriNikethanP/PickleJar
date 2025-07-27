@@ -96,6 +96,7 @@ export default function EditProductDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (images.length > 0 && (images.length < 1 || images.length > 3)) {
       toast.error("Please select 1 to 3 images.");
       return;
@@ -120,8 +121,10 @@ export default function EditProductDialog({
       setImages([]);
       setImagePreviews([]);
       onSuccess();
-    } catch {
-      toast.error("Failed to update product");
+    } catch (error: any) {
+      // Show specific error message from backend
+      const errorMessage = error.message || "Failed to update product";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -182,7 +185,7 @@ export default function EditProductDialog({
             onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">Select Category</option>
+            <option value="">Select Category (Optional)</option>
             {categories.map((category) => (
               <option key={category.id} value={category.id}>
                 {category.name}

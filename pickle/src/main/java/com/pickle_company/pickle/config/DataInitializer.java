@@ -21,52 +21,62 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) throws Exception {
         // Initialize categories if none exist
         if (categoryRepository.count() == 0) {
-            Category electronics = Category.builder()
-                    .name("Electronics")
+            Category spicyPickles = Category.builder()
+                    .name("Spicy Pickles")
                     .build();
-            categoryRepository.save(electronics);
+            categoryRepository.save(spicyPickles);
 
-            Category clothing = Category.builder()
-                    .name("Clothing")
+            Category sweetPickles = Category.builder()
+                    .name("Sweet Pickles")
                     .build();
-            categoryRepository.save(clothing);
+            categoryRepository.save(sweetPickles);
 
-            Category home = Category.builder()
-                    .name("Home & Garden")
+            Category dillPickles = Category.builder()
+                    .name("Dill Pickles")
                     .build();
-            categoryRepository.save(home);
+            categoryRepository.save(dillPickles);
 
-            Category sports = Category.builder()
-                    .name("Sports & Outdoors")
+            Category breadButterPickles = Category.builder()
+                    .name("Bread & Butter Pickles")
                     .build();
-            categoryRepository.save(sports);
+            categoryRepository.save(breadButterPickles);
 
-            System.out.println("Sample categories created successfully!");
+            Category gherkins = Category.builder()
+                    .name("Gherkins")
+                    .build();
+            categoryRepository.save(gherkins);
+
+            System.out.println("Pickle categories created successfully!");
         }
 
         // Initialize collections if none exist
         if (collectionRepository.count() == 0) {
-            Collection featuredProducts = Collection.builder()
-                    .title("Featured Products")
+            Collection summerSpecials = Collection.builder()
+                    .title("Summer Specials")
                     .build();
-            collectionRepository.save(featuredProducts);
+            collectionRepository.save(summerSpecials);
 
-            Collection newArrivals = Collection.builder()
-                    .title("New Arrivals")
+            Collection winterCollection = Collection.builder()
+                    .title("Winter Collection")
                     .build();
-            collectionRepository.save(newArrivals);
+            collectionRepository.save(winterCollection);
 
-            Collection bestSellers = Collection.builder()
-                    .title("Best Sellers")
+            Collection organicPickles = Collection.builder()
+                    .title("Organic Pickles")
                     .build();
-            collectionRepository.save(bestSellers);
+            collectionRepository.save(organicPickles);
 
-            Collection seasonal = Collection.builder()
-                    .title("Seasonal Collection")
+            Collection premiumSelection = Collection.builder()
+                    .title("Premium Selection")
                     .build();
-            collectionRepository.save(seasonal);
+            collectionRepository.save(premiumSelection);
 
-            System.out.println("Sample collections created successfully!");
+            Collection bulkOrders = Collection.builder()
+                    .title("Bulk Orders")
+                    .build();
+            collectionRepository.save(bulkOrders);
+
+            System.out.println("Pickle collections created successfully!");
         }
     }
 } 

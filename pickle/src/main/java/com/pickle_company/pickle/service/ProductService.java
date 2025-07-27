@@ -42,16 +42,20 @@ public class ProductService {
     public ProductResponseDTO addOrUpdateProduct(ProductRequestDTO dto, Long productId) {
         Category category = null;
         if (dto.getCategoryId() != null) {
-            category = categoryRepo.findById(dto.getCategoryId()).orElse(null);
+            category = categoryRepo.findById(dto.getCategoryId())
+                    .orElseThrow(() -> new IllegalArgumentException("Category with ID " + dto.getCategoryId() + " not found"));
         } else if (dto.getCategoryName() != null) {
             category = categoryRepo.findByName(dto.getCategoryName())
                     .orElseGet(() -> categoryRepo.save(Category.builder().name(dto.getCategoryName()).build()));
         }
+        // If neither categoryId nor categoryName is provided, category remains null (which is allowed)
 
         Collection collection = null;
         if (dto.getCollectionId() != null) {
-            collection = collectionRepo.findById(dto.getCollectionId()).orElse(null);
+            collection = collectionRepo.findById(dto.getCollectionId())
+                    .orElseThrow(() -> new IllegalArgumentException("Collection with ID " + dto.getCollectionId() + " not found"));
         }
+        // If collectionId is not provided, collection remains null (which is allowed)
 
         Product product;
         if (productId != null) {

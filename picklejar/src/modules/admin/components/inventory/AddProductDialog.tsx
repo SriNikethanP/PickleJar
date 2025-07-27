@@ -75,10 +75,12 @@ export default function AddProductDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (images.length < 1 || images.length > 3) {
       toast.error("Please select 1 to 3 images.");
       return;
     }
+
     setLoading(true);
     try {
       await addProduct(
@@ -107,8 +109,10 @@ export default function AddProductDialog({
       setImages([]);
       setImagePreviews([]);
       onSuccess();
-    } catch {
-      toast.error("Failed to add product");
+    } catch (error: any) {
+      // Show specific error message from backend
+      const errorMessage = error.message || "Failed to add product";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -167,7 +171,7 @@ export default function AddProductDialog({
             onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">Select Category</option>
+            <option value="">Select Category (Optional)</option>
             {categories.map((category) => (
               <option key={category.id} value={category.id}>
                 {category.name}

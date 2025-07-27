@@ -2,18 +2,19 @@ import axios from "axios";
 import { uploadMultipleImagesToCloudinary } from "@lib/util/cloudinary";
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "http://localhost:8080",
+  baseURL:
+    process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "http://localhost:8080/api/v1",
 });
 
 export const getAdminDashboardData = async () => {
   try {
     const [sales, orders, customers, pie, trend, timeline] = await Promise.all([
-      api.get("/api/v1/admin/reports/total-sales"),
-      api.get("/api/v1/admin/reports/total-orders"),
-      api.get("/api/v1/admin/reports/total-customers"),
-      api.get("/api/v1/admin/reports/category-distribution"),
-      api.get("/api/v1/admin/reports/revenue-trend"),
-      api.get("/api/v1/admin/reports/monthly-revenue-timeline"),
+      api.get("/admin/reports/total-sales"),
+      api.get("/admin/reports/total-orders"),
+      api.get("/admin/reports/total-customers"),
+      api.get("/admin/reports/category-distribution"),
+      api.get("/admin/reports/revenue-trend"),
+      api.get("/admin/reports/monthly-revenue-timeline"),
     ]);
 
     return {
@@ -42,7 +43,7 @@ export const getAdminDashboardData = async () => {
 
 export const listOrders = async () => {
   try {
-    const res = await api.get("/api/v1/orders");
+    const res = await api.get("/orders");
     return res.data;
   } catch (error) {
     console.error("Error fetching orders:", error);
@@ -52,7 +53,7 @@ export const listOrders = async () => {
 
 export const listCustomers = async () => {
   try {
-    const res = await api.get("/api/v1/admin/users");
+    const res = await api.get("/admin/users");
     return res.data;
   } catch (error) {
     console.error("Error fetching customers:", error);
@@ -62,7 +63,7 @@ export const listCustomers = async () => {
 
 export const getOrderCount = async (userId: number) => {
   try {
-    const res = await api.get(`/api/v1/admin/users/${userId}/orders`);
+    const res = await api.get(`/admin/users/${userId}/orders`);
     return res.data.length;
   } catch (error) {
     console.error("Error fetching order count:", error);
@@ -82,19 +83,50 @@ export const addProduct = async (product: any, images: File[] = []) => {
     const productData = {
       name: product.name,
       description: product.description,
-      categoryName: product.categoryName,
+      // categoryName: product.categoryName,
       categoryId: product.categoryId,
       collectionId: product.collectionId,
       price: product.price,
       stock: product.stock,
       imageUrls: imageUrls, // Send Cloudinary URLs instead of files
     };
-    const res = await api.post("/api/v1/products/admin", productData, {
+    const res = await api.post("/products/admin", productData, {
       headers: { "Content-Type": "application/json" },
     });
     return res.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error adding product:", error);
+
+    // Handle specific validation errors from backend
+    if (error.response?.status === 400) {
+      const errorData = error.response.data;
+      if (errorData.error) {
+        throw new Error(errorData.error);
+      } else if (typeof errorData === "string") {
+        throw new Error(errorData);
+      }
+    }
+
+    // Handle foreign key constraint errors
+    if (error.response?.status === 500) {
+      const errorMessage =
+        error.response.data?.message || error.response.data?.error;
+      if (
+        errorMessage &&
+        errorMessage.includes("foreign key constraint fails")
+      ) {
+        if (errorMessage.includes("category_id")) {
+          throw new Error(
+            "Selected category does not exist. Please choose a valid category."
+          );
+        } else if (errorMessage.includes("collection_id")) {
+          throw new Error(
+            "Selected collection does not exist. Please choose a valid collection."
+          );
+        }
+      }
+    }
+
     throw error;
   }
 };
@@ -122,12 +154,43 @@ export const updateProduct = async (
       stock: product.stock,
       imageUrls: imageUrls, // Send Cloudinary URLs instead of files
     };
-    const res = await api.put(`/api/v1/products/admin/${id}`, productData, {
+    const res = await api.put(`/products/admin/${id}`, productData, {
       headers: { "Content-Type": "application/json" },
     });
     return res.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error updating product:", error);
+
+    // Handle specific validation errors from backend
+    if (error.response?.status === 400) {
+      const errorData = error.response.data;
+      if (errorData.error) {
+        throw new Error(errorData.error);
+      } else if (typeof errorData === "string") {
+        throw new Error(errorData);
+      }
+    }
+
+    // Handle foreign key constraint errors
+    if (error.response?.status === 500) {
+      const errorMessage =
+        error.response.data?.message || error.response.data?.error;
+      if (
+        errorMessage &&
+        errorMessage.includes("foreign key constraint fails")
+      ) {
+        if (errorMessage.includes("category_id")) {
+          throw new Error(
+            "Selected category does not exist. Please choose a valid category."
+          );
+        } else if (errorMessage.includes("collection_id")) {
+          throw new Error(
+            "Selected collection does not exist. Please choose a valid collection."
+          );
+        }
+      }
+    }
+
     throw error;
   }
 };
@@ -138,7 +201,7 @@ export const deleteProductImage = async (
   imageUrl: string
 ) => {
   try {
-    const res = await api.delete(`/api/v1/products/admin/${productId}/images`, {
+    const res = await api.delete(`/products/admin/${productId}/images`, {
       data: { imageUrl },
     });
     return res.data;
@@ -151,7 +214,7 @@ export const deleteProductImage = async (
 // Delete an entire product (which should also delete its images)
 export const deleteProduct = async (productId: number) => {
   try {
-    const res = await api.delete(`/api/v1/products/admin/${productId}`);
+    const res = await api.delete(`/products/admin/${productId}`);
     return res.data;
   } catch (error) {
     console.error("Error deleting product:", error);
@@ -162,7 +225,7 @@ export const deleteProduct = async (productId: number) => {
 // Collection Management
 export const listCollections = async () => {
   try {
-    const res = await api.get("/api/v1/admin/collections");
+    const res = await api.get("/admin/collections");
     return res.data;
   } catch (error) {
     console.error("Error fetching collections:", error);
@@ -172,7 +235,7 @@ export const listCollections = async () => {
 
 export const getCollection = async (id: number) => {
   try {
-    const res = await api.get(`/api/v1/admin/collections/${id}`);
+    const res = await api.get(`/admin/collections/${id}`);
     return res.data;
   } catch (error) {
     console.error("Error fetching collection:", error);
@@ -183,7 +246,7 @@ export const getCollection = async (id: number) => {
 export const createCollection = async (collection: { title: string }) => {
   try {
     const res = await api.post(
-      "/api/v1/admin/collections",
+      "/admin/collections",
       { title: collection.title },
       {
         headers: { "Content-Type": "application/json" },
@@ -202,7 +265,7 @@ export const updateCollection = async (
 ) => {
   try {
     const res = await api.put(
-      `/api/v1/admin/collections/${id}`,
+      `/admin/collections/${id}`,
       { title: collection.title },
       {
         headers: { "Content-Type": "application/json" },
@@ -217,7 +280,7 @@ export const updateCollection = async (
 
 export const deleteCollection = async (id: number) => {
   try {
-    const res = await api.delete(`/api/v1/admin/collections/${id}`);
+    const res = await api.delete(`/admin/collections/${id}`);
     return res.data;
   } catch (error) {
     console.error("Error deleting collection:", error);
@@ -228,7 +291,7 @@ export const deleteCollection = async (id: number) => {
 // Category Management
 export const listCategories = async () => {
   try {
-    const res = await api.get("/api/v1/admin/categories");
+    const res = await api.get("/admin/categories");
     return res.data;
   } catch (error) {
     console.error("Error fetching categories:", error);
@@ -238,7 +301,7 @@ export const listCategories = async () => {
 
 export const getCategory = async (id: number) => {
   try {
-    const res = await api.get(`/api/v1/admin/categories/${id}`);
+    const res = await api.get(`/admin/categories/${id}`);
     return res.data;
   } catch (error) {
     console.error("Error fetching category:", error);
@@ -248,7 +311,7 @@ export const getCategory = async (id: number) => {
 
 export const createCategory = async (category: any) => {
   try {
-    const res = await api.post("/api/v1/admin/categories", category, {
+    const res = await api.post("/admin/categories", category, {
       headers: { "Content-Type": "application/json" },
     });
     return res.data;
@@ -260,7 +323,7 @@ export const createCategory = async (category: any) => {
 
 export const updateCategory = async (id: number, category: any) => {
   try {
-    const res = await api.put(`/api/v1/admin/categories/${id}`, category, {
+    const res = await api.put(`/admin/categories/${id}`, category, {
       headers: { "Content-Type": "application/json" },
     });
     return res.data;
@@ -272,7 +335,7 @@ export const updateCategory = async (id: number, category: any) => {
 
 export const deleteCategory = async (id: number) => {
   try {
-    const res = await api.delete(`/api/v1/admin/categories/${id}`);
+    const res = await api.delete(`/admin/categories/${id}`);
     return res.data;
   } catch (error) {
     console.error("Error deleting category:", error);
@@ -282,7 +345,7 @@ export const deleteCategory = async (id: number) => {
 
 export const listPayments = async () => {
   try {
-    const res = await api.get("/api/v1/payments");
+    const res = await api.get("/payments");
     return res.data;
   } catch (error) {
     console.error("Error fetching payments:", error);
@@ -311,7 +374,7 @@ export const listShipments = async () => {
 
 export const listInventory = async () => {
   try {
-    const res = await api.get("/api/v1/products");
+    const res = await api.get("/products");
     return res.data;
   } catch (error) {
     console.error("Error fetching inventory:", error);

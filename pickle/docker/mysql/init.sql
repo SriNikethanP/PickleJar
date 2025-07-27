@@ -2,7 +2,7 @@
 USE pickle;
 
 -- Create initial categories
-INSERT INTO categories (name) VALUES 
+INSERT INTO category (name) VALUES 
 ('Spicy Pickles'),
 ('Sweet Pickles'),
 ('Dill Pickles'),
@@ -11,7 +11,7 @@ INSERT INTO categories (name) VALUES
 ON DUPLICATE KEY UPDATE name = VALUES(name);
 
 -- Create initial collections
-INSERT INTO collections (title) VALUES 
+INSERT INTO collection (title) VALUES 
 ('Summer Specials'),
 ('Winter Collection'),
 ('Organic Pickles'),

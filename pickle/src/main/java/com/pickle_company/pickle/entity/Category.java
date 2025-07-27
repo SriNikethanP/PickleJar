@@ -3,10 +3,9 @@ package com.pickle_company.pickle.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.*;
 
 @Entity
-@Table(name = "categories")
+@Table(name = "category")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,9 +17,5 @@ public class Category {
     
     @Column(unique = true, nullable = false)
     private String name;
-
-    // @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    // @Builder.Default
-    // private List<Product> products = new ArrayList<>();
 }
 

@@ -61,7 +61,7 @@ export default function ProductActions({
             onClick={handleAddToCart}
             disabled={disabled || !inStock || isAdding}
             className="w-full"
-            size="lg"
+            
           >
             {!inStock ? "Out of stock" : isAdding ? "Adding..." : "Add to cart"}
           </Button>

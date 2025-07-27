@@ -40,11 +40,11 @@ public class Product {
     private List<Review> reviews = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "category_id", nullable = true)
     private Category category;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "collection_id")
+    @JoinColumn(name = "collection_id", nullable = true)
     private Collection collection;
     
     @Column(nullable = false)
