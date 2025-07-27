@@ -29,6 +29,11 @@ export type Cart = {
   items: CartItem[];
 };
 
+// Placeholder: Replace with real session/user logic
+function getUserIdFromSession(): number | null {
+  return null; // Return userId if logged in, otherwise null
+}
+
 export const getCartByUserId = async (userId: number): Promise<Cart | null> => {
   try {
     const authHeaders = await getAuthHeaders();
@@ -85,6 +90,26 @@ export const updateCartItem = async (
     console.error("Error updating cart item:", error);
     return null;
   }
+};
+
+// Wrapper function for cart item component
+export const updateLineItem = async ({
+  lineId,
+  quantity,
+}: {
+  lineId: string;
+  quantity: number;
+}) => {
+  const userId = getUserIdFromSession();
+  if (!userId) {
+    throw new Error("User not authenticated");
+  }
+
+  const result = await updateCartItem(userId, parseInt(lineId), quantity);
+  if (!result) {
+    throw new Error("Failed to update cart item");
+  }
+  return result;
 };
 
 export const removeCartItem = async (

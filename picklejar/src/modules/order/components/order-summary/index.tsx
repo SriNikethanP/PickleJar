@@ -1,21 +1,21 @@
-import { convertToLocale } from "@lib/util/money"
-import { HttpTypes } from "@medusajs/types"
+import { convertToLocale } from "@lib/util/money";
+import { HttpTypes } from "@medusajs/types";
 
 type OrderSummaryProps = {
-  order: HttpTypes.StoreOrder
-}
+  order: HttpTypes.StoreOrder;
+};
 
 const OrderSummary = ({ order }: OrderSummaryProps) => {
   const getAmount = (amount?: number | null) => {
     if (!amount) {
-      return
+      return;
     }
 
     return convertToLocale({
       amount,
       currency_code: order.currency_code,
-    })
-  }
+    });
+  };
 
   return (
     <div>
@@ -30,12 +30,6 @@ const OrderSummary = ({ order }: OrderSummaryProps) => {
             <div className="flex items-center justify-between">
               <span>Discount</span>
               <span>- {getAmount(order.discount_total)}</span>
-            </div>
-          )}
-          {order.gift_card_total > 0 && (
-            <div className="flex items-center justify-between">
-              <span>Discount</span>
-              <span>- {getAmount(order.gift_card_total)}</span>
             </div>
           )}
           <div className="flex items-center justify-between">
@@ -54,7 +48,7 @@ const OrderSummary = ({ order }: OrderSummaryProps) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default OrderSummary
+export default OrderSummary;

@@ -1,17 +1,14 @@
 "use client"
 
-import { RadioGroup } from "@headlessui/react"
-import { isStripe as isStripeFunc, paymentInfoMap } from "@lib/constants"
-import { initiatePaymentSession } from "@lib/data/cart"
+import { Button, Container, Heading, RadioGroup, Text, clx } from "@medusajs/ui"
 import { CheckCircleSolid, CreditCard } from "@medusajs/icons"
-import { Button, Container, Heading, Text, clx } from "@medusajs/ui"
-import ErrorMessage from "@modules/checkout/components/error-message"
-import PaymentContainer, {
-  StripeCardContainer,
-} from "@modules/checkout/components/payment-container"
-import Divider from "@modules/common/components/divider"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
+import { initiatePaymentSession } from "@lib/data/cart"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { isStripe } from "@lib/util/payment"
+import ErrorMessage from "../error-message"
+import Divider from "@modules/common/components/divider"
+import StripeCardContainer from "../payment-wrapper/stripe-wrapper"
 
 const Payment = ({
   cart,
@@ -20,41 +17,41 @@ const Payment = ({
   cart: any
   availablePaymentMethods: any[]
 }) => {
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>("")
+  const [cardComplete, setCardComplete] = useState(false)
+  const [cardBrand, setCardBrand] = useState<string | null>(null)
+
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const router = useRouter()
+
+  const isOpen = searchParams.get("step") === "payment"
+
   const activeSession = cart.payment_collection?.payment_sessions?.find(
     (paymentSession: any) => paymentSession.status === "pending"
   )
 
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [cardBrand, setCardBrand] = useState<string | null>(null)
-  const [cardComplete, setCardComplete] = useState(false)
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(
-    activeSession?.provider_id ?? ""
-  )
-
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const pathname = usePathname()
-
-  const isOpen = searchParams.get("step") === "payment"
-
-  const isStripe = isStripeFunc(selectedPaymentMethod)
+  const isStripeFunc = (providerId: string) => isStripe(providerId)
 
   const setPaymentMethod = async (method: string) => {
-    setError(null)
     setSelectedPaymentMethod(method)
-    if (isStripeFunc(method)) {
-      await initiatePaymentSession(cart, {
-        provider_id: method,
-      })
+    setError(null)
+
+    if (method !== activeSession?.provider_id) {
+      try {
+        await initiatePaymentSession(cart, {
+          provider_id: method,
+        })
+      } catch (err: any) {
+        setError(err.message)
+      }
     }
   }
 
-  const paidByGiftcard =
-    cart?.gift_cards && cart?.gift_cards?.length > 0 && cart?.total === 0
-
   const paymentReady =
-    (activeSession && cart?.shipping_methods.length !== 0) || paidByGiftcard
+    activeSession && cart?.shipping_methods.length !== 0
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
@@ -136,7 +133,7 @@ const Payment = ({
       </div>
       <div>
         <div className={isOpen ? "block" : "hidden"}>
-          {!paidByGiftcard && availablePaymentMethods?.length && (
+          {availablePaymentMethods?.length && (
             <>
               <RadioGroup
                 value={selectedPaymentMethod}
@@ -148,36 +145,12 @@ const Payment = ({
                       <StripeCardContainer
                         paymentProviderId={paymentMethod.id}
                         selectedPaymentOptionId={selectedPaymentMethod}
-                        paymentInfoMap={paymentInfoMap}
-                        setCardBrand={setCardBrand}
-                        setError={setError}
-                        setCardComplete={setCardComplete}
-                      />
-                    ) : (
-                      <PaymentContainer
-                        paymentInfoMap={paymentInfoMap}
-                        paymentProviderId={paymentMethod.id}
-                        selectedPaymentOptionId={selectedPaymentMethod}
                       />
                     )}
                   </div>
                 ))}
               </RadioGroup>
             </>
-          )}
-
-          {paidByGiftcard && (
-            <div className="flex flex-col w-1/3">
-              <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                Payment method
-              </Text>
-              <Text
-                className="txt-medium text-ui-fg-subtle"
-                data-testid="payment-method-summary"
-              >
-                Gift card
-              </Text>
-            </div>
           )}
 
           <ErrorMessage
@@ -192,7 +165,7 @@ const Payment = ({
             isLoading={isLoading}
             disabled={
               (isStripe && !cardComplete) ||
-              (!selectedPaymentMethod && !paidByGiftcard)
+              (!selectedPaymentMethod)
             }
             data-testid="submit-payment-button"
           >
@@ -238,24 +211,26 @@ const Payment = ({
                 </div>
               </div>
             </div>
-          ) : paidByGiftcard ? (
-            <div className="flex flex-col w-1/3">
-              <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                Payment method
-              </Text>
-              <Text
-                className="txt-medium text-ui-fg-subtle"
-                data-testid="payment-method-summary"
-              >
-                Gift card
-              </Text>
-            </div>
           ) : null}
         </div>
       </div>
       <Divider className="mt-8" />
     </div>
   )
+}
+
+const paymentInfoMap: Record<
+  string,
+  { title: string; icon: React.ReactNode }
+> = {
+  stripe: {
+    title: "Credit card",
+    icon: <CreditCard />,
+  },
+  manual: {
+    title: "Manual payment",
+    icon: <CreditCard />,
+  },
 }
 
 export default Payment
