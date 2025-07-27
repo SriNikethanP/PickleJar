@@ -19,6 +19,7 @@ type ProductActionsProps = {
 
 export default function ProductActions({
   product,
+  region,
   disabled,
 }: ProductActionsProps) {
   const [isAdding, setIsAdding] = useState(false);
