@@ -9,9 +9,13 @@ import {
 } from "@lib/components/ui/dialog";
 import { Input } from "@lib/components/ui/input";
 import { Button } from "@lib/components/ui/button";
-import { addProduct, listCategories, listCollections } from "@lib/data/admin";
+import {
+  addProduct,
+  listCategories,
+  listCollections,
+} from "@lib/data/admin-new";
 import { toast } from "sonner";
-import { Upload, X } from "lucide-react";
+import ImageUpload from "../../../../components/ImageUpload";
 
 export default function AddProductDialog({
   onSuccess,
@@ -32,7 +36,6 @@ export default function AddProductDialog({
     collectionId: "",
   });
   const [images, setImages] = useState<File[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,8 +44,8 @@ export default function AddProductDialog({
           listCategories(),
           listCollections(),
         ]);
-        setCategories(categoriesData);
-        setCollections(collectionsData);
+        setCategories(categoriesData as any[]);
+        setCollections(collectionsData as any[]);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -56,28 +59,13 @@ export default function AddProductDialog({
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files ? Array.from(e.target.files) : [];
-    if (files.length < 1 || files.length > 3) {
-      toast.error("Please select 1 to 3 images.");
-      return;
-    }
-    setImages(files);
-    setImagePreviews(files.map((file) => URL.createObjectURL(file)));
-  };
-
-  const removeImage = (index: number) => {
-    const newImages = images.filter((_, i) => i !== index);
-    const newPreviews = imagePreviews.filter((_, i) => i !== index);
-    setImages(newImages);
-    setImagePreviews(newPreviews);
-  };
+  // Image handling is now managed by the ImageUpload component
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (images.length < 1 || images.length > 3) {
-      toast.error("Please select 1 to 3 images.");
+    if (images.length === 0) {
+      toast.error("Please select at least one image.");
       return;
     }
 
@@ -107,7 +95,6 @@ export default function AddProductDialog({
         collectionId: "",
       });
       setImages([]);
-      setImagePreviews([]);
       onSuccess();
     } catch (error: any) {
       // Show specific error message from backend
@@ -197,52 +184,15 @@ export default function AddProductDialog({
           {/* Image Upload */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Product Images (1-3 images)
+              Product Images
             </label>
-            <div className="flex items-center justify-center w-full">
-              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <Upload className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" />
-                  <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                    <span className="font-semibold">Click to upload</span> or
-                    drag and drop
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    PNG, JPG, GIF up to 10MB
-                  </p>
-                </div>
-                <input
-                  type="file"
-                  className="hidden"
-                  multiple
-                  accept="image/*"
-                  onChange={handleImageChange}
-                />
-              </label>
-            </div>
+            <ImageUpload
+              images={images}
+              setImages={setImages}
+              maxImages={3}
+              maxSize={10}
+            />
           </div>
-
-          {/* Image Previews */}
-          {imagePreviews.length > 0 && (
-            <div className="grid grid-cols-3 gap-2">
-              {imagePreviews.map((preview, index) => (
-                <div key={index} className="relative">
-                  <img
-                    src={preview}
-                    alt={`Preview ${index + 1}`}
-                    className="w-full h-20 object-cover rounded"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeImage(index)}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
 
           <Button type="submit" disabled={loading} className="w-full">
             {loading ? "Adding..." : "Add Product"}

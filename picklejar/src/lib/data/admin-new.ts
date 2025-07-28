@@ -1,4 +1,4 @@
-import { uploadMultipleImagesToCloudinary } from "@lib/util/cloudinary";
+import { uploadMultipleFilesAsBase64ToCloudinary } from "@lib/util/cloudinary";
 import { adminApiClient } from "@lib/admin-api";
 
 export const getAdminDashboardData = async () => {
@@ -67,7 +67,9 @@ export const addProduct = async (product: any, images: File[] = []) => {
   try {
     let imageUrls: string[] = [];
     if (images.length > 0) {
-      const cloudinaryResults = await uploadMultipleImagesToCloudinary(images);
+      const cloudinaryResults = await uploadMultipleFilesAsBase64ToCloudinary(
+        images
+      );
       imageUrls = cloudinaryResults.map((result) => result.secure_url);
     }
 
@@ -96,7 +98,9 @@ export const updateProduct = async (
   try {
     let imageUrls: string[] = [];
     if (images.length > 0) {
-      const cloudinaryResults = await uploadMultipleImagesToCloudinary(images);
+      const cloudinaryResults = await uploadMultipleFilesAsBase64ToCloudinary(
+        images
+      );
       imageUrls = cloudinaryResults.map((result) => result.secure_url);
     }
 
@@ -123,6 +127,20 @@ export const deleteProduct = async (productId: number) => {
   } catch (error) {
     console.error("Error deleting product:", error);
     throw new Error("Failed to delete product");
+  }
+};
+
+export const deleteProductImage = async (
+  productId: number,
+  imageUrl: string
+) => {
+  try {
+    return await adminApiClient.delete(`/products/admin/${productId}/images`, {
+      data: { imageUrl },
+    });
+  } catch (error) {
+    console.error("Error deleting product image:", error);
+    throw new Error("Failed to delete product image");
   }
 };
 

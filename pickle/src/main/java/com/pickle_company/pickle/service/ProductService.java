@@ -70,7 +70,19 @@ public class ProductService {
         product.setActive(dto.isActive());
         product.setCategory(category);
         product.setCollection(collection);
-        // For images: handled via file upload, so don't set imageUrls here.
+        
+        // Handle image URLs from Cloudinary
+        if (dto.getImageUrls() != null && !dto.getImageUrls().isEmpty()) {
+            if (productId != null) {
+                // For updates, merge with existing images
+                List<String> existingImages = new ArrayList<>(product.getImageUrls());
+                existingImages.addAll(dto.getImageUrls());
+                product.setImageUrls(existingImages);
+            } else {
+                // For new products, set the image URLs
+                product.setImageUrls(dto.getImageUrls());
+            }
+        }
 
         Product saved = productRepo.save(product);
         return productMapper.toDto(saved);
