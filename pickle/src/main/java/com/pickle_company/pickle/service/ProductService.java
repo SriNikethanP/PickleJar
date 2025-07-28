@@ -142,14 +142,52 @@ public class ProductService {
         Product product = productRepo.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
 
+        // Validate rating
+        if (reviewDTO.getRating() < 1 || reviewDTO.getRating() > 5) {
+            throw new IllegalArgumentException("Rating must be between 1 and 5");
+        }
+
+        // Validate comment length
+        if (reviewDTO.getComment() != null && reviewDTO.getComment().length() > 1000) {
+            throw new IllegalArgumentException("Comment must be less than 1000 characters");
+        }
+
         Review review = Review.builder()
                 .product(product)
                 .username(reviewDTO.getUsername()) // in real-world, extract from JWT/Principal
                 .rating(reviewDTO.getRating())
+                .comment(reviewDTO.getComment())
                 .createdAt(LocalDateTime.now())
+                .verified(false) // Set to true if user has purchased the product
                 .build();
 
         return reviewMapper.toDto(reviewRepo.save(review));
+    }
+
+    // Get reviews for a product
+    public List<ReviewDTO> getProductReviews(Long productId) {
+        Product product = productRepo.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+        
+        return product.getReviews().stream()
+                .map(reviewMapper::toDto)
+                .toList();
+    }
+
+    // Get average rating for a product
+    public double getAverageRating(Long productId) {
+        Product product = productRepo.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+        
+        if (product.getReviews().isEmpty()) {
+            return 0.0;
+        }
+        
+        double totalRating = product.getReviews().stream()
+                .mapToInt(Review::getRating)
+                .sum();
+        
+        return Math.round((totalRating / product.getReviews().size()) * 10.0) / 10.0;
     }
 
     public void deleteProduct(Long productId) {

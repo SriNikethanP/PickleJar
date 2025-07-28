@@ -83,6 +83,18 @@ public class ProductController {
     public ResponseEntity<ReviewDTO> addReview(@PathVariable Long id, @RequestBody ReviewDTO dto) {
         return ResponseEntity.ok(productService.addReview(id, dto));
     }
+
+    // Get reviews for a product
+    @GetMapping("/{id}/reviews")
+    public ResponseEntity<List<ReviewDTO>> getProductReviews(@PathVariable Long id) {
+        return ResponseEntity.ok(productService.getProductReviews(id));
+    }
+
+    // Get average rating for a product
+    @GetMapping("/{id}/rating")
+    public ResponseEntity<Double> getAverageRating(@PathVariable Long id) {
+        return ResponseEntity.ok(productService.getAverageRating(id));
+    }
     @DeleteMapping("/admin/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);

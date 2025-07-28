@@ -12,5 +12,7 @@ public class ReviewDTO {
     private Long id;
     private String username;
     private int rating;
+    private String comment;
     private LocalDateTime createdAt;
+    private boolean verified;
 }
