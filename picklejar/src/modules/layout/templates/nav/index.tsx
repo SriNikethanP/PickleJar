@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import LocalizedClientLink from "@modules/common/components/localized-client-link";
 import CartButton from "@modules/layout/components/cart-button";
 import SideMenu from "@modules/layout/components/side-menu";
+import ClientAccountButton from "@modules/layout/components/account-button/ClientAccountButton";
 
 export default async function Nav() {
   return (
@@ -27,13 +28,7 @@ export default async function Nav() {
 
           <div className="flex items-center gap-x-6 h-full flex-1 basis-0 justify-end">
             <div className="hidden small:flex items-center gap-x-6 h-full">
-              <LocalizedClientLink
-                className="hover:text-ui-fg-base"
-                href="/account"
-                data-testid="nav-account-link"
-              >
-                Account
-              </LocalizedClientLink>
+              <ClientAccountButton />
             </div>
             <Suspense
               fallback={
