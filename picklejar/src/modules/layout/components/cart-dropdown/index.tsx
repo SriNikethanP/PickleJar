@@ -20,7 +20,7 @@ import { Fragment, useEffect, useRef, useState } from "react"
 const CartDropdown = ({
   cart: cartState,
 }: {
-  cart?: HttpTypes.StoreCart | null
+  cart?: any | null
 }) => {
   const [activeTimer, setActiveTimer] = useState<NodeJS.Timer | undefined>(
     undefined
@@ -35,7 +35,9 @@ const CartDropdown = ({
       return acc + item.quantity
     }, 0) || 0
 
-  const subtotal = cartState?.subtotal ?? 0
+  const subtotal = cartState?.items?.reduce((acc, item) => {
+    return acc + (item.product.price * item.quantity)
+  }, 0) || 0
   const itemRef = useRef<number>(totalItems || 0)
 
   const timedOpen = () => {
@@ -109,44 +111,31 @@ const CartDropdown = ({
               <>
                 <div className="overflow-y-scroll max-h-[402px] px-4 grid grid-cols-1 gap-y-8 no-scrollbar p-px">
                   {cartState.items
-                    .sort((a, b) => {
-                      return (a.created_at ?? "") > (b.created_at ?? "")
-                        ? -1
-                        : 1
-                    })
                     .map((item) => (
                       <div
                         className="grid grid-cols-[122px_1fr] gap-x-4"
                         key={item.id}
                         data-testid="cart-item"
                       >
-                        <LocalizedClientLink
-                          href={`/products/${item.product_handle}`}
-                          className="w-24"
-                        >
-                          <Thumbnail
-                            thumbnail={item.thumbnail}
-                            images={item.variant?.product?.images}
-                            size="square"
+                        <div className="w-24">
+                          <img
+                            src={item.product.imageUrls?.[0] || "/placeholder.png"}
+                            alt={item.product.name}
+                            className="w-24 h-24 object-cover rounded"
                           />
-                        </LocalizedClientLink>
+                        </div>
                         <div className="flex flex-col justify-between flex-1">
                           <div className="flex flex-col flex-1">
                             <div className="flex items-start justify-between">
                               <div className="flex flex-col overflow-ellipsis whitespace-nowrap mr-4 w-[180px]">
                                 <h3 className="text-base-regular overflow-hidden text-ellipsis">
                                   <LocalizedClientLink
-                                    href={`/products/${item.product_handle}`}
+                                    href={`/products/${item.product.id}`}
                                     data-testid="product-link"
                                   >
-                                    {item.title}
+                                    {item.product.name}
                                   </LocalizedClientLink>
                                 </h3>
-                                <LineItemOptions
-                                  variant={item.variant}
-                                  data-testid="cart-item-variant"
-                                  data-value={item.variant}
-                                />
                                 <span
                                   data-testid="cart-item-quantity"
                                   data-value={item.quantity}
@@ -155,11 +144,9 @@ const CartDropdown = ({
                                 </span>
                               </div>
                               <div className="flex justify-end">
-                                <LineItemPrice
-                                  item={item}
-                                  style="tight"
-                                  currencyCode={cartState.currency_code}
-                                />
+                                <span className="text-base-regular font-semibold">
+                                  ₹{item.product.price * item.quantity}
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -185,10 +172,7 @@ const CartDropdown = ({
                       data-testid="cart-subtotal"
                       data-value={subtotal}
                     >
-                      {convertToLocale({
-                        amount: subtotal,
-                        currency_code: cartState.currency_code,
-                      })}
+                      ₹{subtotal}
                     </span>
                   </div>
                   <LocalizedClientLink href="/cart" passHref>

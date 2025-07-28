@@ -5,20 +5,14 @@ import { Button, Heading } from "@medusajs/ui";
 import CartTotals from "@modules/common/components/cart-totals";
 import Divider from "@modules/common/components/divider";
 import LocalizedClientLink from "@modules/common/components/localized-client-link";
-import { HttpTypes } from "@medusajs/types";
 
 type SummaryProps = {
-  cart: HttpTypes.StoreCart;
+  cart: any;
 };
 
-function getCheckoutStep(cart: HttpTypes.StoreCart) {
-  if (!cart?.shipping_address?.address_1 || !cart.email) {
-    return "address";
-  } else if (cart?.shipping_methods?.length === 0) {
-    return "delivery";
-  } else {
-    return "payment";
-  }
+function getCheckoutStep(cart: any) {
+  // For now, always go to address step
+  return "address";
 }
 
 const Summary = ({ cart }: SummaryProps) => {

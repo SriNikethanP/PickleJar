@@ -1,63 +1,58 @@
-"use client"
+"use client";
 
-import { Table, Text, clx } from "@medusajs/ui"
-import { updateLineItem } from "@lib/data/cart"
-import { HttpTypes } from "@medusajs/types"
-import CartItemSelect from "@modules/cart/components/cart-item-select"
-import ErrorMessage from "@modules/checkout/components/error-message"
-import DeleteButton from "@modules/common/components/delete-button"
-import LineItemOptions from "@modules/common/components/line-item-options"
-import LineItemPrice from "@modules/common/components/line-item-price"
-import LineItemUnitPrice from "@modules/common/components/line-item-unit-price"
-import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import Spinner from "@modules/common/icons/spinner"
-import Thumbnail from "@modules/products/components/thumbnail"
-import { useState } from "react"
+import { Table, Text, clx } from "@medusajs/ui";
+import { updateLineItem } from "@lib/client-cart";
+import CartItemSelect from "@modules/cart/components/cart-item-select";
+import ErrorMessage from "@modules/checkout/components/error-message";
+import DeleteButton from "@modules/common/components/delete-button";
+import LocalizedClientLink from "@modules/common/components/localized-client-link";
+import Spinner from "@modules/common/icons/spinner";
+import { useState } from "react";
 
 type ItemProps = {
-  item: HttpTypes.StoreCartLineItem
-  type?: "full" | "preview"
-  currencyCode: string
-}
+  item: any;
+  type?: "full" | "preview";
+  currencyCode: string;
+};
 
 const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
-  const [updating, setUpdating] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [updating, setUpdating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const changeQuantity = async (quantity: number) => {
-    setError(null)
-    setUpdating(true)
+    setError(null);
+    setUpdating(true);
 
     await updateLineItem({
       lineId: item.id,
       quantity,
     })
       .catch((err) => {
-        setError(err.message)
+        setError(err.message);
       })
       .finally(() => {
-        setUpdating(false)
-      })
-  }
+        setUpdating(false);
+      });
+  };
 
   // TODO: Update this to grab the actual max inventory
-  const maxQtyFromInventory = 10
-  const maxQuantity = item.variant?.manage_inventory ? 10 : maxQtyFromInventory
+  const maxQtyFromInventory = 10;
+  const maxQuantity = item.variant?.manage_inventory ? 10 : maxQtyFromInventory;
 
   return (
     <Table.Row className="w-full" data-testid="product-row">
       <Table.Cell className="!pl-0 p-4 w-24">
         <LocalizedClientLink
-          href={`/products/${item.product_handle}`}
+          href={`/products/${item.product.id}`}
           className={clx("flex", {
             "w-16": type === "preview",
             "small:w-24 w-12": type === "full",
           })}
         >
-          <Thumbnail
-            thumbnail={item.thumbnail}
-            images={item.variant?.product?.images}
-            size="square"
+          <img
+            src={item.product.imageUrls?.[0] || "/placeholder.png"}
+            alt={item.product.name}
+            className="w-24 h-24 object-cover rounded"
           />
         </LocalizedClientLink>
       </Table.Cell>
@@ -67,9 +62,8 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
           className="txt-medium-plus text-ui-fg-base"
           data-testid="product-title"
         >
-          {item.product_title}
+          {item.product.name}
         </Text>
-        <LineItemOptions variant={item.variant} data-testid="product-variant" />
       </Table.Cell>
 
       {type === "full" && (
@@ -106,11 +100,9 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
 
       {type === "full" && (
         <Table.Cell className="hidden small:table-cell">
-          <LineItemUnitPrice
-            item={item}
-            style="tight"
-            currencyCode={currencyCode}
-          />
+          <span className="text-base-regular">
+            ₹{item.product.price}
+          </span>
         </Table.Cell>
       )}
 
@@ -123,22 +115,16 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
           {type === "preview" && (
             <span className="flex gap-x-1 ">
               <Text className="text-ui-fg-muted">{item.quantity}x </Text>
-              <LineItemUnitPrice
-                item={item}
-                style="tight"
-                currencyCode={currencyCode}
-              />
+              <span className="text-base-regular">₹{item.product.price}</span>
             </span>
           )}
-          <LineItemPrice
-            item={item}
-            style="tight"
-            currencyCode={currencyCode}
-          />
+          <span className="text-base-regular font-semibold">
+            ₹{item.product.price * item.quantity}
+          </span>
         </span>
       </Table.Cell>
     </Table.Row>
-  )
-}
+  );
+};
 
-export default Item
+export default Item;

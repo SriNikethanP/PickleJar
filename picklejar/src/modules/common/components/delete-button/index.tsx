@@ -1,4 +1,4 @@
-import { removeCartItem } from "@lib/data/cart";
+import { removeCartItem } from "@lib/client-cart";
 import { Spinner, Trash } from "@medusajs/icons";
 import { clx } from "@medusajs/ui";
 import { useState } from "react";
@@ -18,9 +18,8 @@ const DeleteButton = ({
   const handleDelete = async (id: string) => {
     setIsDeleting(true);
     try {
-      // You may need to pass userId as well, update as needed
-      await removeCartItem(/* userId */ 0, Number(id));
-      toast.success("Item deleted successfully");
+      await removeCartItem(Number(id));
+      // Toast is handled by the removeCartItem function
     } catch (err) {
       toast.error("Failed to delete item");
     }

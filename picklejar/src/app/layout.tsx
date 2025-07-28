@@ -3,6 +3,7 @@ import { Metadata } from "next";
 import "styles/globals.css";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@lib/context/auth-context";
+import { CartProvider } from "@lib/context/cart-context";
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
@@ -17,8 +18,10 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AuthProvider>
-          {children}
-          <Toaster position="top-right" richColors />
+          <CartProvider>
+            {children}
+            <Toaster position="top-right" richColors />
+          </CartProvider>
         </AuthProvider>
       </body>
     </html>

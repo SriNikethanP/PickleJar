@@ -1,6 +1,5 @@
 "use client";
 
-import { addToCartWrapper } from "@lib/data/cart";
 import { useIntersection } from "@lib/hooks/use-in-view";
 import { Product } from "@lib/data/products";
 import { Button } from "@medusajs/ui";
@@ -9,7 +8,8 @@ import { useParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ProductPrice from "../product-price";
 import MobileActions from "./mobile-actions";
-import { toast } from "sonner";
+import { useCart } from "@lib/context/cart-context";
+import { useAuth } from "@lib/context/auth-context";
 
 type ProductActionsProps = {
   product: Product;
@@ -23,6 +23,8 @@ export default function ProductActions({
   disabled,
 }: ProductActionsProps) {
   const [isAdding, setIsAdding] = useState(false);
+  const { addToCart } = useCart();
+  const { user } = useAuth();
   const countryCode = "in";
 
   // check if the product is in stock
@@ -35,18 +37,20 @@ export default function ProductActions({
   // add the product to the cart
   const handleAddToCart = async () => {
     if (!product.id) return null;
+    if (!user) {
+      // Redirect to login or show login prompt
+      return;
+    }
 
     setIsAdding(true);
 
     try {
-      await addToCartWrapper({
-        productId: product.id,
-        quantity: 1,
-        countryCode,
-      });
-      toast.success("Added to cart");
+      const success = await addToCart(product.id, 1);
+      if (!success) {
+        throw new Error("Failed to add to cart");
+      }
     } catch (err) {
-      toast.error("Failed to add to cart");
+      console.error("Failed to add to cart:", err);
     } finally {
       setIsAdding(false);
     }
@@ -61,7 +65,6 @@ export default function ProductActions({
             onClick={handleAddToCart}
             disabled={disabled || !inStock || isAdding}
             className="w-full"
-            
           >
             {!inStock ? "Out of stock" : isAdding ? "Adding..." : "Add to cart"}
           </Button>
