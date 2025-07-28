@@ -34,4 +34,10 @@ public class AuthController {
         AuthResponseDTO authResponse = userService.refreshToken(refreshTokenRequest);
         return ResponseEntity.ok(authResponse);
     }
+
+    @PostMapping("/create-admin")
+    public ResponseEntity<AuthResponseDTO> createAdmin(@RequestBody UserRegistrationDTO userRegistrationDTO){
+        AuthResponseDTO authResponse = userService.createAdmin(userRegistrationDTO);
+        return ResponseEntity.ok(authResponse);
+    }
 }

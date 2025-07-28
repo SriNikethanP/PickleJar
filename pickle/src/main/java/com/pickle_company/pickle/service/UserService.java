@@ -142,4 +142,30 @@ public class UserService {
             throw new IllegalArgumentException("Invalid refresh token");
         }
     }
+
+    public AuthResponseDTO createAdmin(UserRegistrationDTO userRegistrationDTO) {
+        if(userRepository.findByEmail(userRegistrationDTO.getEmail()).isPresent()){
+            throw new IllegalArgumentException("Email already registered");
+        }
+
+        User user = new User();
+        user.setFullName(userRegistrationDTO.getFullName());
+        user.setEmail(userRegistrationDTO.getEmail());
+        user.setMobile(userRegistrationDTO.getMobile());
+        user.setPassword(passwordEncoder.encode(userRegistrationDTO.getPassword()));
+        user.setRole(Role.ADMIN); // Set role to ADMIN
+        user.setBanned(false);
+
+        User saved = userRepository.save(user);
+        
+        String accessToken = jwtUtil.generateToken(saved.getEmail(), saved.getId(), saved.getRole());
+        String refreshToken = jwtUtil.generateRefreshToken(saved.getEmail());
+        
+        return AuthResponseDTO.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .expiresIn(86400000L)
+                .user(userMapper.toDto(saved))
+                .build();
+    }
 }

@@ -1,30 +1,25 @@
-import axios from "axios";
 import { uploadMultipleImagesToCloudinary } from "@lib/util/cloudinary";
-
-const api = axios.create({
-  baseURL:
-    process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "http://localhost:8080/api/v1",
-});
+import { adminApiClient } from "@lib/admin-api";
 
 export const getAdminDashboardData = async () => {
   try {
     const [sales, orders, customers, pie, trend, timeline] = await Promise.all([
-      api.get("/admin/reports/total-sales"),
-      api.get("/admin/reports/total-orders"),
-      api.get("/admin/reports/total-customers"),
-      api.get("/admin/reports/category-distribution"),
-      api.get("/admin/reports/revenue-trend"),
-      api.get("/admin/reports/monthly-revenue-timeline"),
+      adminApiClient.get("/admin/reports/total-sales"),
+      adminApiClient.get("/admin/reports/total-orders"),
+      adminApiClient.get("/admin/reports/total-customers"),
+      adminApiClient.get("/admin/reports/category-distribution"),
+      adminApiClient.get("/admin/reports/revenue-trend"),
+      adminApiClient.get("/admin/reports/monthly-revenue-timeline"),
     ]);
 
     return {
-      totalSales: sales.data,
-      totalOrders: orders.data,
-      totalCustomers: customers.data,
-      categoryPieData: pie.data, // [{ value, name }]
-      trendLabels: trend.data.map((d: any) => d.date),
-      revenueTrend: trend.data.map((d: any) => d.revenue),
-      revenueTimeline: timeline.data,
+      totalSales: sales,
+      totalOrders: orders,
+      totalCustomers: customers,
+      categoryPieData: pie, // [{ value, name }]
+      trendLabels: trend.map((d: any) => d.date),
+      revenueTrend: trend.map((d: any) => d.revenue),
+      revenueTimeline: timeline,
     };
   } catch (error) {
     console.error("Error fetching admin dashboard data:", error);
@@ -43,8 +38,8 @@ export const getAdminDashboardData = async () => {
 
 export const listOrders = async () => {
   try {
-    const res = await api.get("/orders");
-    return res.data;
+    const res = await adminApiClient.get("/orders");
+    return res;
   } catch (error) {
     console.error("Error fetching orders:", error);
     return [];
@@ -53,8 +48,8 @@ export const listOrders = async () => {
 
 export const listCustomers = async () => {
   try {
-    const res = await api.get("/admin/users");
-    return res.data;
+    const res = await adminApiClient.get("/admin/users");
+    return res;
   } catch (error) {
     console.error("Error fetching customers:", error);
     return [];
@@ -63,8 +58,8 @@ export const listCustomers = async () => {
 
 export const getOrderCount = async (userId: number) => {
   try {
-    const res = await api.get(`/admin/users/${userId}/orders`);
-    return res.data.length;
+    const res = await adminApiClient.get(`/admin/users/${userId}/orders`);
+    return res.length;
   } catch (error) {
     console.error("Error fetching order count:", error);
     return 0;
@@ -90,10 +85,8 @@ export const addProduct = async (product: any, images: File[] = []) => {
       stock: product.stock,
       imageUrls: imageUrls, // Send Cloudinary URLs instead of files
     };
-    const res = await api.post("/products/admin", productData, {
-      headers: { "Content-Type": "application/json" },
-    });
-    return res.data;
+    const res = await adminApiClient.post("/products/admin", productData);
+    return res;
   } catch (error: any) {
     console.error("Error adding product:", error);
 

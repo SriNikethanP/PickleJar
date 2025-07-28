@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useAdminAuth } from "@lib/context/admin-auth-context";
 import {
   BarChart3,
   Users,
@@ -12,6 +13,7 @@ import {
   Home,
   FolderOpen,
   Tag,
+  LogOut,
 } from "lucide-react";
 
 const navItems = [
@@ -64,6 +66,13 @@ const navItems = [
 
 export function AdminNavbar() {
   const pathname = usePathname();
+  const { admin, logout } = useAdminAuth();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    logout();
+    router.push("/admin/login");
+  };
 
   return (
     <nav className="bg-white shadow-sm border-b">
@@ -96,6 +105,19 @@ export function AdminNavbar() {
                 );
               })}
             </div>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <div className="hidden sm:flex items-center space-x-2 text-sm text-gray-700">
+              <span>Welcome, {admin?.fullName}</span>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </button>
           </div>
 
           {/* Mobile menu button */}

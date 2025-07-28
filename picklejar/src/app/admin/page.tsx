@@ -1,5 +1,5 @@
 
-import { getAdminDashboardData } from "@lib/data/admin";
+import { getAdminDashboardData } from "@lib/data/admin-new";
 import AdminDashboardClient from "./AdminDashboardClient";
 
 export default async function AdminDashboard() {
