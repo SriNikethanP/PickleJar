@@ -1,7 +1,9 @@
 package com.pickle_company.pickle.service;
 
+import com.pickle_company.pickle.dto.AuthResponseDTO;
 import com.pickle_company.pickle.dto.LoginRequestDTO;
 import com.pickle_company.pickle.dto.OrderDTO;
+import com.pickle_company.pickle.dto.RefreshTokenRequestDTO;
 import com.pickle_company.pickle.dto.UserRegistrationDTO;
 import com.pickle_company.pickle.dto.UserResponseDTO;
 import com.pickle_company.pickle.entity.Order;
@@ -11,6 +13,7 @@ import com.pickle_company.pickle.mapper.OrderMapper;
 import com.pickle_company.pickle.mapper.UserMapper;
 import com.pickle_company.pickle.repository.OrderRepository;
 import com.pickle_company.pickle.repository.UserRepository;
+import com.pickle_company.pickle.util.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,20 +28,23 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
+    private final JwtUtil jwtUtil;
 
-    public UserService(  UserRepository userRepository,
-                         UserMapper userMapper,
-                         PasswordEncoder passwordEncoder,
-                         OrderMapper orderMapper,
-                         OrderRepository orderRepository){
+    public UserService(UserRepository userRepository,
+                       UserMapper userMapper,
+                       PasswordEncoder passwordEncoder,
+                       OrderMapper orderMapper,
+                       OrderRepository orderRepository,
+                       JwtUtil jwtUtil){
         this.userMapper = userMapper;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.orderMapper= orderMapper;
         this.orderRepository = orderRepository;
+        this.jwtUtil = jwtUtil;
     }
 
-    public UserResponseDTO registerUser(UserRegistrationDTO userRegistrationDTO){
+    public AuthResponseDTO registerUser(UserRegistrationDTO userRegistrationDTO){
         if(userRepository.findByEmail(userRegistrationDTO.getEmail()).isPresent()){
             throw new IllegalArgumentException("Email already registered");
         }
@@ -53,10 +59,19 @@ public class UserService {
         user.setRole(Role.CUSTOMER);
 
         User saved = userRepository.save(user);
-        return userMapper.toDto(saved);
+        
+        String accessToken = jwtUtil.generateToken(saved.getEmail(), saved.getId(), saved.getRole());
+        String refreshToken = jwtUtil.generateRefreshToken(saved.getEmail());
+        
+        return AuthResponseDTO.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .expiresIn(86400000L) // 24 hours
+                .user(userMapper.toDto(saved))
+                .build();
     }
 
-    public UserResponseDTO loginUser(LoginRequestDTO loginRequestDTO){
+    public AuthResponseDTO loginUser(LoginRequestDTO loginRequestDTO){
         Optional<User> user =  userRepository.findByEmail(loginRequestDTO.getEmail());
         if(user.isEmpty()){
             throw new IllegalArgumentException("Invalid credentials");
@@ -64,7 +79,17 @@ public class UserService {
         if(!passwordEncoder.matches(loginRequestDTO.getPassword(),user.get().getPassword())){
             throw new IllegalArgumentException("Invalid credentials");
         }
-        return userMapper.toDto(user.get());
+        
+        User userEntity = user.get();
+        String accessToken = jwtUtil.generateToken(userEntity.getEmail(), userEntity.getId(), userEntity.getRole());
+        String refreshToken = jwtUtil.generateRefreshToken(userEntity.getEmail());
+        
+        return AuthResponseDTO.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .expiresIn(86400000L) // 24 hours
+                .user(userMapper.toDto(userEntity))
+                .build();
     }
     public void setUserBannedStatus(Long userId, boolean banned) {
         User user = userRepository.findById(userId).orElseThrow();
@@ -92,5 +117,29 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
         return userMapper.toDto(user);
+    }
+
+    public AuthResponseDTO refreshToken(RefreshTokenRequestDTO refreshTokenRequest) {
+        try {
+            String email = jwtUtil.extractEmail(refreshTokenRequest.getRefreshToken());
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+            
+            if (user.isBanned()) {
+                throw new IllegalArgumentException("User is banned");
+            }
+            
+            String newAccessToken = jwtUtil.generateToken(user.getEmail(), user.getId(), user.getRole());
+            String newRefreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+            
+            return AuthResponseDTO.builder()
+                    .accessToken(newAccessToken)
+                    .refreshToken(newRefreshToken)
+                    .expiresIn(86400000L) // 24 hours
+                    .user(userMapper.toDto(user))
+                    .build();
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid refresh token");
+        }
     }
 }

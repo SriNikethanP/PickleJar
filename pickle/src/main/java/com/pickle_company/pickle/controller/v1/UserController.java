@@ -3,6 +3,7 @@ package com.pickle_company.pickle.controller.v1;
 import com.pickle_company.pickle.dto.UserResponseDTO;
 import com.pickle_company.pickle.dto.OrderDTO;
 import com.pickle_company.pickle.service.UserService;
+import com.pickle_company.pickle.util.SecurityUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -30,5 +31,25 @@ public class UserController {
     @GetMapping("/{id}/orders")
     public List<OrderDTO> getUserOrders(@PathVariable Long id) {
         return userService.getUserOrders(id);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponseDTO> getCurrentUser() {
+        Long userId = SecurityUtil.getCurrentUserId();
+        if (userId == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        UserResponseDTO userDTO = userService.getUserById(userId);
+        return ResponseEntity.ok(userDTO);
+    }
+
+    @GetMapping("/me/orders")
+    public ResponseEntity<List<OrderDTO>> getCurrentUserOrders() {
+        Long userId = SecurityUtil.getCurrentUserId();
+        if (userId == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        List<OrderDTO> orders = userService.getUserOrders(userId);
+        return ResponseEntity.ok(orders);
     }
 }

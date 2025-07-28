@@ -1,17 +1,23 @@
 package com.pickle_company.pickle.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+    
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -22,21 +28,23 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(authz -> authz
                 // Public endpoints
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/api/v1/products/**").permitAll()
                 .requestMatchers("/api/v1/categories/**").permitAll()
                 .requestMatchers("/api/v1/collections/**").permitAll()
-                .requestMatchers("/api/v1/users/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
-                // Admin endpoints require authentication
-                .requestMatchers("/api/v1/admin/**").permitAll()
-                .requestMatchers("/api/v1/cart/**").permitAll()
-                .requestMatchers("/api/v1/orders/**").permitAll()
-                .requestMatchers("/api/v1/wishlist/**").permitAll()
-                .requestMatchers("/api/v1/account/**").permitAll()
+                // Protected endpoints
+                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/v1/cart/**").hasRole("CUSTOMER")
+                .requestMatchers("/api/v1/orders/**").hasRole("CUSTOMER")
+                .requestMatchers("/api/v1/wishlist/**").hasRole("CUSTOMER")
+                .requestMatchers("/api/v1/account/**").hasRole("CUSTOMER")
+                .requestMatchers("/api/v1/users/**").hasRole("CUSTOMER")
                 // Allow all other requests for now (you can restrict this later)
                 .anyRequest().permitAll()
             )

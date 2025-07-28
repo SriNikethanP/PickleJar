@@ -1,5 +1,6 @@
 package com.pickle_company.pickle.mapper;
 
+import com.pickle_company.pickle.dto.ProductResponseDTO;
 import com.pickle_company.pickle.dto.WishlistDTO;
 import com.pickle_company.pickle.entity.Wishlist;
 import org.springframework.stereotype.Component;
@@ -16,10 +17,16 @@ public class WishlistMapper {
         
         return WishlistDTO.builder()
                 .wishlistId(wishlist.getId())
-                .userId(wishlist.getUser() != null ? wishlist.getUser().getId() : null)
-                .productIds(wishlist.getProducts() != null ? 
+                .products(wishlist.getProducts() != null ? 
                     wishlist.getProducts().stream()
-                        .map(product -> product.getId())
+                        .map(product -> ProductResponseDTO.builder()
+                            .id(product.getId())
+                            .name(product.getName())
+                            .description(product.getDescription())
+                            .price(product.getPrice())
+                            .imageUrls(product.getImageUrls())
+                            .stock(product.getStock())
+                            .build())
                         .collect(Collectors.toList()) : null)
                 .build();
     }

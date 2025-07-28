@@ -5,6 +5,7 @@ import com.pickle_company.pickle.dto.CheckoutResponseDTO;
 import com.pickle_company.pickle.dto.UpdateCartItemRequestDTO;
 import com.pickle_company.pickle.entity.AssignCartRequest;
 import com.pickle_company.pickle.service.CartService;
+import com.pickle_company.pickle.util.SecurityUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,23 +19,40 @@ public class CartController {
     }
 
     @GetMapping
-    public ResponseEntity<CartResponseDTO> getUserCart(@RequestParam Long userId) {
+    public ResponseEntity<CartResponseDTO> getUserCart() {
+        Long userId = SecurityUtil.getCurrentUserId();
+        if (userId == null) {
+            return ResponseEntity.badRequest().build();
+        }
         CartResponseDTO cartDTO = cartService.getCartByUserId(userId);
         return ResponseEntity.ok(cartDTO);
     }
+    
     @PutMapping("/item")
-    public ResponseEntity<CartResponseDTO> updateItem(
-            @RequestParam Long userId, @RequestBody UpdateCartItemRequestDTO dto) {
+    public ResponseEntity<CartResponseDTO> updateItem(@RequestBody UpdateCartItemRequestDTO dto) {
+        Long userId = SecurityUtil.getCurrentUserId();
+        if (userId == null) {
+            return ResponseEntity.badRequest().build();
+        }
         return ResponseEntity.ok(cartService.updateItem(userId, dto));
     }
+    
     @DeleteMapping("/item")
-    public ResponseEntity<CartResponseDTO> removeItem(
-            @RequestParam Long userId, @RequestParam Long cartItemId) {
+    public ResponseEntity<CartResponseDTO> removeItem(@RequestParam Long cartItemId) {
+        Long userId = SecurityUtil.getCurrentUserId();
+        if (userId == null) {
+            return ResponseEntity.badRequest().build();
+        }
         return ResponseEntity.ok(cartService.removeItem(userId, cartItemId));
     }
+    
     // Checkout
     @PostMapping("/checkout")
-    public ResponseEntity<CheckoutResponseDTO> checkout(@RequestParam Long userId) {
+    public ResponseEntity<CheckoutResponseDTO> checkout() {
+        Long userId = SecurityUtil.getCurrentUserId();
+        if (userId == null) {
+            return ResponseEntity.badRequest().build();
+        }
         return ResponseEntity.ok(cartService.checkout(userId));
     }
 
