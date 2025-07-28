@@ -3,7 +3,7 @@ version: "3.8"
 services:
   # MySQL Database
   mysql:
-    image: mysql:8.0
+    image: mysql:8.3
     container_name: pickle-mysql
     restart: unless-stopped
     environment:
@@ -11,48 +11,72 @@ services:
       MYSQL_DATABASE: pickle
       MYSQL_USER: root
       MYSQL_PASSWORD: test
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./docker/mysql/fix-schema.sql:/docker-entrypoint-initdb.d/fix-schema.sql
     networks:
       - pickle-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test:
+        ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ptest"]
       timeout: 20s
       retries: 10
+      interval: 30s
+      start_period: 40s
+    command: --default-authentication-plugin=mysql_native_password
 
   # Spring Boot Application
   backend:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: pickle-backend
     restart: unless-stopped
     ports:
       - "8080:8080"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/pickle?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/pickle?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: test
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_JPA_SHOW_SQL: false
       SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.MySQLDialect
+      SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: true
+      # JWT Configuration
+      JWT_SECRET: your-secret-key-here-make-it-very-long-and-secure-for-production
+      JWT_EXPIRATION: 86400000
+      JWT_ISSUER: pickle-company
+      JWT_AUDIENCE: pickle-users
+      # File Upload Configuration
+      SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE: 10MB
+      SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: 10MB
+      # Logging
+      LOGGING_LEVEL_COM_PICKLE_COMPANY_PICKLE: INFO
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: DEBUG
+    volumes:
+      - uploads_data:/app/uploads
     depends_on:
       mysql:
         condition: service_healthy
     networks:
       - pickle-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      test:
+        ["CMD", "curl", "-f", "http://localhost:8080/api/v1/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 60s
 
-  # Redis for caching (optional)
+  # Redis for caching and session management
   redis:
-    image: redis:7-alpine
+    image: redis:7.2-alpine
     container_name: pickle-redis
     restart: unless-stopped
     ports:
@@ -61,11 +85,34 @@ services:
       - redis_data:/data
     networks:
       - pickle-network
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Adminer for database management (optional)
+  adminer:
+    image: adminer:4.8.1
+    container_name: pickle-adminer
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: mysql
+    networks:
+      - pickle-network
+    depends_on:
+      - mysql
 
 volumes:
   mysql_data:
+    driver: local
   redis_data:
+    driver: local
+  uploads_data:
+    driver: local
 
 networks:
   pickle-network:
