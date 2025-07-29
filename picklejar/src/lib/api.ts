@@ -4,6 +4,7 @@ const API_BASE_URL =
 class ApiClient {
   private async getAuthHeaders(): Promise<HeadersInit> {
     const token = localStorage.getItem("accessToken");
+    console.log("Auth token:", token ? "Present" : "Missing");
     return {
       "Content-Type": "application/json",
       ...(token && { Authorization: `Bearer ${token}` }),
@@ -43,6 +44,12 @@ class ApiClient {
     const url = `${API_BASE_URL}${endpoint}`;
     const headers = await this.getAuthHeaders();
 
+    console.log(`Making ${options.method || "GET"} request to: ${url}`);
+    console.log("Request headers:", headers);
+    if (options.body) {
+      console.log("Request body:", options.body);
+    }
+
     let response = await fetch(url, {
       ...options,
       headers: {
@@ -50,6 +57,12 @@ class ApiClient {
         ...options.headers,
       },
     });
+
+    console.log(`Response status: ${response.status}`);
+    console.log(
+      "Response headers:",
+      Object.fromEntries(response.headers.entries())
+    );
 
     // If 401, try to refresh token and retry once
     if (response.status === 401) {
@@ -67,10 +80,47 @@ class ApiClient {
     }
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(
-        errorData.message || `HTTP error! status: ${response.status}`
-      );
+      let errorMessage = `HTTP error! status: ${response.status}`;
+
+      // Provide more specific error messages based on status code
+      switch (response.status) {
+        case 401:
+          errorMessage = "Authentication required. Please log in.";
+          break;
+        case 403:
+          errorMessage =
+            "Access denied. You don't have permission to perform this action.";
+          break;
+        case 404:
+          errorMessage = "Resource not found.";
+          break;
+        case 500:
+          errorMessage = "Internal server error. Please try again later.";
+          break;
+        default:
+          errorMessage = `HTTP error! status: ${response.status}`;
+      }
+
+      try {
+        const errorData = await response.json();
+        console.log("Error response JSON:", errorData);
+        errorMessage = errorData.message || errorMessage;
+      } catch (parseError) {
+        console.log("Failed to parse error response as JSON:", parseError);
+        // If response is not JSON, try to get text content
+        try {
+          const textContent = await response.text();
+          console.log("Error response text:", textContent);
+          if (textContent && textContent.trim()) {
+            errorMessage = textContent;
+          }
+        } catch (textError) {
+          console.log("Failed to get error response text:", textError);
+          // If all else fails, use the default error message
+        }
+      }
+      console.log("Final error message:", errorMessage);
+      throw new Error(errorMessage);
     }
 
     return response.json();

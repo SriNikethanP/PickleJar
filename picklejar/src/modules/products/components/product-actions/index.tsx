@@ -49,8 +49,9 @@ export default function ProductActions({
       if (!success) {
         throw new Error("Failed to add to cart");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to add to cart:", err);
+      // The error toast is already handled in the cart context
     } finally {
       setIsAdding(false);
     }

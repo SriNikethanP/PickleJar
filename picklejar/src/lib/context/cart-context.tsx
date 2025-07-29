@@ -86,6 +86,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
       return false;
     } catch (error) {
       console.error("Error adding to cart:", error);
+      // The error toast is already handled in the addToCart function
       return false;
     }
   };

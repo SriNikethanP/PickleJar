@@ -1,5 +1,6 @@
 package com.pickle_company.pickle.controller.v1;
 
+import com.pickle_company.pickle.dto.AddToCartRequestDTO;
 import com.pickle_company.pickle.dto.CartResponseDTO;
 import com.pickle_company.pickle.dto.CheckoutResponseDTO;
 import com.pickle_company.pickle.dto.UpdateCartItemRequestDTO;
@@ -25,6 +26,16 @@ public class CartController {
             return ResponseEntity.badRequest().build();
         }
         CartResponseDTO cartDTO = cartService.getCartByUserId(userId);
+        return ResponseEntity.ok(cartDTO);
+    }
+    
+    @PostMapping
+    public ResponseEntity<CartResponseDTO> addToCart(@RequestBody AddToCartRequestDTO request) {
+        Long userId = SecurityUtil.getCurrentUserId();
+        if (userId == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        CartResponseDTO cartDTO = cartService.addToCart(userId, request);
         return ResponseEntity.ok(cartDTO);
     }
     
