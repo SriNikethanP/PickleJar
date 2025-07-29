@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import { Button } from "@medusajs/ui"
+import { Button } from "@medusajs/ui";
 
-import OrderCard from "../order-card"
-import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { HttpTypes } from "@medusajs/types"
+import OrderCard from "../order-card";
+import LocalizedClientLink from "@modules/common/components/localized-client-link";
+import { CustomOrder } from "@lib/data/orders";
 
-const OrderOverview = ({ orders }: { orders: HttpTypes.StoreOrder[] }) => {
+const OrderOverview = ({ orders }: { orders: CustomOrder[] }) => {
   if (orders?.length) {
     return (
       <div className="flex flex-col gap-y-8 w-full">
@@ -19,7 +19,7 @@ const OrderOverview = ({ orders }: { orders: HttpTypes.StoreOrder[] }) => {
           </div>
         ))}
       </div>
-    )
+    );
   }
 
   return (
@@ -39,7 +39,7 @@ const OrderOverview = ({ orders }: { orders: HttpTypes.StoreOrder[] }) => {
         </LocalizedClientLink>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default OrderOverview
+export default OrderOverview;

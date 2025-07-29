@@ -6,9 +6,10 @@ import { useState, useEffect } from "react";
 import OrderOverview from "@modules/account/components/order-overview";
 import Divider from "@modules/common/components/divider";
 import { apiClient } from "@lib/api";
+import { CustomOrder } from "@lib/data/orders";
 
-// Transform backend OrderDTO to frontend StoreOrder format
-const transformOrderData = (backendOrder: any) => {
+// Transform backend OrderDTO to frontend CustomOrder format
+const transformOrderData = (backendOrder: any): CustomOrder => {
   console.log("Transforming order:", backendOrder);
 
   return {
@@ -51,7 +52,7 @@ const transformOrderData = (backendOrder: any) => {
 export default function Orders() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
-  const [orders, setOrders] = useState<any[] | null>(null);
+  const [orders, setOrders] = useState<CustomOrder[] | null>(null);
   const [ordersLoading, setOrdersLoading] = useState(true);
 
   // Show loading state while checking authentication

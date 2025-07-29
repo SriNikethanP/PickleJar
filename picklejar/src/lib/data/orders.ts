@@ -3,6 +3,42 @@
 import axios from "axios";
 import { getAuthHeaders } from "./cookies";
 
+// Custom order types that match our backend structure
+export interface CustomProduct {
+  id: number;
+  name: string;
+  description: string;
+  imageUrls: string[];
+  price: number;
+  stock: number;
+  categoryName: string;
+  averageRating: number;
+}
+
+export interface CustomOrderItem {
+  id: number;
+  product: CustomProduct;
+  quantity: number;
+  priceAtOrder: number;
+  title?: string;
+  thumbnail?: string;
+}
+
+export interface CustomOrder {
+  id: number;
+  display_id: number;
+  total: number;
+  currency_code: string;
+  created_at: string;
+  items: CustomOrderItem[];
+  status: string;
+  payment_method: string;
+  shipping_address: any;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+}
+
 const api = axios.create({
   baseURL:
     process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "http://localhost:8080/api/v1",

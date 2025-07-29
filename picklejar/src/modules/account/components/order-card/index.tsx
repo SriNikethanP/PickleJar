@@ -1,13 +1,12 @@
-import { Button } from "@medusajs/ui";
+// import { Button } from "@medusajs/ui";
 import { useMemo } from "react";
 
 import Thumbnail from "@modules/products/components/thumbnail";
-import LocalizedClientLink from "@modules/common/components/localized-client-link";
 import { convertToLocale } from "@lib/util/money";
-import { HttpTypes } from "@medusajs/types";
+import { CustomOrder } from "@lib/data/orders";
 
 type OrderCardProps = {
-  order: HttpTypes.StoreOrder;
+  order: CustomOrder;
 };
 
 const OrderCard = ({ order }: OrderCardProps) => {
@@ -64,7 +63,7 @@ const OrderCard = ({ order }: OrderCardProps) => {
               data-testid="order-item"
             >
               <Thumbnail
-                thumbnail={i.thumbnail}
+                thumbnail={i.thumbnail || i.product?.imageUrls?.[0]}
                 images={
                   i.product?.imageUrls?.map((url: string) => ({ url })) || []
                 }
@@ -75,7 +74,7 @@ const OrderCard = ({ order }: OrderCardProps) => {
                   className="text-ui-fg-base font-semibold"
                   data-testid="item-title"
                 >
-                  {i.title || "Unknown Product"}
+                  {i.title || i.product?.name || "Unknown Product"}
                 </span>
                 <span className="ml-2">x</span>
                 <span data-testid="item-quantity">{i.quantity || 0}</span>
@@ -92,13 +91,13 @@ const OrderCard = ({ order }: OrderCardProps) => {
           </div>
         )}
       </div>
-      <div className="flex justify-end">
+      {/* <div className="flex justify-end">
         <LocalizedClientLink href={`/account/orders/details/${order.id}`}>
           <Button data-testid="order-details-link" variant="secondary">
             See details
           </Button>
         </LocalizedClientLink>
-      </div>
+      </div> */}
     </div>
   );
 };
