@@ -5,7 +5,7 @@ import com.pickle_company.pickle.dto.CartResponseDTO;
 import com.pickle_company.pickle.dto.CheckoutResponseDTO;
 import com.pickle_company.pickle.dto.UpdateCartItemRequestDTO;
 import com.pickle_company.pickle.dto.CODOrderRequestDTO;
-import com.pickle_company.pickle.entity.AssignCartRequest;
+import com.pickle_company.pickle.dto.AssignCartRequestDTO;
 import com.pickle_company.pickle.service.CartService;
 import com.pickle_company.pickle.util.SecurityUtil;
 import org.springframework.http.ResponseEntity;
@@ -68,6 +68,20 @@ public class CartController {
         return ResponseEntity.ok(cartService.removeItem(userId, cartItemId));
     }
     
+    @DeleteMapping
+    public ResponseEntity<Void> clearCart() {
+        Long userId = SecurityUtil.getCurrentUserId();
+        if (userId == null) {
+            return ResponseEntity.status(401).build();
+        }
+        try {
+            cartService.clearCart(userId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+    
     // Checkout
     @PostMapping("/checkout")
     public ResponseEntity<CheckoutResponseDTO> checkout() {
@@ -108,7 +122,7 @@ public class CartController {
     }
 
     @PutMapping("/assign")
-    public ResponseEntity<CartResponseDTO> assignCartToUser(@RequestBody AssignCartRequest request) {
+    public ResponseEntity<CartResponseDTO> assignCartToUser(@RequestBody AssignCartRequestDTO request) {
         CartResponseDTO cartDTO = cartService.assignCartToUser(request.getCartId(), request.getCustomerId());
         return ResponseEntity.ok(cartDTO);
     }

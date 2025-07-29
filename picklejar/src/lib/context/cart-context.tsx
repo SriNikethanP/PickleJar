@@ -7,6 +7,7 @@ import {
   addToCart,
   updateCartItem,
   removeCartItem,
+  clearCart,
   Cart,
 } from "@lib/client-cart";
 
@@ -16,6 +17,7 @@ interface CartContextType {
   addToCart: (productId: number, quantity: number) => Promise<boolean>;
   updateCartItem: (cartItemId: number, quantity: number) => Promise<boolean>;
   removeCartItem: (cartItemId: number) => Promise<boolean>;
+  clearCart: () => Promise<boolean>;
   refreshCart: () => Promise<void>;
   cartItemCount: number;
 }
@@ -132,6 +134,25 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const handleClearCart = async (): Promise<boolean> => {
+    if (!user) {
+      console.error("User not authenticated");
+      return false;
+    }
+
+    try {
+      const success = await clearCart();
+      if (success) {
+        setCart(null);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error clearing cart:", error);
+      return false;
+    }
+  };
+
   const refreshCart = async () => {
     await fetchCart();
   };
@@ -142,6 +163,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     addToCart: handleAddToCart,
     updateCartItem: handleUpdateCartItem,
     removeCartItem: handleRemoveCartItem,
+    clearCart: handleClearCart,
     refreshCart,
     cartItemCount,
   };

@@ -92,10 +92,10 @@ export const removeCartItem = async (
   }
 };
 
-// Clear entire cart for current authenticated user
+// Clear cart for current authenticated user
 export const clearCart = async (): Promise<boolean> => {
   try {
-    await apiClient.delete("/cart/clear");
+    await apiClient.delete("/cart");
     toast.success("Cart cleared successfully!");
     return true;
   } catch (error: any) {
@@ -130,28 +130,21 @@ export const codCheckout = async (userDetails: any) => {
     // Check if user is authenticated
     const token = localStorage.getItem("accessToken");
     if (!token) {
-      throw new Error("User not authenticated. Please log in first.");
+      throw new Error("Authentication required");
     }
 
-    console.log("COD Checkout - Making request to /cart/checkout/cod");
     const result = await apiClient.post("/cart/checkout/cod", userDetails);
-    console.log("COD Checkout - Success response:", result);
-    toast.success("COD order placed successfully!");
+    console.log("COD Checkout result:", result);
+
+    // Clear cart after successful order placement
+    if (result) {
+      await clearCart();
+    }
+
     return result;
   } catch (error: any) {
-    console.error("Error during COD checkout:", error);
-    console.error("Error details:", {
-      message: error.message,
-      status: error.response?.status,
-      data: error.response?.data,
-    });
-
-    if (error.message.includes("not authenticated")) {
-      toast.error("Please log in to complete your order");
-    } else {
-      toast.error(error.message || "COD checkout failed");
-    }
-    return null;
+    console.error("COD Checkout error:", error);
+    throw error;
   }
 };
 

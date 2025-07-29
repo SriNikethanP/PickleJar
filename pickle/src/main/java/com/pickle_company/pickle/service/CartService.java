@@ -155,6 +155,18 @@ public class CartService {
         return cartMapper.toDto(savedCart);
     }
 
+    public void clearCart(Long userId) {
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("No cart for user"));
+        
+        // Delete all cart items
+        cartItemRepository.deleteAll(cart.getItems());
+        
+        // Clear the cart items list
+        cart.getItems().clear();
+        cartRepository.save(cart);
+    }
+
     @Transactional
     public CheckoutResponseDTO codCheckout(Long userId, CODOrderRequestDTO request) {
         Cart cart = cartRepository.findByUserId(userId)
