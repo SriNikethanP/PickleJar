@@ -4,7 +4,11 @@ const API_BASE_URL =
 class ApiClient {
   private async getAuthHeaders(): Promise<HeadersInit> {
     const token = localStorage.getItem("accessToken");
-    console.log("Auth token:", token ? "Present" : "Missing");
+    console.log("API Client - Auth token check:", {
+      token: token ? "Present" : "Missing",
+      tokenLength: token ? token.length : 0,
+      tokenPreview: token ? `${token.substring(0, 20)}...` : "None",
+    });
     return {
       "Content-Type": "application/json",
       ...(token && { Authorization: `Bearer ${token}` }),
@@ -44,10 +48,12 @@ class ApiClient {
     const url = `${API_BASE_URL}${endpoint}`;
     const headers = await this.getAuthHeaders();
 
-    console.log(`Making ${options.method || "GET"} request to: ${url}`);
-    console.log("Request headers:", headers);
+    console.log(
+      `API Client - Making ${options.method || "GET"} request to: ${url}`
+    );
+    console.log("API Client - Request headers:", headers);
     if (options.body) {
-      console.log("Request body:", options.body);
+      console.log("API Client - Request body:", options.body);
     }
 
     let response = await fetch(url, {
@@ -58,16 +64,18 @@ class ApiClient {
       },
     });
 
-    console.log(`Response status: ${response.status}`);
+    console.log(`API Client - Response status: ${response.status}`);
     console.log(
-      "Response headers:",
+      "API Client - Response headers:",
       Object.fromEntries(response.headers.entries())
     );
 
     // If 401, try to refresh token and retry once
     if (response.status === 401) {
+      console.log("API Client - 401 received, attempting token refresh");
       const refreshSuccess = await this.refreshTokenIfNeeded();
       if (refreshSuccess) {
+        console.log("API Client - Token refresh successful, retrying request");
         const newHeaders = await this.getAuthHeaders();
         response = await fetch(url, {
           ...options,
@@ -76,6 +84,9 @@ class ApiClient {
             ...options.headers,
           },
         });
+        console.log(`API Client - Retry response status: ${response.status}`);
+      } else {
+        console.log("API Client - Token refresh failed");
       }
     }
 
@@ -103,23 +114,29 @@ class ApiClient {
 
       try {
         const errorData = await response.json();
-        console.log("Error response JSON:", errorData);
+        console.log("API Client - Error response JSON:", errorData);
         errorMessage = errorData.message || errorMessage;
       } catch (parseError) {
-        console.log("Failed to parse error response as JSON:", parseError);
+        console.log(
+          "API Client - Failed to parse error response as JSON:",
+          parseError
+        );
         // If response is not JSON, try to get text content
         try {
           const textContent = await response.text();
-          console.log("Error response text:", textContent);
+          console.log("API Client - Error response text:", textContent);
           if (textContent && textContent.trim()) {
             errorMessage = textContent;
           }
         } catch (textError) {
-          console.log("Failed to get error response text:", textError);
+          console.log(
+            "API Client - Failed to get error response text:",
+            textError
+          );
           // If all else fails, use the default error message
         }
       }
-      console.log("Final error message:", errorMessage);
+      console.log("API Client - Final error message:", errorMessage);
       throw new Error(errorMessage);
     }
 

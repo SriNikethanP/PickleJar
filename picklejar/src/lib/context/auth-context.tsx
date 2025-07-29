@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { apiClient } from "@lib/api";
 
 export interface User {
   id: number;
@@ -59,42 +60,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const token = localStorage.getItem("accessToken");
 
       if (!token) {
+        console.log("No access token found in localStorage");
         setIsLoading(false);
         return;
       }
 
-      console.log(
-        "Checking auth status with token:",
-        token ? "Present" : "Missing"
-      );
-
-      // Verify token by calling the /me endpoint
-      const response = await fetch(`${API_BASE_URL}/users/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+      console.log("Checking auth status with token:", {
+        token: token ? "Present" : "Missing",
+        tokenLength: token ? token.length : 0,
+        tokenPreview: token ? `${token.substring(0, 20)}...` : "None",
       });
 
-      console.log("Auth status response:", response.status);
-
-      if (response.ok) {
-        const userData = await response.json();
-        console.log("User data received:", userData);
-        setUser(userData);
-      } else {
-        console.log("Token validation failed, attempting refresh");
-        // Token is invalid, try to refresh
-        const refreshSuccess = await refreshToken();
-        if (!refreshSuccess) {
-          console.log("Token refresh failed, clearing auth data");
-          // Refresh failed, clear everything
-          localStorage.removeItem("accessToken");
-          localStorage.removeItem("refreshToken");
-          localStorage.removeItem("user");
-          setUser(null);
-        }
-      }
+      // Use apiClient to verify token by calling the /me endpoint
+      // This will handle token refresh automatically if needed
+      const userData = await apiClient.get<User>("/users/me");
+      console.log("User data received:", userData);
+      setUser(userData);
     } catch (error) {
       console.error("Error checking auth status:", error);
       // Clear auth data on error
@@ -124,11 +105,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (response.ok) {
         const data = await response.json();
         console.log("Login successful, user data:", data);
+        console.log("Token details:", {
+          accessToken: data.accessToken ? "Present" : "Missing",
+          accessTokenLength: data.accessToken ? data.accessToken.length : 0,
+          refreshToken: data.refreshToken ? "Present" : "Missing",
+          refreshTokenLength: data.refreshToken ? data.refreshToken.length : 0,
+        });
 
         // Store tokens and user data
         localStorage.setItem("accessToken", data.accessToken);
         localStorage.setItem("refreshToken", data.refreshToken);
         localStorage.setItem("user", JSON.stringify(data.user));
+
+        // Verify tokens were stored
+        const storedToken = localStorage.getItem("accessToken");
+        console.log("Stored token verification:", {
+          stored: storedToken ? "Present" : "Missing",
+          length: storedToken ? storedToken.length : 0,
+          matches: storedToken === data.accessToken,
+        });
 
         setUser(data.user);
         toast.success("Login successful!");
@@ -177,11 +172,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (response.ok) {
         const data = await response.json();
         console.log("Registration successful, user data:", data);
+        console.log("Token details:", {
+          accessToken: data.accessToken ? "Present" : "Missing",
+          accessTokenLength: data.accessToken ? data.accessToken.length : 0,
+          refreshToken: data.refreshToken ? "Present" : "Missing",
+          refreshTokenLength: data.refreshToken ? data.refreshToken.length : 0,
+        });
 
         // Store tokens and user data
         localStorage.setItem("accessToken", data.accessToken);
         localStorage.setItem("refreshToken", data.refreshToken);
         localStorage.setItem("user", JSON.stringify(data.user));
+
+        // Verify tokens were stored
+        const storedToken = localStorage.getItem("accessToken");
+        console.log("Stored token verification:", {
+          stored: storedToken ? "Present" : "Missing",
+          length: storedToken ? storedToken.length : 0,
+          matches: storedToken === data.accessToken,
+        });
 
         setUser(data.user);
         toast.success("Registration successful!");
