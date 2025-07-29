@@ -1,8 +1,7 @@
 "use server";
 
 import axios from "axios";
-import { getAuthHeaders, getCacheOptions } from "./cookies";
-import { HttpTypes } from "@medusajs/types";
+import { getAuthHeaders } from "./cookies";
 
 const api = axios.create({
   baseURL:

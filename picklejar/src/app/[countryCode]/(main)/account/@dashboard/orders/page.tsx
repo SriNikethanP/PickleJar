@@ -7,6 +7,47 @@ import OrderOverview from "@modules/account/components/order-overview";
 import Divider from "@modules/common/components/divider";
 import { apiClient } from "@lib/api";
 
+// Transform backend OrderDTO to frontend StoreOrder format
+const transformOrderData = (backendOrder: any) => {
+  console.log("Transforming order:", backendOrder);
+
+  return {
+    id: backendOrder.id,
+    display_id: backendOrder.id, // Use id as display_id
+    total: backendOrder.totalAmount,
+    currency_code: "INR", // Default to INR for now
+    created_at: backendOrder.placedAt,
+    items:
+      backendOrder.items?.map((item: any) => {
+        console.log("Transforming order item:", item);
+        return {
+          id: item.id,
+          title: item.product?.name || "Unknown Product",
+          quantity: item.quantity,
+          thumbnail: item.product?.imageUrls?.[0] || null,
+          price: item.priceAtOrder,
+          // Add more product details if needed
+          product: {
+            id: item.product?.id,
+            name: item.product?.name,
+            description: item.product?.description,
+            imageUrls: item.product?.imageUrls || [],
+            price: item.product?.price,
+            stock: item.product?.stock,
+            categoryName: item.product?.categoryName,
+            averageRating: item.product?.averageRating,
+          },
+        };
+      }) || [],
+    status: backendOrder.status || "PLACED",
+    payment_method: backendOrder.paymentMethod,
+    shipping_address: backendOrder.shippingAddress,
+    customer_name: backendOrder.customerName,
+    customer_email: backendOrder.customerEmail,
+    customer_phone: backendOrder.customerPhone,
+  };
+};
+
 export default function Orders() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
@@ -34,7 +75,17 @@ export default function Orders() {
       try {
         setOrdersLoading(true);
         const ordersData = await apiClient.get<any[]>("/users/me/orders");
-        setOrders(ordersData);
+        console.log("Orders data received:", ordersData);
+
+        // Validate that ordersData is an array and transform the data
+        if (Array.isArray(ordersData)) {
+          const transformedOrders = ordersData.map(transformOrderData);
+          console.log("Transformed orders:", transformedOrders);
+          setOrders(transformedOrders);
+        } else {
+          console.warn("Orders data is not an array:", ordersData);
+          setOrders([]);
+        }
       } catch (error) {
         console.error("Error fetching orders:", error);
         setOrders([]);
