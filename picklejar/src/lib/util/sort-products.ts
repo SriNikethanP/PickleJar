@@ -6,32 +6,78 @@ interface MinPricedProduct extends Product {
 }
 
 /**
- * Helper function to sort products by price until the store API supports sorting by price
+ * Helper function to sort products by price and creation order
  * @param products
  * @param sortBy
- * @returns products sorted by price
+ * @returns products sorted according to the specified criteria
  */
 export function sortProducts(
   products: Product[],
   sortBy: SortOptions
 ): Product[] {
-  let sortedProducts = products as MinPricedProduct[];
+  console.log("Sorting products:", {
+    totalProducts: products.length,
+    sortBy,
+    sampleProducts: products
+      .slice(0, 3)
+      .map((p) => ({ id: p.id, name: p.name, price: p.price })),
+  });
 
-  if (["price_asc", "price_desc"].includes(sortBy)) {
-    // Precompute the minimum price for each product
-    sortedProducts.forEach((product) => {
-      product._minPrice = product.price;
-    });
+  let sortedProducts = [...products] as MinPricedProduct[];
 
-    // Sort products based on the precomputed minimum prices
-    sortedProducts.sort((a, b) => {
-      const diff = a._minPrice! - b._minPrice!;
-      return sortBy === "price_asc" ? diff : -diff;
-    });
+  switch (sortBy) {
+    case "latest":
+      // Sort by ID in descending order (assuming higher IDs are newer)
+      sortedProducts.sort((a, b) => b.id - a.id);
+      console.log(
+        "Sorted by latest (ID desc):",
+        sortedProducts.slice(0, 3).map((p) => ({ id: p.id, name: p.name }))
+      );
+      break;
+
+    case "price_asc":
+      // Sort by price in ascending order
+      sortedProducts.forEach((product) => {
+        product._minPrice = product.price;
+      });
+      sortedProducts.sort((a, b) => {
+        const diff = a._minPrice! - b._minPrice!;
+        return diff;
+      });
+      console.log(
+        "Sorted by price asc:",
+        sortedProducts
+          .slice(0, 3)
+          .map((p) => ({ id: p.id, name: p.name, price: p.price }))
+      );
+      break;
+
+    case "price_desc":
+      // Sort by price in descending order
+      sortedProducts.forEach((product) => {
+        product._minPrice = product.price;
+      });
+      sortedProducts.sort((a, b) => {
+        const diff = a._minPrice! - b._minPrice!;
+        return -diff;
+      });
+      console.log(
+        "Sorted by price desc:",
+        sortedProducts
+          .slice(0, 3)
+          .map((p) => ({ id: p.id, name: p.name, price: p.price }))
+      );
+      break;
+
+    default:
+      // Default to latest
+      sortedProducts.sort((a, b) => b.id - a.id);
+      console.log(
+        "Default sort (latest):",
+        sortedProducts.slice(0, 3).map((p) => ({ id: p.id, name: p.name }))
+      );
+      break;
   }
-
-  // Product type does not have createdAt/created_at, so we skip created_at sorting
-  // If you add a date field to Product, you can implement date sorting here
 
   return sortedProducts;
 }

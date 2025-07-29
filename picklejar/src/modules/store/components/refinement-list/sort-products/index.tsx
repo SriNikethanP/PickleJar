@@ -30,7 +30,10 @@ const SortProducts = ({
   sortBy,
   setQueryParams,
 }: SortProductsProps) => {
+  console.log("SortProducts - Received sortBy:", sortBy);
+
   const handleChange = (value: SortOptions) => {
+    console.log("SortProducts - handleChange called with:", value);
     setQueryParams("sortBy", value);
   };
 

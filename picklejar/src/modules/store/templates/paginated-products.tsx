@@ -1,8 +1,12 @@
-import { getAllProducts, Product } from "@lib/data/products";
+import { Product } from "@lib/data/products";
+import { getAllProducts, listProductsByCollection } from "@lib/data/products";
 import { getRegion } from "@lib/data/regions";
-import ProductPreview from "@modules/products/components/product-preview";
-import { Pagination } from "@modules/store/components/pagination";
+import { sortProducts } from "@lib/util/sort-products";
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products";
+import { Suspense } from "react";
+
+import ProductPreview from "@modules/products/components/product-preview";
+import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid";
 
 const PRODUCT_LIMIT = 12;
 type Products = Product[];
@@ -10,10 +14,12 @@ export default async function PaginatedProducts({
   sortBy,
   page,
   countryCode,
+  collectionId,
 }: {
   sortBy?: SortOptions;
   page: number;
   countryCode: string;
+  collectionId?: string;
 }) {
   let region = null;
   let products: Product[] = [];
@@ -52,40 +58,39 @@ export default async function PaginatedProducts({
       );
     }
 
-    // Map sortBy to the correct parameters for listProducts
-    let sortByParam: "updatedAt" | "price" = "updatedAt";
-    let order: "asc" | "desc" = "desc";
-
-    switch (sortBy) {
-      case "latest":
-        sortByParam = "updatedAt";
-        order = "desc";
-        break;
-      case "price_asc":
-        sortByParam = "price";
-        order = "asc";
-        break;
-      case "price_desc":
-        sortByParam = "price";
-        order = "desc";
-        break;
-      default:
-        sortByParam = "updatedAt";
-        order = "desc";
+    // Get products based on whether we're filtering by collection or not
+    if (collectionId) {
+      // Get products for specific collection
+      const result = await listProductsByCollection(parseInt(collectionId));
+      products = result || [];
+      count = result.length || 0;
+    } else {
+      // Get all products
+      const result = await getAllProducts();
+      products = result || [];
+      count = result.length || 0;
     }
 
-    const result = await getAllProducts();
+    // Apply sorting using the utility function
+    if (sortBy) {
+      console.log("Applying sorting with:", sortBy);
+      products = sortProducts(products, sortBy);
+    } else {
+      console.log("No sorting applied, using default order");
+    }
 
-    products = result || [];
-    count = result.length || 0;
+    // Apply pagination
+    const startIndex = (page - 1) * PRODUCT_LIMIT;
+    const endIndex = startIndex + PRODUCT_LIMIT;
+    products = products.slice(startIndex, endIndex);
   } catch (error) {
-    console.error("Error fetching products:", error);
+    console.error("Error in PaginatedProducts:", error);
     return (
       <div className="text-center py-16">
         <div className="max-w-md mx-auto">
           <div className="mb-6">
             <svg
-              className="mx-auto h-12 w-12 text-red-400"
+              className="mx-auto h-12 w-12 text-gray-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -109,9 +114,7 @@ export default async function PaginatedProducts({
     );
   }
 
-  const totalPages = Math.ceil(count / PRODUCT_LIMIT);
-
-  if (products.length === 0) {
+  if (!products || products.length === 0) {
     return (
       <div className="text-center py-16">
         <div className="max-w-md mx-auto">
@@ -140,26 +143,14 @@ export default async function PaginatedProducts({
   }
 
   return (
-    <div className="space-y-8">
-      {/* Products Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
-        {products.map((product) => (
+    <div className="space-y-6 z-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {products.map((product: Product) => (
           <div key={product.id} className="group">
-            <ProductPreview product={product} region={region} isFeatured />
+            <ProductPreview product={product} region={region} />
           </div>
         ))}
       </div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex justify-center">
-          <Pagination
-            data-testid="product-pagination"
-            page={page}
-            totalPages={totalPages}
-          />
-        </div>
-      )}
     </div>
   );
 }

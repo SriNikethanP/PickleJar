@@ -12,6 +12,8 @@ type RefinementListProps = {
 }
 
 const RefinementList = ({ sortBy, 'data-testid': dataTestId }: RefinementListProps) => {
+  console.log("RefinementList - Received sortBy:", sortBy);
+  
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -27,7 +29,9 @@ const RefinementList = ({ sortBy, 'data-testid': dataTestId }: RefinementListPro
   )
 
   const setQueryParams = (name: string, value: string) => {
+    console.log("RefinementList - setQueryParams called:", { name, value });
     const query = createQueryString(name, value)
+    console.log("RefinementList - New query string:", query);
     router.push(`${pathname}?${query}`)
   }
 
