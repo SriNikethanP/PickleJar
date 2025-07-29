@@ -1,9 +1,8 @@
-import { login } from "@lib/data/customer";
 import { LOGIN_VIEW } from "@modules/account/templates/login-template";
 import { SubmitButton } from "@modules/checkout/components/submit-button";
 import Input from "@modules/common/components/input";
-import { useActionState } from "react";
-import { useEffect, useState } from "react";
+import { useAuth } from "@lib/context/auth-context";
+import { useState } from "react";
 import { toast } from "sonner";
 
 type Props = {
@@ -26,27 +25,13 @@ const validatePassword = (password: string): string | null => {
 };
 
 const Login = ({ setCurrentView, onSuccessfulLogin }: Props) => {
-  const [message, formAction] = useActionState(login, null);
+  const { login } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  // Handle login messages with toast notifications
-  useEffect(() => {
-    if (message) {
-      if (message === "Login successful") {
-        toast.success("Login successful! Welcome back.");
-        // Call the onSuccessfulLogin callback to redirect
-        if (onSuccessfulLogin) {
-          onSuccessfulLogin();
-        }
-      } else {
-        toast.error(message);
-      }
-    }
-  }, [message, onSuccessfulLogin]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -70,14 +55,29 @@ const Login = ({ setCurrentView, onSuccessfulLogin }: Props) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (formDataObj: FormData) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
     if (!validateForm()) {
       toast.error("Please fix the errors in the form");
       return;
     }
 
-    // If validation passes, proceed with the form action
-    formAction(formDataObj);
+    setIsLoading(true);
+    try {
+      const success = await login(formData.email, formData.password);
+      if (success) {
+        toast.success("Login successful! Welcome back.");
+        if (onSuccessfulLogin) {
+          onSuccessfulLogin();
+        }
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      toast.error("Login failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -89,7 +89,7 @@ const Login = ({ setCurrentView, onSuccessfulLogin }: Props) => {
       <p className="text-center text-base-regular text-ui-fg-base mb-8">
         Sign in to access an enhanced shopping experience.
       </p>
-      <form className="w-full" action={handleSubmit}>
+      <form className="w-full" onSubmit={handleSubmit}>
         <div className="flex flex-col w-full gap-y-2">
           <Input
             label="Email"
@@ -115,8 +115,12 @@ const Login = ({ setCurrentView, onSuccessfulLogin }: Props) => {
             error={errors.password}
           />
         </div>
-        <SubmitButton data-testid="sign-in-button" className="w-full mt-6">
-          Log in
+        <SubmitButton
+          data-testid="sign-in-button"
+          className="w-full mt-6"
+          disabled={isLoading}
+        >
+          {isLoading ? "Signing in..." : "Log in"}
         </SubmitButton>
       </form>
       <span className="text-center text-ui-fg-base text-small-regular mt-6">

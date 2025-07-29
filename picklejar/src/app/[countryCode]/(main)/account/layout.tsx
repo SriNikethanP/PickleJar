@@ -1,7 +1,7 @@
 import { Toaster } from "@medusajs/ui";
 import AccountLayout from "@modules/account/templates/account-layout";
 
-export default async function AccountPageLayout({
+export default function AccountPageLayout({
   dashboard,
   login,
 }: {
@@ -10,7 +10,7 @@ export default async function AccountPageLayout({
 }) {
   return (
     <AccountLayout customer={null}>
-      {dashboard}
+      {login || dashboard}
       <Toaster />
     </AccountLayout>
   );

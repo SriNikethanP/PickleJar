@@ -1,13 +1,12 @@
 "use client";
 
-import { useActionState } from "react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import Input from "@modules/common/components/input";
 import { LOGIN_VIEW } from "@modules/account/templates/login-template";
 import { SubmitButton } from "@modules/checkout/components/submit-button";
 import LocalizedClientLink from "@modules/common/components/localized-client-link";
-import { signup } from "@lib/data/customer";
+import { useAuth } from "@lib/context/auth-context";
 
 type Props = {
   setCurrentView: (view: LOGIN_VIEW) => void;
@@ -56,7 +55,8 @@ const validateConfirmPassword = (
 };
 
 const Register = ({ setCurrentView }: Props) => {
-  const [message, formAction] = useActionState(signup, null);
+  const { register } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     full_name: "",
     email: "",
@@ -65,23 +65,6 @@ const Register = ({ setCurrentView }: Props) => {
     confirm_password: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  // Handle success message and redirect to login
-  useEffect(() => {
-    if (message) {
-      if (message === "Registration successful! Please sign in.") {
-        toast.success("Registration successful! Please sign in.");
-        // Show success message briefly, then redirect to login
-        const timer = setTimeout(() => {
-          setCurrentView(LOGIN_VIEW.SIGN_IN);
-        }, 2000);
-
-        return () => clearTimeout(timer);
-      } else {
-        toast.error(message);
-      }
-    }
-  }, [message, setCurrentView]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -117,14 +100,38 @@ const Register = ({ setCurrentView }: Props) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (formDataObj: FormData) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
     if (!validateForm()) {
       toast.error("Please fix the errors in the form");
       return;
     }
 
-    // If validation passes, proceed with the form action
-    formAction(formDataObj);
+    setIsLoading(true);
+    try {
+      const userData = {
+        fullName: formData.full_name,
+        email: formData.email,
+        mobile: formData.phone,
+        password: formData.password,
+        confirmPassword: formData.confirm_password,
+      };
+
+      const success = await register(userData);
+      if (success) {
+        toast.success("Registration successful! Please sign in.");
+        // Show success message briefly, then redirect to login
+        setTimeout(() => {
+          setCurrentView(LOGIN_VIEW.SIGN_IN);
+        }, 2000);
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      toast.error("Registration failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -139,7 +146,7 @@ const Register = ({ setCurrentView }: Props) => {
         Create your Pickle Jar Member profile, and get access to an enhanced
         shopping experience.
       </p>
-      <form className="w-full flex flex-col" action={handleSubmit}>
+      <form className="w-full flex flex-col" onSubmit={handleSubmit}>
         <div className="flex flex-col w-full gap-y-2">
           <Input
             label="Full name"
@@ -215,8 +222,12 @@ const Register = ({ setCurrentView }: Props) => {
           </LocalizedClientLink>
           .
         </span>
-        <SubmitButton className="w-full mt-6" data-testid="register-button">
-          Join
+        <SubmitButton
+          className="w-full mt-6"
+          data-testid="register-button"
+          disabled={isLoading}
+        >
+          {isLoading ? "Creating Account..." : "Join"}
         </SubmitButton>
       </form>
       <span className="text-center text-ui-fg-base text-small-regular mt-6">

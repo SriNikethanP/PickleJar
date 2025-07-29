@@ -2,11 +2,15 @@
 
 import { useAuth } from "@lib/context/auth-context";
 import { useRouter } from "next/navigation";
-import ProtectedRoute from "@lib/components/ProtectedRoute";
 
 export default function AccountDashboard() {
   const { user, logout } = useAuth();
   const router = useRouter();
+
+  // If user is not authenticated, don't render anything
+  if (!user) {
+    return null;
+  }
 
   const handleLogout = () => {
     logout();
@@ -14,8 +18,7 @@ export default function AccountDashboard() {
   };
 
   return (
-    <ProtectedRoute>
-      <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-lg p-8">
         {/* Header */}
         <div className="border-b border-gray-200 pb-6 mb-8">
@@ -146,6 +149,5 @@ export default function AccountDashboard() {
         </div>
       </div>
     </div>
-    </ProtectedRoute>
   );
 }

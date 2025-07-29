@@ -9,10 +9,10 @@ import {
   ReviewResponse,
 } from "@lib/api/reviews";
 import { Button } from "@lib/components/ui/button";
-import { Textarea } from "@lib/components/ui/textarea";
 import { Input } from "@lib/components/ui/input";
 import { toast } from "sonner";
 import { Star, MessageCircle, ThumbsUp, User, Calendar } from "lucide-react";
+import { Textarea } from "@lib/components/ui/textarea";
 
 interface ProductReviewSystemProps {
   productId: number;

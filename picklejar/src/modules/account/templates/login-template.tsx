@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@lib/context/auth-context";
 import Register from "@modules/account/components/register";
 import Login from "@modules/account/components/login";
 
@@ -11,25 +12,36 @@ export enum LOGIN_VIEW {
 }
 
 const LoginTemplate = () => {
-  const [currentView, setCurrentView] = useState(LOGIN_VIEW.REGISTER);
+  const [currentView, setCurrentView] = useState(LOGIN_VIEW.SIGN_IN);
   const router = useRouter();
+  const { user } = useAuth();
 
-  // Handle successful login redirect
-  const handleSuccessfulLogin = () => {
-    // Redirect to home page
-    router.push("/");
-  };
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      router.push("/");
+    }
+  }, [user, router]);
+
+  // If user is already logged in, don't render anything
+  if (user) {
+    return null;
+  }
 
   return (
-    <div className="w-full flex justify-start px-8 py-8">
-      {currentView === LOGIN_VIEW.SIGN_IN ? (
-        <Login
-          setCurrentView={setCurrentView}
-          onSuccessfulLogin={handleSuccessfulLogin}
-        />
-      ) : (
-        <Register setCurrentView={setCurrentView} />
-      )}
+    <div className="w-full flex justify-center items-center py-12">
+      <div className="max-w-sm w-full">
+        {currentView === LOGIN_VIEW.SIGN_IN ? (
+          <Login
+            setCurrentView={setCurrentView}
+            onSuccessfulLogin={() => {
+              // The useEffect above will handle the redirect
+            }}
+          />
+        ) : (
+          <Register setCurrentView={setCurrentView} />
+        )}
+      </div>
     </div>
   );
 };

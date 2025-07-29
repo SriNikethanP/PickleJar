@@ -56,6 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const checkAuthStatus = async () => {
     try {
       const token = localStorage.getItem("accessToken");
+
       if (!token) {
         setIsLoading(false);
         return;
