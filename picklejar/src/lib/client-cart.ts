@@ -108,12 +108,36 @@ export const checkoutCart = async () => {
 // COD Checkout for current authenticated user
 export const codCheckout = async (userDetails: any) => {
   try {
+    console.log("COD Checkout - userDetails:", userDetails);
+    console.log(
+      "COD Checkout - accessToken:",
+      localStorage.getItem("accessToken")
+    );
+
+    // Check if user is authenticated
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      throw new Error("User not authenticated. Please log in first.");
+    }
+
+    console.log("COD Checkout - Making request to /cart/checkout/cod");
     const result = await apiClient.post("/cart/checkout/cod", userDetails);
+    console.log("COD Checkout - Success response:", result);
     toast.success("COD order placed successfully!");
     return result;
   } catch (error: any) {
     console.error("Error during COD checkout:", error);
-    toast.error(error.message || "COD checkout failed");
+    console.error("Error details:", {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+    });
+
+    if (error.message.includes("not authenticated")) {
+      toast.error("Please log in to complete your order");
+    } else {
+      toast.error(error.message || "COD checkout failed");
+    }
     return null;
   }
 };

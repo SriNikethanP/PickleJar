@@ -27,6 +27,7 @@ export type Cart = {
   id: number;
   user: { id: number; fullName: string; email: string };
   items: CartItem[];
+  customer_id?: number;
 };
 
 // Placeholder: Replace with real session/user logic
@@ -174,10 +175,8 @@ export const retrieveCart = async (): Promise<Cart | null> => {
     return res.data;
   } catch (error: any) {
     console.error("Error retrieving cart:", error);
-    if (error.response?.status === 401 || error.response?.status === 403) {
-      // User is not authenticated, redirect to login
-      throw new Error("Authentication required");
-    }
+    // For any authentication errors, just return null instead of throwing
+    // The client-side components will handle authentication
     return null;
   }
 };

@@ -16,11 +16,7 @@ export const metadata: Metadata = {
 export default async function Profile() {
   let customer = null;
 
-  try {
-    customer = await retrieveCustomer();
-  } catch (error) {
-    console.error("Error fetching customer data:", error);
-  }
+  customer = await retrieveCustomer();
 
   if (!customer) {
     notFound();

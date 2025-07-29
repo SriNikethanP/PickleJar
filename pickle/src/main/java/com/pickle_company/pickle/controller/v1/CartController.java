@@ -81,16 +81,28 @@ public class CartController {
     // COD Checkout
     @PostMapping("/checkout/cod")
     public ResponseEntity<CheckoutResponseDTO> codCheckout(@RequestBody CODOrderRequestDTO request) {
+        System.out.println("COD Checkout endpoint called");
+        System.out.println("Request body: " + request);
+        
         Long userId = SecurityUtil.getCurrentUserId();
+        System.out.println("Current user ID: " + userId);
+        
         if (userId == null) {
+            System.out.println("User ID is null - authentication failed");
             return ResponseEntity.status(401).body(null);
         }
+        
         try {
+            System.out.println("Calling cartService.codCheckout with userId: " + userId);
             CheckoutResponseDTO checkoutDTO = cartService.codCheckout(userId, request);
+            System.out.println("COD checkout successful: " + checkoutDTO);
             return ResponseEntity.ok(checkoutDTO);
         } catch (IllegalArgumentException e) {
+            System.out.println("IllegalArgumentException: " + e.getMessage());
             return ResponseEntity.badRequest().body(null);
         } catch (Exception e) {
+            System.out.println("Exception in COD checkout: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(500).body(null);
         }
     }

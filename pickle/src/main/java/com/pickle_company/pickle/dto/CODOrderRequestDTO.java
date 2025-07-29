@@ -15,5 +15,6 @@ public class CODOrderRequestDTO {
     private String city;
     private String state;
     private String pincode;
+    @Builder.Default
     private String paymentMethod = "COD";
 } 

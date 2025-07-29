@@ -12,4 +12,5 @@ public class CheckoutResponseDTO {
     private Long orderId;
     private double totalAmount;
     private LocalDateTime placedAt;
+    private String paymentMethod;
 }

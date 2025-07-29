@@ -30,6 +30,11 @@ public class OrderMapper {
                 .totalAmount(order.getTotalAmount())
                 .placedAt(order.getPlacedAt())
                 .status("PLACED") // Default status since it's not in the entity
+                .paymentMethod(order.getPaymentMethod())
+                .shippingAddress(order.getShippingAddress())
+                .customerName(order.getCustomerName())
+                .customerEmail(order.getCustomerEmail())
+                .customerPhone(order.getCustomerPhone())
                 .build();
     }
     

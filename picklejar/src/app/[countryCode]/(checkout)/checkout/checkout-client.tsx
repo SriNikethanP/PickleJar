@@ -20,7 +20,7 @@ export default function CheckoutClient() {
     const checkAuthAndLoadData = async () => {
       if (!isAuthenticated()) {
         toast.error("Please log in to access checkout");
-        router.push("/login");
+        router.push("/account/login");
         return;
       }
 

@@ -88,10 +88,8 @@ export const retrieveCustomer = async (): Promise<User | null> => {
     return res.data;
   } catch (error: any) {
     console.error("Error retrieving customer:", error);
-    if (error.response?.status === 401 || error.response?.status === 403) {
-      // User is not authenticated, redirect to login
-      throw new Error("Authentication required");
-    }
+    // For any authentication errors, just return null instead of throwing
+    // The client-side components will handle authentication
     return null;
   }
 };

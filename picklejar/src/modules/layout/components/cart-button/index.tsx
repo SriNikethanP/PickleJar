@@ -4,12 +4,7 @@ import CartDropdown from "../cart-dropdown";
 export default async function CartButton() {
   let cart = null;
 
-  try {
-    cart = await retrieveCart();
-  } catch (error) {
-    console.error("Error retrieving cart:", error);
-    cart = null;
-  }
+  cart = await retrieveCart();
 
   return <CartDropdown cart={cart} />;
 }
