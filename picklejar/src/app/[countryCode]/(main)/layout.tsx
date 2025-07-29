@@ -13,33 +13,32 @@ export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
 };
 
-// Placeholder: Replace with real session/user logic
-function getUserIdFromSession(): number | null {
-  return null; // Return userId if logged in, otherwise null
-}
-
 export default async function PageLayout(props: { children: React.ReactNode }) {
-  const userId = getUserIdFromSession();
   let customer = null;
   let cart = null;
   let shippingOptions: StoreCartShippingOption[] = [];
 
-  if (userId) {
-    try {
-      customer = await retrieveCustomer(userId);
-      cart = await retrieveCart(userId);
+  try {
+    customer = await retrieveCustomer();
+    cart = await retrieveCart();
 
-      if (cart) {
-        try {
-          const { shipping_options } = await listCartOptions();
-          shippingOptions = shipping_options || [];
-        } catch (error) {
-          console.error("Error fetching cart options:", error);
-          shippingOptions = [];
-        }
+    if (cart) {
+      try {
+        const { shipping_options } = await listCartOptions();
+        shippingOptions = shipping_options || [];
+      } catch (error) {
+        console.error("Error fetching cart options:", error);
+        shippingOptions = [];
       }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
+    }
+  } catch (error: any) {
+    console.error("Error fetching user data:", error);
+    // If it's an authentication error, just continue without user/cart data
+    // The client-side components will handle authentication
+    if (error.message === "Authentication required") {
+      customer = null;
+      cart = null;
+      shippingOptions = [];
     }
   }
 

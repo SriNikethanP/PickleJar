@@ -79,18 +79,19 @@ export const signup = async (_: any, formData: FormData) => {
   }
 };
 
-export const retrieveCustomer = async (
-  userId: number
-): Promise<User | null> => {
+export const retrieveCustomer = async (): Promise<User | null> => {
   try {
     const authHeaders = await getAuthHeaders();
-    const res = await api.get("/users", {
-      params: { userId },
+    const res = await api.get("/users/me", {
       headers: authHeaders,
     });
     return res.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error retrieving customer:", error);
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      // User is not authenticated, redirect to login
+      throw new Error("Authentication required");
+    }
     return null;
   }
 };

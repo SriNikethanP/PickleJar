@@ -34,22 +34,20 @@ function getUserIdFromSession(): number | null {
   return null; // Return userId if logged in, otherwise null
 }
 
-export const getCartByUserId = async (userId: number): Promise<Cart | null> => {
+export const getCartByUserId = async (): Promise<Cart | null> => {
   try {
     const authHeaders = await getAuthHeaders();
     const res = await api.get("/cart", {
-      params: { userId },
       headers: authHeaders,
     });
     return res.data;
   } catch (error) {
-    console.error("Error fetching cart by user ID:", error);
+    console.error("Error fetching cart:", error);
     return null;
   }
 };
 
 export const addToCart = async (
-  userId: number,
   productId: number,
   quantity: number
 ): Promise<Cart | null> => {
@@ -59,7 +57,6 @@ export const addToCart = async (
       "/cart",
       { productId, quantity },
       {
-        params: { userId },
         headers: authHeaders,
       }
     );
@@ -71,7 +68,6 @@ export const addToCart = async (
 };
 
 export const updateCartItem = async (
-  userId: number,
   cartItemId: number,
   quantity: number
 ): Promise<Cart | null> => {
@@ -81,7 +77,6 @@ export const updateCartItem = async (
       "/cart/item",
       { cartItemId, quantity },
       {
-        params: { userId },
         headers: authHeaders,
       }
     );
@@ -100,12 +95,7 @@ export const updateLineItem = async ({
   lineId: string;
   quantity: number;
 }) => {
-  const userId = getUserIdFromSession();
-  if (!userId) {
-    throw new Error("User not authenticated");
-  }
-
-  const result = await updateCartItem(userId, parseInt(lineId), quantity);
+  const result = await updateCartItem(parseInt(lineId), quantity);
   if (!result) {
     throw new Error("Failed to update cart item");
   }
@@ -122,12 +112,7 @@ export const addToCartWrapper = async ({
   quantity: number;
   countryCode: string;
 }) => {
-  const userId = getUserIdFromSession();
-  if (!userId) {
-    throw new Error("User not authenticated");
-  }
-
-  const result = await addToCart(userId, productId, quantity);
+  const result = await addToCart(productId, quantity);
   if (!result) {
     throw new Error("Failed to add to cart");
   }
@@ -135,13 +120,12 @@ export const addToCartWrapper = async ({
 };
 
 export const removeCartItem = async (
-  userId: number,
   cartItemId: number
 ): Promise<Cart | null> => {
   try {
     const authHeaders = await getAuthHeaders();
     const res = await api.delete("/cart/item", {
-      params: { userId, cartItemId },
+      params: { cartItemId },
       headers: authHeaders,
     });
     return res.data;
@@ -151,11 +135,10 @@ export const removeCartItem = async (
   }
 };
 
-export const checkoutCart = async (userId: number) => {
+export const checkoutCart = async () => {
   try {
     const authHeaders = await getAuthHeaders();
     const res = await api.post("/cart/checkout", null, {
-      params: { userId },
       headers: authHeaders,
     });
     return res.data;
@@ -182,16 +165,19 @@ export const assignCart = async (cartId: number, customerId: number) => {
   }
 };
 
-export const retrieveCart = async (userId: number): Promise<Cart | null> => {
+export const retrieveCart = async (): Promise<Cart | null> => {
   try {
     const authHeaders = await getAuthHeaders();
     const res = await api.get("/cart", {
-      params: { userId },
       headers: authHeaders,
     });
     return res.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error retrieving cart:", error);
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      // User is not authenticated, redirect to login
+      throw new Error("Authentication required");
+    }
     return null;
   }
 };

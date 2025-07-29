@@ -5,15 +5,13 @@ import { Heading, Text, clx } from "@medusajs/ui";
 import PaymentButton from "../payment-button";
 import { useSearchParams } from "next/navigation";
 
-const Review = ({ cart }: { cart: any }) => {
+const Review = ({ cart, userDetails }: { cart: any; userDetails?: any }) => {
   const searchParams = useSearchParams();
 
   const isOpen = searchParams.get("step") === "review";
 
-  const previousStepsCompleted =
-    cart.shipping_address &&
-    cart.shipping_methods.length > 0 &&
-    cart.payment_collection;
+  // For COD flow, we need cart items and user details
+  const previousStepsCompleted = cart?.items && cart.items.length > 0 && userDetails;
 
   return (
     <div className="bg-white">
@@ -42,7 +40,7 @@ const Review = ({ cart }: { cart: any }) => {
               </Text>
             </div>
           </div>
-          <PaymentButton cart={cart} data-testid="submit-order-button" />
+          <PaymentButton cart={cart} userDetails={userDetails} data-testid="submit-order-button" />
         </>
       )}
     </div>

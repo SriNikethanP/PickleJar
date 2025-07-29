@@ -16,13 +16,7 @@ import ErrorMessage from "../error-message";
 import Divider from "@modules/common/components/divider";
 import UserDetails from "../user-details";
 
-const Payment = ({
-  cart,
-  availablePaymentMethods,
-}: {
-  cart: any;
-  availablePaymentMethods: any[];
-}) => {
+const Payment = ({ cart }: { cart: any }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] =

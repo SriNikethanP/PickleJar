@@ -1,18 +1,29 @@
 import "server-only";
 import { cookies as nextCookies } from "next/headers";
+import { headers } from "next/headers";
 
 export const getAuthHeaders = async (): Promise<
   { authorization: string } | {}
 > => {
   try {
+    // First try to get token from cookies
     const cookies = await nextCookies();
     const token = cookies.get("_medusa_jwt")?.value;
 
-    if (!token) {
-      return {};
+    if (token) {
+      return { authorization: `Bearer ${token}` };
     }
 
-    return { authorization: `Bearer ${token}` };
+    // If no cookie, try to get from Authorization header
+    const headersList = await headers();
+    const authHeader = headersList.get("authorization");
+
+    if (authHeader) {
+      return { authorization: authHeader };
+    }
+
+    // If no token found, return empty object
+    return {};
   } catch {
     return {};
   }

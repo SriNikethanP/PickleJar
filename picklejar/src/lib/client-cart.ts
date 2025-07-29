@@ -27,8 +27,11 @@ export type Cart = {
 export const getCurrentUserCart = async (): Promise<Cart | null> => {
   try {
     return await apiClient.get("/cart");
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching cart:", error);
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      throw new Error("Authentication required");
+    }
     return null;
   }
 };
