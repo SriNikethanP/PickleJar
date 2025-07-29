@@ -27,14 +27,14 @@ const CartDropdown = ({ cart: cartState }: { cart?: any | null }) => {
   const close = () => setCartDropdownOpen(false);
 
   const totalItems =
-    cartState?.items?.reduce((acc, item) => {
-      return acc + item.quantity;
+    cartState?.items?.reduce((acc: number, item: any) => {
+      return acc + (item.quantity || 0);
     }, 0) || 0;
 
   const subtotal =
-    cartState?.items?.reduce((acc, item) => {
-      // Handle cases where item.product might be undefined or missing price
-      const price = item?.product?.price || 0;
+    cartState?.items?.reduce((acc: number, item: any) => {
+      // Handle cases where item might be undefined or missing price
+      const price = item?.price || 0;
       const quantity = item?.quantity || 0;
       return acc + price * quantity;
     }, 0) || 0;
@@ -111,8 +111,8 @@ const CartDropdown = ({ cart: cartState }: { cart?: any | null }) => {
               <>
                 <div className="overflow-y-scroll max-h-[402px] px-4 grid grid-cols-1 gap-y-8 no-scrollbar p-px">
                   {cartState.items
-                    .filter((item) => item && item.cartItemId) // Filter out invalid items
-                    .map((item) => (
+                    .filter((item: any) => item && item.cartItemId) // Filter out invalid items
+                    .map((item: any) => (
                       <div
                         className="grid grid-cols-[122px_1fr] gap-x-4"
                         key={item.cartItemId}
@@ -153,7 +153,7 @@ const CartDropdown = ({ cart: cartState }: { cart?: any | null }) => {
                           </div>
                           <DeleteButton
                             id={item.cartItemId}
-                            className="mt-1"
+                            className="mt-1 text-red-500 hover:text-red-700 transition-colors duration-200"
                             data-testid="cart-item-remove-button"
                           >
                             Remove

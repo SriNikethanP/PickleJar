@@ -39,7 +39,7 @@ export const addToCart = async (
   quantity: number
 ): Promise<Cart | null> => {
   try {
-    const result = await apiClient.post("/cart", { productId, quantity });
+    const result = await apiClient.post<Cart>("/cart", { productId, quantity });
     toast.success("Added to cart successfully!");
     return result;
   } catch (error: any) {
@@ -55,7 +55,10 @@ export const updateCartItem = async (
   quantity: number
 ): Promise<Cart | null> => {
   try {
-    const result = await apiClient.put("/cart/item", { cartItemId, quantity });
+    const result = await apiClient.put<Cart>("/cart/item", {
+      cartItemId,
+      quantity,
+    });
     if (quantity > 0) {
       toast.success("Cart updated successfully!");
     } else {
@@ -74,7 +77,7 @@ export const removeCartItem = async (
   cartItemId: number
 ): Promise<Cart | null> => {
   try {
-    const result = await apiClient.delete(
+    const result = await apiClient.delete<Cart>(
       `/cart/item?cartItemId=${cartItemId}`
     );
     toast.success("Item removed from cart!");
@@ -95,6 +98,19 @@ export const checkoutCart = async () => {
   } catch (error: any) {
     console.error("Error checking out cart:", error);
     toast.error(error.message || "Failed to checkout");
+    return null;
+  }
+};
+
+// COD Checkout for current authenticated user
+export const codCheckout = async (userDetails: any) => {
+  try {
+    const result = await apiClient.post("/cart/checkout/cod", userDetails);
+    toast.success("COD order placed successfully!");
+    return result;
+  } catch (error: any) {
+    console.error("Error during COD checkout:", error);
+    toast.error(error.message || "COD checkout failed");
     return null;
   }
 };

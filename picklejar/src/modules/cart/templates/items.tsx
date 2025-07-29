@@ -1,15 +1,15 @@
-import repeat from "@lib/util/repeat"
-import { Heading, Table } from "@medusajs/ui"
+import repeat from "@lib/util/repeat";
+import { Heading, Table } from "@medusajs/ui";
 
-import Item from "@modules/cart/components/item"
-import SkeletonLineItem from "@modules/skeletons/components/skeleton-line-item"
+import Item from "@modules/cart/components/item";
+import SkeletonLineItem from "@modules/skeletons/components/skeleton-line-item";
 
 type ItemsTemplateProps = {
-  cart?: any
-}
+  cart?: any;
+};
 
 const ItemsTemplate = ({ cart }: ItemsTemplateProps) => {
-  const items = cart?.items
+  const items = cart?.items;
   return (
     <div>
       <div className="pb-3 flex items-center">
@@ -32,23 +32,23 @@ const ItemsTemplate = ({ cart }: ItemsTemplateProps) => {
         <Table.Body>
           {items
             ? items
-                .filter(item => item && item.id) // Filter out invalid items
-                .map((item, index) => {
+                .filter((item: any) => item && item.cartItemId) // Filter out invalid items
+                .map((item: any, index: number) => {
                   return (
                     <Item
-                      key={item.id || `item-${index}`}
+                      key={item.cartItemId || `item-${index}`}
                       item={item}
                       currencyCode="INR"
                     />
-                  )
+                  );
                 })
             : repeat(5).map((i) => {
-                return <SkeletonLineItem key={i} />
+                return <SkeletonLineItem key={i} />;
               })}
         </Table.Body>
       </Table>
     </div>
-  )
-}
+  );
+};
 
-export default ItemsTemplate
+export default ItemsTemplate;

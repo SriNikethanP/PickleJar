@@ -26,4 +26,9 @@ public class Order {
 
     private double totalAmount;
     private LocalDateTime placedAt;
+    private String paymentMethod;
+    private String shippingAddress;
+    private String customerName;
+    private String customerEmail;
+    private String customerPhone;
 }

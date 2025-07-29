@@ -4,6 +4,7 @@ import com.pickle_company.pickle.dto.AddToCartRequestDTO;
 import com.pickle_company.pickle.dto.CartResponseDTO;
 import com.pickle_company.pickle.dto.CheckoutResponseDTO;
 import com.pickle_company.pickle.dto.UpdateCartItemRequestDTO;
+import com.pickle_company.pickle.dto.CODOrderRequestDTO;
 import com.pickle_company.pickle.entity.AssignCartRequest;
 import com.pickle_company.pickle.service.CartService;
 import com.pickle_company.pickle.util.SecurityUtil;
@@ -75,6 +76,23 @@ public class CartController {
             return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.ok(cartService.checkout(userId));
+    }
+
+    // COD Checkout
+    @PostMapping("/checkout/cod")
+    public ResponseEntity<CheckoutResponseDTO> codCheckout(@RequestBody CODOrderRequestDTO request) {
+        Long userId = SecurityUtil.getCurrentUserId();
+        if (userId == null) {
+            return ResponseEntity.status(401).body(null);
+        }
+        try {
+            CheckoutResponseDTO checkoutDTO = cartService.codCheckout(userId, request);
+            return ResponseEntity.ok(checkoutDTO);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
+        }
     }
 
     @PutMapping("/assign")

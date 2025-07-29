@@ -4,6 +4,7 @@ import com.pickle_company.pickle.dto.AddToCartRequestDTO;
 import com.pickle_company.pickle.dto.CartResponseDTO;
 import com.pickle_company.pickle.dto.CheckoutResponseDTO;
 import com.pickle_company.pickle.dto.UpdateCartItemRequestDTO;
+import com.pickle_company.pickle.dto.CODOrderRequestDTO;
 import com.pickle_company.pickle.entity.*;
 import com.pickle_company.pickle.repository.*;
 import com.pickle_company.pickle.mapper.CartMapper;
@@ -152,6 +153,53 @@ public class CartService {
         cart.setUser(user);
         Cart savedCart = cartRepository.save(cart);
         return cartMapper.toDto(savedCart);
+    }
+
+    @Transactional
+    public CheckoutResponseDTO codCheckout(Long userId, CODOrderRequestDTO request) {
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("No cart for user"));
+        if (cart.getItems().isEmpty()) throw new IllegalArgumentException("Cart is empty!");
+        User user = cart.getUser();
+
+        // Create Order with COD details
+        Order order = Order.builder()
+                .user(user)
+                .totalAmount(cart.getItems().stream()
+                        .mapToDouble(ci -> ci.getProduct().getPrice() * ci.getQuantity()).sum())
+                .placedAt(LocalDateTime.now())
+                .paymentMethod("COD")
+                .shippingAddress(request.getAddress() + ", " + request.getCity() + ", " + request.getState() + " - " + request.getPincode())
+                .customerName(request.getFullName())
+                .customerEmail(request.getEmail())
+                .customerPhone(request.getPhone())
+                .build();
+        order = orderRepository.save(order);
+
+        // Copy items as snapshot, update product stock
+        for (CartItem cartItem : cart.getItems()) {
+            Product product = cartItem.getProduct();
+            if (product.getStock() < cartItem.getQuantity())
+                throw new IllegalArgumentException("Not enough stock for " + product.getName());
+            product.setStock(product.getStock() - cartItem.getQuantity());
+            productRepository.save(product);
+            orderItemRepository.save(OrderItem.builder()
+                    .order(order)
+                    .product(product)
+                    .quantity(cartItem.getQuantity())
+                    .priceAtOrder(product.getPrice())
+                    .build());
+        }
+        // Clear cart
+        cart.getItems().clear();
+        cartRepository.save(cart);
+
+        return CheckoutResponseDTO.builder()
+                .orderId(order.getId())
+                .totalAmount(order.getTotalAmount())
+                .placedAt(order.getPlacedAt())
+                .paymentMethod("COD")
+                .build();
     }
 }
 
