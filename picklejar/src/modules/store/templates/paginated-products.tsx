@@ -142,13 +142,10 @@ export default async function PaginatedProducts({
   return (
     <div className="space-y-8">
       {/* Products Grid */}
-      <div
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-        data-testid="products-list"
-      >
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
         {products.map((product) => (
-          <div key={product.id} className="flex justify-center">
-            <ProductPreview product={product} region={region} />
+          <div key={product.id} className="group">
+            <ProductPreview product={product} region={region} isFeatured />
           </div>
         ))}
       </div>

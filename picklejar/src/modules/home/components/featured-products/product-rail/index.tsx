@@ -55,6 +55,7 @@ export default async function ProductRail({
             </div>
           ))}
         </div>
+        
 
         {/* View All Button */}
         <div className="text-center mt-12 lg:mt-16">
