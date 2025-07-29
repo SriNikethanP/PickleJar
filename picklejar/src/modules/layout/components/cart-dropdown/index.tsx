@@ -1,79 +1,79 @@
-"use client"
+"use client";
 
 import {
   Popover,
   PopoverButton,
   PopoverPanel,
   Transition,
-} from "@headlessui/react"
-import { convertToLocale } from "@lib/util/money"
-import { HttpTypes } from "@medusajs/types"
-import { Button } from "@medusajs/ui"
-import DeleteButton from "@modules/common/components/delete-button"
-import LineItemOptions from "@modules/common/components/line-item-options"
-import LineItemPrice from "@modules/common/components/line-item-price"
-import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import Thumbnail from "@modules/products/components/thumbnail"
-import { usePathname } from "next/navigation"
-import { Fragment, useEffect, useRef, useState } from "react"
+} from "@headlessui/react";
+import { convertToLocale } from "@lib/util/money";
+import { HttpTypes } from "@medusajs/types";
+import { Button } from "@medusajs/ui";
+import DeleteButton from "@modules/common/components/delete-button";
+import LineItemOptions from "@modules/common/components/line-item-options";
+import LineItemPrice from "@modules/common/components/line-item-price";
+import LocalizedClientLink from "@modules/common/components/localized-client-link";
+import Thumbnail from "@modules/products/components/thumbnail";
+import { usePathname } from "next/navigation";
+import { Fragment, useEffect, useRef, useState } from "react";
 
-const CartDropdown = ({
-  cart: cartState,
-}: {
-  cart?: any | null
-}) => {
+const CartDropdown = ({ cart: cartState }: { cart?: any | null }) => {
   const [activeTimer, setActiveTimer] = useState<NodeJS.Timer | undefined>(
     undefined
-  )
-  const [cartDropdownOpen, setCartDropdownOpen] = useState(false)
+  );
+  const [cartDropdownOpen, setCartDropdownOpen] = useState(false);
 
-  const open = () => setCartDropdownOpen(true)
-  const close = () => setCartDropdownOpen(false)
+  const open = () => setCartDropdownOpen(true);
+  const close = () => setCartDropdownOpen(false);
 
   const totalItems =
     cartState?.items?.reduce((acc, item) => {
-      return acc + item.quantity
-    }, 0) || 0
+      return acc + item.quantity;
+    }, 0) || 0;
 
-  const subtotal = cartState?.items?.reduce((acc, item) => {
-    return acc + (item.product.price * item.quantity)
-  }, 0) || 0
-  const itemRef = useRef<number>(totalItems || 0)
+  const subtotal =
+    cartState?.items?.reduce((acc, item) => {
+      // Handle cases where item.product might be undefined or missing price
+      const price = item?.product?.price || 0;
+      const quantity = item?.quantity || 0;
+      return acc + price * quantity;
+    }, 0) || 0;
+  const itemRef = useRef<number>(totalItems || 0);
 
   const timedOpen = () => {
-    open()
+    open();
 
-    const timer = setTimeout(close, 5000)
+    const timer = setTimeout(close, 5000);
 
-    setActiveTimer(timer)
-  }
+    setActiveTimer(timer);
+  };
 
   const openAndCancel = () => {
     if (activeTimer) {
-      clearTimeout(activeTimer)
+      clearTimeout(activeTimer);
     }
 
-    open()
-  }
+    open();
+  };
 
   // Clean up the timer when the component unmounts
   useEffect(() => {
     return () => {
       if (activeTimer) {
-        clearTimeout(activeTimer)
+        clearTimeout(activeTimer);
       }
-    }
-  }, [activeTimer])
+    };
+  }, [activeTimer]);
 
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   // open cart dropdown when modifying the cart items, but only if we're not on the cart page
   useEffect(() => {
     if (itemRef.current !== totalItems && !pathname.includes("/cart")) {
-      timedOpen()
+      timedOpen();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [totalItems, itemRef.current])
+  }, [totalItems, itemRef.current]);
 
   return (
     <div
@@ -111,6 +111,7 @@ const CartDropdown = ({
               <>
                 <div className="overflow-y-scroll max-h-[402px] px-4 grid grid-cols-1 gap-y-8 no-scrollbar p-px">
                   {cartState.items
+                    .filter((item) => item?.product) // Filter out items without products
                     .map((item) => (
                       <div
                         className="grid grid-cols-[122px_1fr] gap-x-4"
@@ -119,8 +120,10 @@ const CartDropdown = ({
                       >
                         <div className="w-24">
                           <img
-                            src={item.product.imageUrls?.[0] || "/placeholder.png"}
-                            alt={item.product.name}
+                            src={
+                              item.product?.imageUrls?.[0] || "/placeholder.png"
+                            }
+                            alt={item.product?.name || "Product"}
                             className="w-24 h-24 object-cover rounded"
                           />
                         </div>
@@ -130,22 +133,24 @@ const CartDropdown = ({
                               <div className="flex flex-col overflow-ellipsis whitespace-nowrap mr-4 w-[180px]">
                                 <h3 className="text-base-regular overflow-hidden text-ellipsis">
                                   <LocalizedClientLink
-                                    href={`/products/${item.product.id}`}
+                                    href={`/products/${item.product?.id}`}
                                     data-testid="product-link"
                                   >
-                                    {item.product.name}
+                                    {item.product?.name || "Unknown Product"}
                                   </LocalizedClientLink>
                                 </h3>
                                 <span
                                   data-testid="cart-item-quantity"
                                   data-value={item.quantity}
                                 >
-                                  Quantity: {item.quantity}
+                                  Quantity: {item.quantity || 0}
                                 </span>
                               </div>
                               <div className="flex justify-end">
                                 <span className="text-base-regular font-semibold">
-                                  ₹{item.product.price * item.quantity}
+                                  ₹
+                                  {(item.product?.price || 0) *
+                                    (item.quantity || 0)}
                                 </span>
                               </div>
                             </div>
@@ -208,7 +213,7 @@ const CartDropdown = ({
         </Transition>
       </Popover>
     </div>
-  )
-}
+  );
+};
 
-export default CartDropdown
+export default CartDropdown;

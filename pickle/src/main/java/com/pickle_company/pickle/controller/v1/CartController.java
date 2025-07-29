@@ -23,20 +23,30 @@ public class CartController {
     public ResponseEntity<CartResponseDTO> getUserCart() {
         Long userId = SecurityUtil.getCurrentUserId();
         if (userId == null) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(401).body(null);
         }
-        CartResponseDTO cartDTO = cartService.getCartByUserId(userId);
-        return ResponseEntity.ok(cartDTO);
+        try {
+            CartResponseDTO cartDTO = cartService.getCartByUserId(userId);
+            return ResponseEntity.ok(cartDTO);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
+        }
     }
     
     @PostMapping
     public ResponseEntity<CartResponseDTO> addToCart(@RequestBody AddToCartRequestDTO request) {
         Long userId = SecurityUtil.getCurrentUserId();
         if (userId == null) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(401).body(null);
         }
-        CartResponseDTO cartDTO = cartService.addToCart(userId, request);
-        return ResponseEntity.ok(cartDTO);
+        try {
+            CartResponseDTO cartDTO = cartService.addToCart(userId, request);
+            return ResponseEntity.ok(cartDTO);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
+        }
     }
     
     @PutMapping("/item")
