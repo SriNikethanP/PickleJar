@@ -4,21 +4,23 @@ import { apiClient } from "@lib/api";
 import { toast } from "sonner";
 
 export type CartItem = {
-  id: number;
-  product: {
-    id: number;
-    name: string;
-    price: number;
-    imageUrls: string[];
-    stock: number;
-  };
+  cartItemId: number;
+  productId: number;
+  productName: string;
+  productDescription: string;
+  price: number;
   quantity: number;
+  imageUrls: string[];
+  stock: number;
 };
 
 export type Cart = {
-  id: number;
-  user: { id: number; fullName: string; email: string };
+  cartId: number;
   items: CartItem[];
+  subtotal: number;
+  shippingCharges: number;
+  gstTax: number;
+  total: number;
 };
 
 // Get cart for current authenticated user

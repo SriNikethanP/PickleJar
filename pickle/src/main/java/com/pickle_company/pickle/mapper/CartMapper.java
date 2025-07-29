@@ -16,10 +16,37 @@ public class CartMapper {
             return null;
         }
         
+        List<CartItemDTO> items = toCartItemDtoList(cart.getItems());
+        double subtotal = calculateSubtotal(items);
+        double shippingCharges = calculateShippingCharges(subtotal);
+        double gstTax = calculateGSTTax(subtotal);
+        double total = subtotal + shippingCharges + gstTax;
+        
         return CartResponseDTO.builder()
                 .cartId(cart.getId())
-                .items(toCartItemDtoList(cart.getItems()))
+                .items(items)
+                .subtotal(subtotal)
+                .shippingCharges(shippingCharges)
+                .gstTax(gstTax)
+                .total(total)
                 .build();
+    }
+    
+    private double calculateSubtotal(List<CartItemDTO> items) {
+        if (items == null) return 0.0;
+        return items.stream()
+                .mapToDouble(item -> item.getPrice() * item.getQuantity())
+                .sum();
+    }
+    
+    private double calculateShippingCharges(double subtotal) {
+        // Free shipping for orders above ₹500, otherwise ₹50
+        return subtotal >= 500 ? 0.0 : 50.0;
+    }
+    
+    private double calculateGSTTax(double subtotal) {
+        // 18% GST on subtotal
+        return subtotal * 0.18;
     }
 
     public CartItemDTO toCartItemDto(CartItem item) {
@@ -31,8 +58,11 @@ public class CartMapper {
                 .cartItemId(item.getId())
                 .productId(item.getProduct().getId())
                 .productName(item.getProduct().getName())
+                .productDescription(item.getProduct().getDescription())
                 .price(item.getProduct().getPrice())
                 .quantity(item.getQuantity())
+                .imageUrls(item.getProduct().getImageUrls().toArray(new String[0]))
+                .stock(item.getProduct().getStock())
                 .build();
     }
 

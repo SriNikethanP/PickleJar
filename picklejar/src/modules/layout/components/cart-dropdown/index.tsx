@@ -111,19 +111,17 @@ const CartDropdown = ({ cart: cartState }: { cart?: any | null }) => {
               <>
                 <div className="overflow-y-scroll max-h-[402px] px-4 grid grid-cols-1 gap-y-8 no-scrollbar p-px">
                   {cartState.items
-                    .filter((item) => item?.product) // Filter out items without products
+                    .filter((item) => item && item.cartItemId) // Filter out invalid items
                     .map((item) => (
                       <div
                         className="grid grid-cols-[122px_1fr] gap-x-4"
-                        key={item.id}
+                        key={item.cartItemId}
                         data-testid="cart-item"
                       >
                         <div className="w-24">
                           <img
-                            src={
-                              item.product?.imageUrls?.[0] || "/placeholder.png"
-                            }
-                            alt={item.product?.name || "Product"}
+                            src={item.imageUrls?.[0] || "/placeholder.png"}
+                            alt={item.productName || "Product"}
                             className="w-24 h-24 object-cover rounded"
                           />
                         </div>
@@ -133,10 +131,10 @@ const CartDropdown = ({ cart: cartState }: { cart?: any | null }) => {
                               <div className="flex flex-col overflow-ellipsis whitespace-nowrap mr-4 w-[180px]">
                                 <h3 className="text-base-regular overflow-hidden text-ellipsis">
                                   <LocalizedClientLink
-                                    href={`/products/${item.product?.id}`}
+                                    href={`/products/${item.productId}`}
                                     data-testid="product-link"
                                   >
-                                    {item.product?.name || "Unknown Product"}
+                                    {item.productName || "Unknown Product"}
                                   </LocalizedClientLink>
                                 </h3>
                                 <span
@@ -148,15 +146,13 @@ const CartDropdown = ({ cart: cartState }: { cart?: any | null }) => {
                               </div>
                               <div className="flex justify-end">
                                 <span className="text-base-regular font-semibold">
-                                  ₹
-                                  {(item.product?.price || 0) *
-                                    (item.quantity || 0)}
+                                  ₹{(item.price || 0) * (item.quantity || 0)}
                                 </span>
                               </div>
                             </div>
                           </div>
                           <DeleteButton
-                            id={item.id}
+                            id={item.cartItemId}
                             className="mt-1"
                             data-testid="cart-item-remove-button"
                           >

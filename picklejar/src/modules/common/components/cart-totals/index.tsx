@@ -8,18 +8,19 @@ type CartTotalsProps = {
 };
 
 const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
-  // Calculate totals from cart items
+  // Use the calculated totals from backend if available, otherwise calculate from items
   const subtotal =
+    totals?.subtotal ||
     totals?.items?.reduce((acc: number, item: any) => {
-      // Handle cases where item.product might be undefined or missing price
-      const price = item?.product?.price || 0;
+      const price = item?.price || 0;
       const quantity = item?.quantity || 0;
-      return acc + (price * quantity);
-    }, 0) || 0;
+      return acc + price * quantity;
+    }, 0) ||
+    0;
 
-  const shipping = 0; // Free shipping for now
-  const tax = 0; // No tax for now
-  const total = subtotal + shipping + tax;
+  const shipping = totals?.shippingCharges || 0;
+  const gstTax = totals?.gstTax || 0;
+  const total = totals?.total || subtotal + shipping + gstTax;
 
   return (
     <div>
@@ -29,19 +30,19 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
             Subtotal (excl. shipping and taxes)
           </span>
           <span data-testid="cart-subtotal" data-value={subtotal}>
-            ₹{subtotal}
+            ₹{subtotal.toFixed(2)}
           </span>
         </div>
         <div className="flex items-center justify-between">
           <span>Shipping</span>
           <span data-testid="cart-shipping" data-value={shipping}>
-            ₹{shipping}
+            {shipping === 0 ? "Free" : `₹${shipping.toFixed(2)}`}
           </span>
         </div>
         <div className="flex justify-between">
-          <span className="flex gap-x-1 items-center ">Taxes</span>
-          <span data-testid="cart-taxes" data-value={tax}>
-            ₹{tax}
+          <span className="flex gap-x-1 items-center ">GST (18%)</span>
+          <span data-testid="cart-taxes" data-value={gstTax}>
+            ₹{gstTax.toFixed(2)}
           </span>
         </div>
       </div>
@@ -53,10 +54,15 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
           data-testid="cart-total"
           data-value={total}
         >
-          ₹{total}
+          ₹{total.toFixed(2)}
         </span>
       </div>
       <div className="h-px w-full border-b border-gray-200 mt-4" />
+      {subtotal < 500 && (
+        <div className="text-sm text-green-600 mt-2 text-center">
+          Add ₹{(500 - subtotal).toFixed(2)} more for free shipping!
+        </div>
+      )}
     </div>
   );
 };

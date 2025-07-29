@@ -24,7 +24,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
     setUpdating(true);
 
     await updateLineItem({
-      lineId: item.id,
+      lineId: item.cartItemId.toString(),
       quantity,
     })
       .catch((err) => {
@@ -39,8 +39,8 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
   const maxQtyFromInventory = 10;
   const maxQuantity = item.variant?.manage_inventory ? 10 : maxQtyFromInventory;
 
-  // Handle cases where item or item.product might be undefined
-  if (!item || !item.product) {
+  // Handle cases where item might be undefined
+  if (!item) {
     return null; // Don't render anything if item is invalid
   }
 
@@ -48,15 +48,15 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
     <Table.Row className="w-full" data-testid="product-row">
       <Table.Cell className="!pl-0 p-4 w-24">
         <LocalizedClientLink
-          href={`/products/${item.product?.id}`}
+          href={`/products/${item.productId}`}
           className={clx("flex", {
             "w-16": type === "preview",
             "small:w-24 w-12": type === "full",
           })}
         >
           <img
-            src={item.product?.imageUrls?.[0] || "/placeholder.png"}
-            alt={item.product?.name || "Product"}
+            src={item.imageUrls?.[0] || "/placeholder.png"}
+            alt={item.productName || "Product"}
             className="w-24 h-24 object-cover rounded"
           />
         </LocalizedClientLink>
@@ -67,14 +67,22 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
           className="txt-medium-plus text-ui-fg-base"
           data-testid="product-title"
         >
-          {item.product?.name || "Unknown Product"}
+          {item.productName || "Unknown Product"}
         </Text>
+        {item.productDescription && (
+          <Text className="txt-small text-ui-fg-subtle mt-1">
+            {item.productDescription}
+          </Text>
+        )}
       </Table.Cell>
 
       {type === "full" && (
         <Table.Cell>
           <div className="flex gap-2 items-center w-28">
-            <DeleteButton id={item.id} data-testid="product-delete-button" />
+            <DeleteButton
+              id={item.cartItemId}
+              data-testid="product-delete-button"
+            />
             <CartItemSelect
               value={item.quantity}
               onChange={(value) => changeQuantity(parseInt(value.target.value))}
@@ -105,7 +113,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
 
       {type === "full" && (
         <Table.Cell className="hidden small:table-cell">
-          <span className="text-base-regular">₹{item.product?.price || 0}</span>
+          <span className="text-base-regular">₹{item.price || 0}</span>
         </Table.Cell>
       )}
 
@@ -118,13 +126,11 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
           {type === "preview" && (
             <span className="flex gap-x-1 ">
               <Text className="text-ui-fg-muted">{item.quantity || 0}x </Text>
-              <span className="text-base-regular">
-                ₹{item.product?.price || 0}
-              </span>
+              <span className="text-base-regular">₹{item.price || 0}</span>
             </span>
           )}
           <span className="text-base-regular font-semibold">
-            ₹{(item.product?.price || 0) * (item.quantity || 0)}
+            ₹{(item.price || 0) * (item.quantity || 0)}
           </span>
         </span>
       </Table.Cell>

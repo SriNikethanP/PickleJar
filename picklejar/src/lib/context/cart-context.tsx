@@ -39,7 +39,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Calculate cart item count
   const cartItemCount =
-    cart?.items?.reduce((total, item) => total + item.quantity, 0) || 0;
+    cart?.items?.reduce((total, item) => total + (item.quantity || 0), 0) || 0;
 
   // Fetch cart when user is authenticated
   useEffect(() => {
