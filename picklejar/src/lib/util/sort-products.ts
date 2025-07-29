@@ -15,24 +15,12 @@ export function sortProducts(
   products: Product[],
   sortBy: SortOptions
 ): Product[] {
-  console.log("Sorting products:", {
-    totalProducts: products.length,
-    sortBy,
-    sampleProducts: products
-      .slice(0, 3)
-      .map((p) => ({ id: p.id, name: p.name, price: p.price })),
-  });
-
   let sortedProducts = [...products] as MinPricedProduct[];
 
   switch (sortBy) {
     case "latest":
       // Sort by ID in descending order (assuming higher IDs are newer)
       sortedProducts.sort((a, b) => b.id - a.id);
-      console.log(
-        "Sorted by latest (ID desc):",
-        sortedProducts.slice(0, 3).map((p) => ({ id: p.id, name: p.name }))
-      );
       break;
 
     case "price_asc":
@@ -44,12 +32,6 @@ export function sortProducts(
         const diff = a._minPrice! - b._minPrice!;
         return diff;
       });
-      console.log(
-        "Sorted by price asc:",
-        sortedProducts
-          .slice(0, 3)
-          .map((p) => ({ id: p.id, name: p.name, price: p.price }))
-      );
       break;
 
     case "price_desc":
@@ -61,21 +43,11 @@ export function sortProducts(
         const diff = a._minPrice! - b._minPrice!;
         return -diff;
       });
-      console.log(
-        "Sorted by price desc:",
-        sortedProducts
-          .slice(0, 3)
-          .map((p) => ({ id: p.id, name: p.name, price: p.price }))
-      );
       break;
 
     default:
       // Default to latest
       sortedProducts.sort((a, b) => b.id - a.id);
-      console.log(
-        "Default sort (latest):",
-        sortedProducts.slice(0, 3).map((p) => ({ id: p.id, name: p.name }))
-      );
       break;
   }
 

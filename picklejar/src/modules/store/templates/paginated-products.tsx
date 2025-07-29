@@ -73,10 +73,7 @@ export default async function PaginatedProducts({
 
     // Apply sorting using the utility function
     if (sortBy) {
-      console.log("Applying sorting with:", sortBy);
       products = sortProducts(products, sortBy);
-    } else {
-      console.log("No sorting applied, using default order");
     }
 
     // Apply pagination

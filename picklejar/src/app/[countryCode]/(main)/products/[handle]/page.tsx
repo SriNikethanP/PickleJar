@@ -13,11 +13,20 @@ export async function generateStaticParams() {
     const products = await getAllProducts();
 
     return products
-      .map((product: Product) => ({
-        countryCode: "in",
-        handle: product.name.toLowerCase().replace(/\s+/g, "-"),
-      }))
-      .filter((param: { countryCode: string; handle: string }) => param.handle);
+      .map((product: Product) => {
+        if (!product.name) {
+          console.warn("Product without name found:", product);
+          return null;
+        }
+        return {
+          countryCode: "in",
+          handle: product.name.toLowerCase().replace(/\s+/g, "-"),
+        };
+      })
+      .filter(
+        (param): param is { countryCode: string; handle: string } =>
+          param !== null && Boolean(param.handle) && param.handle.length > 0
+      );
   } catch (error) {
     console.error(
       `Failed to generate static paths for product pages: ${

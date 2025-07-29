@@ -27,10 +27,19 @@ export const getAllProducts = async (): Promise<Product[]> => {
     console.log("Fetching products from:", api.defaults.baseURL);
     const res = await api.get("/products");
     console.log("Products response:", res.data);
-    return res.data;
+
+    return Array.isArray(res.data)
+      ? res.data.filter(
+          (product: any): product is Product =>
+            product.id &&
+            product.name &&
+            typeof product.name === "string" &&
+            product.description &&
+            typeof product.description === "string"
+        )
+      : [];
   } catch (error: any) {
     console.error("Error fetching products:", error);
-
     return [];
   }
 };
@@ -40,7 +49,16 @@ export const listProductsByCollection = async (
 ): Promise<Product[]> => {
   try {
     const res = await api.get(`/collections/${collectionId}/products`);
-    return res.data;
+    return Array.isArray(res.data)
+      ? res.data.filter(
+          (product: any): product is Product =>
+            product.id &&
+            product.name &&
+            typeof product.name === "string" &&
+            product.description &&
+            typeof product.description === "string"
+        )
+      : [];
   } catch (error: any) {
     console.error("Error fetching products by collection:", error);
     return [];

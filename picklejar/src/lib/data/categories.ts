@@ -14,13 +14,28 @@ const api = axios.create({
 export type Category = {
   id: number;
   name: string;
+  description?: string;
+  handle?: string;
   products: Product[];
 };
 
 export const listCategories = async (): Promise<Category[]> => {
   try {
     const res = await api.get("/categories");
-    return res.data;
+    return Array.isArray(res.data)
+      ? res.data
+          .map((category: any) => ({
+            id: category.id,
+            name: category.name,
+            description: category.description,
+            handle: category.name?.toLowerCase().replace(/\s+/g, "-"),
+            products: category.products || [],
+          }))
+          .filter(
+            (category): category is Category =>
+              category.id && category.name && typeof category.name === "string"
+          )
+      : [];
   } catch (error) {
     console.error("Error fetching categories:", error);
     return [];

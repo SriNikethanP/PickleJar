@@ -32,18 +32,25 @@ export async function generateStaticParams() {
   //       .filter(Boolean) as string[]
   // );
 
-  const collectionHandles = collections.map(
-    (collection: StoreCollection) => collection.title?.toLowerCase().replace(/\s+/g, "-")
-  );
+  const collectionHandles = collections
+    .map((collection: StoreCollection) => {
+      if (!collection.title) {
+        console.warn("Collection without title found:", collection);
+        return null;
+      }
+      return collection.title.toLowerCase().replace(/\s+/g, "-");
+    })
+    .filter((handle): handle is string => handle !== null);
 
   const staticParams = [
     { countryCode: "IN", handle: "all-products" },
-    ...collectionHandles.map((handle: string | undefined) => ({
+    ...collectionHandles.map((handle: string) => ({
       countryCode: "IN",
       handle,
     })),
   ];
 
+  console.log("Generated static params for collections:", staticParams);
   return staticParams;
 }
 
