@@ -10,7 +10,7 @@ export default function AccountPageLayout({
 }) {
   return (
     <AccountLayout customer={null}>
-      {login || dashboard}
+      {dashboard || login}
       <Toaster />
     </AccountLayout>
   );

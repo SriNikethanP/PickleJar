@@ -9,13 +9,10 @@ export default function ClientAccountButton() {
   const router = useRouter();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // const handleAccountClick = () => {
-  //   if (user) {
-  //     router.push("/account");
-  //   } else {
-  //     router.push("/account");
-  //   }
-  // };
+  const handleAccountClick = () => {
+    router.push("/account");
+    setIsDropdownOpen(false);
+  };
 
   const handleLogout = () => {
     logout();
@@ -51,12 +48,12 @@ export default function ClientAccountButton() {
         <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
           {user ? (
             <>
-              {/* <button
+              <button
                 onClick={handleAccountClick}
                 className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
               >
                 My Account
-              </button> */}
+              </button>
               <button
                 onClick={handleLogout}
                 className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -66,10 +63,7 @@ export default function ClientAccountButton() {
             </>
           ) : (
             <button
-              onClick={() => {
-                router.push("/account");
-                setIsDropdownOpen(false);
-              }}
+              onClick={handleAccountClick}
               className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
             >
               Sign In / Create Account
