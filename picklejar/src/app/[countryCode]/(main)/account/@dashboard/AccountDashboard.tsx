@@ -36,7 +36,7 @@ export default function AccountDashboard() {
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
             Account Information
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Full Name
@@ -55,12 +55,12 @@ export default function AccountDashboard() {
               </label>
               <p className="text-gray-900">{user?.mobile}</p>
             </div>
-            <div>
+            {/* <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Role
               </label>
               <p className="text-gray-900 capitalize">{user?.role}</p>
-            </div>
+            </div> */}
           </div>
         </div>
 

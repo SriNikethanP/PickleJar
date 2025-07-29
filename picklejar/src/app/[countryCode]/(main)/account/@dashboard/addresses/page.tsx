@@ -1,24 +1,26 @@
-import { Metadata } from "next";
-import { notFound } from "next/navigation";
+"use client";
 
+import { useAuth } from "@lib/context/auth-context";
+import { useRouter } from "next/navigation";
 import AddressBook from "@modules/account/components/address-book";
 
-// import { getRegion } from "@lib/data/regions"
-import { retrieveCustomer } from "@lib/data/customer";
+export default function Addresses() {
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
 
-export const metadata: Metadata = {
-  title: "Addresses",
-  description: "View your addresses",
-};
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
-export default async function Addresses(props: {
-  params: Promise<{ countryCode: string }>;
-}) {
-  const params = await props.params;
-  const customer = await retrieveCustomer();
-
-  if (!customer) {
-    notFound();
+  // If user is not authenticated, redirect to login
+  if (!user) {
+    router.push("/account");
+    return null;
   }
 
   return (
@@ -30,7 +32,7 @@ export default async function Addresses(props: {
           like. Saving your addresses will make them available during checkout.
         </p>
       </div>
-      <AddressBook customer={customer} />
+      <AddressBook customer={user} />
     </div>
   );
 }
