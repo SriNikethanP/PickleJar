@@ -10,7 +10,13 @@ export default function ClientAccountButton() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleAccountClick = () => {
-    router.push("/account");
+    if (user) {
+      // User is logged in, redirect to dashboard
+      router.push("/account");
+    } else {
+      // User is not logged in, redirect to login page
+      router.push("/account");
+    }
     setIsDropdownOpen(false);
   };
 

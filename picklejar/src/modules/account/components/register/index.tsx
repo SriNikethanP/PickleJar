@@ -120,11 +120,9 @@ const Register = ({ setCurrentView }: Props) => {
 
       const success = await register(userData);
       if (success) {
-        toast.success("Registration successful! Please sign in.");
-        // Show success message briefly, then redirect to login
-        setTimeout(() => {
-          setCurrentView(LOGIN_VIEW.SIGN_IN);
-        }, 2000);
+        // Registration successful and user is automatically logged in
+        // The parallel routes will automatically show the dashboard
+        toast.success("Registration successful! Welcome to Pickle Jar!");
       }
     } catch (error) {
       console.error("Registration error:", error);

@@ -1,15 +1,23 @@
-import { redirect } from "next/navigation";
-import { retrieveCustomer } from "@lib/data/customer";
+"use client";
 
-export default async function AccountPage() {
-  // Check if user is authenticated
-  const user = await retrieveCustomer();
+import { useAuth } from "@lib/context/auth-context";
+import { useRouter } from "next/navigation";
 
-  if (user) {
-    // User is authenticated, show dashboard (parallel route will handle this)
-    return null;
-  } else {
-    // User is not authenticated, show login (parallel route will handle this)
-    return null;
+export default function AccountPage() {
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      </div>
+    );
   }
+
+  // The parallel routes will handle showing the correct content
+  // @dashboard will show when user is authenticated
+  // @login will show when user is not authenticated
+  return null;
 }
