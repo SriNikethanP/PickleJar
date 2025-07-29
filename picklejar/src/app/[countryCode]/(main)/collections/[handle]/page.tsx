@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { getCollectionByHandle, listCollections } from "@lib/data/collections";
+import { listCollections } from "@lib/data/collections";
 // import { listRegions } from "@lib/data/regions";
 import { StoreCollection } from "@medusajs/types";
 import CollectionTemplate from "@modules/collections/templates";
@@ -18,9 +18,7 @@ type Props = {
 export const PRODUCT_LIMIT = 12;
 
 export async function generateStaticParams() {
-  const { collections } = await listCollections({
-    fields: "*products",
-  });
+  const collections = await listCollections();
 
   if (!collections) {
     return [];
@@ -35,7 +33,7 @@ export async function generateStaticParams() {
   // );
 
   const collectionHandles = collections.map(
-    (collection: StoreCollection) => collection.handle
+    (collection: StoreCollection) => collection.title?.toLowerCase().replace(/\s+/g, "-")
   );
 
   const staticParams = [
@@ -51,7 +49,10 @@ export async function generateStaticParams() {
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
-  const collection = await getCollectionByHandle(params.handle);
+  const collections = await listCollections();
+  const collection = collections.find(
+    (col) => col.title?.toLowerCase().replace(/\s+/g, "-") === params.handle
+  );
 
   if (!collection) {
     notFound();
@@ -70,8 +71,9 @@ export default async function CollectionPage(props: Props) {
   const params = await props.params;
   const { sortBy, page } = searchParams;
 
-  const collection = await getCollectionByHandle(params.handle).then(
-    (collection: StoreCollection) => collection
+  const collections = await listCollections();
+  const collection = collections.find(
+    (col) => col.title?.toLowerCase().replace(/\s+/g, "-") === params.handle
   );
 
   if (!collection) {
