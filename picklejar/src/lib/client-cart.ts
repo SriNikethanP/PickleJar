@@ -95,7 +95,30 @@ export const removeCartItem = async (
 // Clear cart for current authenticated user
 export const clearCart = async (): Promise<boolean> => {
   try {
-    await apiClient.delete("/cart");
+    // Use fetch directly for DELETE requests that return empty responses
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      throw new Error("Authentication required");
+    }
+
+    const response = await fetch(
+      `${
+        process.env.NEXT_PUBLIC_BACKEND_BASE_URL ||
+        "http://localhost:8080/api/v1"
+      }/cart`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
     toast.success("Cart cleared successfully!");
     return true;
   } catch (error: any) {

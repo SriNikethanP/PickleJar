@@ -44,7 +44,10 @@ class ApiClient {
     }
   }
 
-  async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  async request<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<T | null> {
     const url = `${API_BASE_URL}${endpoint}`;
     const headers = await this.getAuthHeaders();
 
@@ -140,16 +143,44 @@ class ApiClient {
       throw new Error(errorMessage);
     }
 
-    return response.json();
+    // Check if response has content before trying to parse JSON
+    const contentType = response.headers.get("content-type");
+    const contentLength = response.headers.get("content-length");
+
+    console.log("API Client - Response headers:", {
+      contentType,
+      contentLength,
+      status: response.status,
+      statusText: response.statusText,
+    });
+
+    // If response is empty or has no content, return null
+    if (
+      contentLength === "0" ||
+      !contentType ||
+      !contentType.includes("application/json")
+    ) {
+      console.log("API Client - Returning null for empty/non-JSON response");
+      return null;
+    }
+
+    try {
+      const jsonData = await response.json();
+      console.log("API Client - Successfully parsed JSON response:", jsonData);
+      return jsonData;
+    } catch (error) {
+      console.log("API Client - Failed to parse JSON response:", error);
+      return null;
+    }
   }
 
   // GET request
-  async get<T>(endpoint: string): Promise<T> {
+  async get<T>(endpoint: string): Promise<T | null> {
     return this.request<T>(endpoint, { method: "GET" });
   }
 
   // POST request
-  async post<T>(endpoint: string, data?: any): Promise<T> {
+  async post<T>(endpoint: string, data?: any): Promise<T | null> {
     return this.request<T>(endpoint, {
       method: "POST",
       body: data ? JSON.stringify(data) : undefined,
@@ -157,7 +188,7 @@ class ApiClient {
   }
 
   // PUT request
-  async put<T>(endpoint: string, data?: any): Promise<T> {
+  async put<T>(endpoint: string, data?: any): Promise<T | null> {
     return this.request<T>(endpoint, {
       method: "PUT",
       body: data ? JSON.stringify(data) : undefined,
@@ -165,7 +196,7 @@ class ApiClient {
   }
 
   // DELETE request
-  async delete<T>(endpoint: string): Promise<T> {
+  async delete<T>(endpoint: string): Promise<T | null> {
     return this.request<T>(endpoint, { method: "DELETE" });
   }
 }
