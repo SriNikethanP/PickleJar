@@ -10,13 +10,10 @@ import {
 } from "@medusajs/ui";
 import { CheckCircleSolid, CreditCard } from "@medusajs/icons";
 import { useCallback, useEffect, useState } from "react";
-import { initiatePaymentSession } from "@lib/data/cart";
 import { codCheckout } from "@lib/client-cart";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { isStripe } from "@lib/util/payment";
 import ErrorMessage from "../error-message";
 import Divider from "@modules/common/components/divider";
-import StripeCardContainer from "../payment-wrapper/stripe-wrapper";
 import UserDetails from "../user-details";
 
 const Payment = ({
@@ -29,9 +26,7 @@ const Payment = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
-    useState<string>("");
-  const [cardComplete, setCardComplete] = useState(false);
-  const [cardBrand, setCardBrand] = useState<string | null>(null);
+    useState<string>("cod"); // Default to COD
   const [userDetails, setUserDetails] = useState<any>(null);
 
   const searchParams = useSearchParams();
@@ -40,28 +35,14 @@ const Payment = ({
 
   const isOpen = searchParams.get("step") === "payment";
 
-  const activeSession = cart.payment_collection?.payment_sessions?.find(
-    (paymentSession: any) => paymentSession.status === "pending"
-  );
-
-  const isStripeFunc = (providerId: string) => isStripe(providerId);
+  // COD only payment system
 
   const setPaymentMethod = async (method: string) => {
     setSelectedPaymentMethod(method);
     setError(null);
-
-    if (method !== activeSession?.provider_id) {
-      try {
-        await initiatePaymentSession(cart, {
-          provider_id: method,
-        });
-      } catch (err: any) {
-        setError(err.message);
-      }
-    }
   };
 
-  const paymentReady = activeSession && cart?.shipping_methods.length !== 0;
+  const paymentReady = cart?.items?.length > 0;
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
@@ -95,27 +76,7 @@ const Payment = ({
           scroll: false,
         });
       } else {
-        // Handle other payment methods (Stripe, etc.)
-        const shouldInputCard =
-          isStripeFunc(selectedPaymentMethod) && !activeSession;
-
-        const checkActiveSession =
-          activeSession?.provider_id === selectedPaymentMethod;
-
-        if (!checkActiveSession) {
-          await initiatePaymentSession(cart, {
-            provider_id: selectedPaymentMethod,
-          });
-        }
-
-        if (!shouldInputCard) {
-          return router.push(
-            pathname + "?" + createQueryString("step", "review"),
-            {
-              scroll: false,
-            }
-          );
-        }
+        setError("Only COD payment is currently available");
       }
     } catch (err: any) {
       setError(err.message);
@@ -158,42 +119,21 @@ const Payment = ({
       </div>
       <div>
         <div className={isOpen ? "block" : "hidden"}>
-          {availablePaymentMethods?.length && (
-            <>
-              <RadioGroup
-                value={selectedPaymentMethod}
-                onChange={(value: string) => setPaymentMethod(value)}
-              >
-                {/* Stripe payment temporarily disabled
-                {availablePaymentMethods.map((paymentMethod) => (
-                  <div key={paymentMethod.id}>
-                    {isStripeFunc(paymentMethod.id) ? (
-                      <StripeCardContainer
-                        paymentProviderId={paymentMethod.id}
-                        selectedPaymentOptionId={selectedPaymentMethod}
-                      />
-                    ) : null}
-                  </div>
-                ))}
-                */}
-                <div className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg">
-                  <input
-                    type="radio"
-                    id="cod"
-                    name="payment"
-                    value="cod"
-                    checked={selectedPaymentMethod === "cod"}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="text-blue-600"
-                  />
-                  <label htmlFor="cod" className="flex items-center gap-2">
-                    <CreditCard className="w-5 h-5" />
-                    <span className="font-medium">Cash on Delivery (COD)</span>
-                  </label>
-                </div>
-              </RadioGroup>
-            </>
-          )}
+          <div className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg bg-blue-50">
+            <input
+              type="radio"
+              id="cod"
+              name="payment"
+              value="cod"
+              checked={selectedPaymentMethod === "cod"}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+              className="text-blue-600"
+            />
+            <label htmlFor="cod" className="flex items-center gap-2">
+              <CreditCard className="w-5 h-5" />
+              <span className="font-medium">Cash on Delivery (COD)</span>
+            </label>
+          </div>
 
           <ErrorMessage
             error={error}
@@ -228,24 +168,11 @@ const Payment = ({
             </div>
           )}
 
-          {selectedPaymentMethod !== "cod" && (
-            <Button
-              size="large"
-              className="mt-6"
-              onClick={handleSubmit}
-              isLoading={isLoading}
-              disabled={(isStripe && !cardComplete) || !selectedPaymentMethod}
-              data-testid="submit-payment-button"
-            >
-              {!activeSession && isStripeFunc(selectedPaymentMethod)
-                ? " Enter card details"
-                : "Continue to review"}
-            </Button>
-          )}
+          {/* COD only - no other payment methods */}
         </div>
 
         <div className={isOpen ? "hidden" : "block"}>
-          {cart && paymentReady && activeSession ? (
+          {cart && selectedPaymentMethod === "cod" && userDetails ? (
             <div className="flex items-start gap-x-1 w-full">
               <div className="flex flex-col w-1/3">
                 <Text className="txt-medium-plus text-ui-fg-base mb-1">
@@ -255,27 +182,22 @@ const Payment = ({
                   className="txt-medium text-ui-fg-subtle"
                   data-testid="payment-method-summary"
                 >
-                  {paymentInfoMap[activeSession?.provider_id]?.title ||
-                    activeSession?.provider_id}
+                  Cash on Delivery (COD)
                 </Text>
               </div>
               <div className="flex flex-col w-1/3">
                 <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                  Payment details
+                  Delivery details
                 </Text>
                 <div
                   className="flex gap-2 txt-medium text-ui-fg-subtle items-center"
                   data-testid="payment-details-summary"
                 >
                   <Container className="flex items-center h-7 w-fit p-2 bg-ui-button-neutral-hover">
-                    {paymentInfoMap[selectedPaymentMethod]?.icon || (
-                      <CreditCard />
-                    )}
+                    <CreditCard />
                   </Container>
                   <Text>
-                    {isStripeFunc(selectedPaymentMethod) && cardBrand
-                      ? cardBrand
-                      : "Another step will appear"}
+                    {userDetails.fullName} - {userDetails.phone}
                   </Text>
                 </div>
               </div>
@@ -288,14 +210,11 @@ const Payment = ({
   );
 };
 
+// COD payment info
 const paymentInfoMap: Record<string, { title: string; icon: React.ReactNode }> =
   {
-    stripe: {
-      title: "Credit card",
-      icon: <CreditCard />,
-    },
-    manual: {
-      title: "Manual payment",
+    cod: {
+      title: "Cash on Delivery",
       icon: <CreditCard />,
     },
   };
