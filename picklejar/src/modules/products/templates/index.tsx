@@ -80,7 +80,7 @@ export default function ProductTemplate({
             </div>
 
             {/* Product Info and Actions */}
-            <div className="space-y-6">
+            <div className="space-y-6 z-10">
               <ProductInfo product={product} />
               <ProductActions product={product} region={region} />
             </div>
