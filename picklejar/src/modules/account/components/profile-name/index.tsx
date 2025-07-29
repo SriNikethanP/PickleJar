@@ -1,32 +1,29 @@
 "use client";
 
 import React, { useEffect, useActionState } from "react";
-
 import Input from "@modules/common/components/input";
-
 import AccountInfo from "../account-info";
-import { HttpTypes } from "@medusajs/types";
-import { updateCustomer } from "@lib/data/customer";
+import { updateUser } from "@lib/api";
 import { toast } from "sonner";
 
-type MyInformationProps = {
-  customer: HttpTypes.StoreCustomer;
+type ProfileNameProps = {
+  customer: any;
 };
 
-const ProfileName: React.FC<MyInformationProps> = ({ customer }) => {
+const ProfileName: React.FC<ProfileNameProps> = ({ customer }) => {
   const [successState, setSuccessState] = React.useState(false);
 
   const updateCustomerName = async (
     _currentState: Record<string, unknown>,
     formData: FormData
   ) => {
-    const customer = {
-      first_name: formData.get("first_name") as string,
-      last_name: formData.get("last_name") as string,
+    const userData = {
+      fullName: formData.get("fullName") as string,
+      mobile: formData.get("mobile") as string,
     };
 
     try {
-      await updateCustomer(customer);
+      await updateUser(userData);
       return { success: true, error: null };
     } catch (error: any) {
       return { success: false, error: error.toString() };
@@ -37,9 +34,9 @@ const ProfileName: React.FC<MyInformationProps> = ({ customer }) => {
     async (...args) => {
       const result = await updateCustomerName(...args);
       if (result.success) {
-        toast.success("Name updated successfully");
+        toast.success("Profile updated successfully");
       } else if (result.error) {
-        toast.error(result.error || "Failed to update name");
+        toast.error(result.error || "Failed to update profile");
       }
       return result;
     },
@@ -60,27 +57,29 @@ const ProfileName: React.FC<MyInformationProps> = ({ customer }) => {
   return (
     <form action={formAction} className="w-full overflow-visible">
       <AccountInfo
-        label="Name"
-        currentInfo={`${customer.first_name} ${customer.last_name}`}
+        label="Profile Information"
+        currentInfo={`${customer?.fullName || "Not provided"} | ${
+          customer?.mobile || "Not provided"
+        }`}
         isSuccess={successState}
         isError={!!state?.error}
         clearState={clearState}
         data-testid="account-name-editor"
       >
-        <div className="grid grid-cols-2 gap-x-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
-            label="First name"
-            name="first_name"
+            label="Full Name"
+            name="fullName"
             required
-            defaultValue={customer.first_name ?? ""}
-            data-testid="first-name-input"
+            defaultValue={customer?.fullName ?? ""}
+            data-testid="full-name-input"
           />
           <Input
-            label="Last name"
-            name="last_name"
+            label="Mobile"
+            name="mobile"
             required
-            defaultValue={customer.last_name ?? ""}
-            data-testid="last-name-input"
+            defaultValue={customer?.mobile ?? ""}
+            data-testid="mobile-input"
           />
         </div>
       </AccountInfo>

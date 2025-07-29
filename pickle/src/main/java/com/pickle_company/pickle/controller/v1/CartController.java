@@ -27,8 +27,8 @@ public class CartController {
             return ResponseEntity.status(401).body(null);
         }
         try {
-            CartResponseDTO cartDTO = cartService.getCartByUserId(userId);
-            return ResponseEntity.ok(cartDTO);
+        CartResponseDTO cartDTO = cartService.getCartByUserId(userId);
+        return ResponseEntity.ok(cartDTO);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(null);
         } catch (Exception e) {

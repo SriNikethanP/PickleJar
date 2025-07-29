@@ -1,12 +1,12 @@
 "use client";
 
 import { CheckCircleSolid } from "@medusajs/icons";
-import { Heading, Text, Input, Label, Button } from "@medusajs/ui";
+import { Heading, Text, Button } from "@medusajs/ui";
 import Divider from "@modules/common/components/divider";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { updateUserAddress } from "@lib/api";
+import LocalizedClientLink from "@modules/common/components/localized-client-link";
 
 type ShippingProps = {
   cart: any;
@@ -27,37 +27,44 @@ const Shipping: React.FC<ShippingProps> = ({
 
   const isOpen = searchParams.get("step") === "delivery";
 
-  const [address, setAddress] = useState({
+  // User details state
+  const [userInfo, setUserInfo] = useState({
     fullName: customer?.fullName || userDetails?.fullName || "",
     email: customer?.email || userDetails?.email || "",
-    phone: customer?.mobile || userDetails?.phone || "",
-    address: customer?.address?.street || userDetails?.address || "",
+    mobile: customer?.mobile || userDetails?.phone || "",
+  });
+
+  // Address state
+  const [address, setAddress] = useState({
+    street: customer?.address?.street || userDetails?.address || "",
     city: customer?.address?.city || userDetails?.city || "",
     state: customer?.address?.state || userDetails?.state || "",
     pincode: customer?.address?.pincode || userDetails?.pincode || "",
   });
 
-  const [errors, setErrors] = useState<any>({});
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState<any>(null);
 
   useEffect(() => {
     if (customer) {
-      setAddress({
+      setUserInfo({
         fullName: customer.fullName || "",
         email: customer.email || "",
-        phone: customer.mobile || "",
-        address: customer.address?.street || "",
+        mobile: customer.mobile || "",
+      });
+      setAddress({
+        street: customer.address?.street || "",
         city: customer.address?.city || "",
         state: customer.address?.state || "",
         pincode: customer.address?.pincode || "",
       });
     } else if (userDetails) {
-      setAddress({
+      setUserInfo({
         fullName: userDetails.fullName || "",
         email: userDetails.email || "",
-        phone: userDetails.phone || "",
-        address: userDetails.address || "",
+        mobile: userDetails.phone || "",
+      });
+      setAddress({
+        street: userDetails.address || "",
         city: userDetails.city || "",
         state: userDetails.state || "",
         pincode: userDetails.pincode || "",
@@ -65,82 +72,47 @@ const Shipping: React.FC<ShippingProps> = ({
     }
   }, [customer, userDetails]);
 
-  const validateAddress = () => {
-    const newErrors: any = {};
-    if (!address.fullName.trim()) newErrors.fullName = "Full name is required";
-    if (!address.email.trim()) newErrors.email = "Email is required";
-    if (!address.phone.trim()) newErrors.phone = "Phone is required";
-    if (!address.address.trim()) newErrors.address = "Address is required";
-    if (!address.city.trim()) newErrors.city = "City is required";
-    if (!address.state.trim()) newErrors.state = "State is required";
-    if (!address.pincode.trim()) newErrors.pincode = "Pincode is required";
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleInputChange = (field: string, value: string) => {
-    setAddress((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: "" }));
-    }
-  };
-
-  const handleSaveAddress = async () => {
-    if (!validateAddress()) {
+  const handleSelectAddress = () => {
+    if (!userInfo.fullName || !userInfo.email || !userInfo.mobile) {
+      toast.error("Please complete your contact information first");
       return;
     }
 
-    setIsSaving(true);
-    try {
-      // Save address to user profile
-      const addressData = {
-        street: address.address,
-        city: address.city,
-        state: address.state,
-        pincode: address.pincode,
-      };
-
-      await updateUserAddress(addressData);
-
-      if (onAddressComplete) {
-        onAddressComplete(address);
-      }
-      setIsEditing(false);
-      toast.success("Address saved successfully");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to save address");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
-
-  const handlePlaceOrder = () => {
-    if (!validateAddress()) {
-      toast.error("Please fill in all required fields");
+    if (
+      !address.street ||
+      !address.city ||
+      !address.state ||
+      !address.pincode
+    ) {
+      toast.error("Please complete your delivery address first");
       return;
     }
+
+    const deliveryDetails = {
+      fullName: userInfo.fullName,
+      email: userInfo.email,
+      phone: userInfo.mobile,
+      address: address.street,
+      city: address.city,
+      state: address.state,
+      pincode: address.pincode,
+    };
+
+    setSelectedAddress(deliveryDetails);
 
     if (onAddressComplete) {
-      onAddressComplete(address);
+      onAddressComplete(deliveryDetails);
     }
 
-    // Navigate to payment step to place order
+    // Navigate to payment step
     router.push(pathname + "?step=payment", { scroll: false });
   };
 
+  const isUserInfoComplete =
+    userInfo.fullName && userInfo.email && userInfo.mobile;
   const isAddressComplete =
-    address.fullName &&
-    address.email &&
-    address.phone &&
-    address.address &&
-    address.city &&
-    address.state &&
-    address.pincode;
+    address.street && address.city && address.state && address.pincode;
+  const isAllComplete = isUserInfoComplete && isAddressComplete;
 
   return (
     <div className="bg-white">
@@ -149,173 +121,134 @@ const Shipping: React.FC<ShippingProps> = ({
           level="h2"
           className="flex flex-row text-3xl-regular gap-x-2 items-baseline"
         >
-          Delivery Address
-          {isAddressComplete && !isEditing && <CheckCircleSolid />}
+          Delivery Information
+          {isAllComplete && <CheckCircleSolid />}
         </Heading>
-        {isAddressComplete && !isEditing && (
-          <Text>
-            <button
-              onClick={handleEdit}
-              className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
-              data-testid="edit-delivery-button"
-            >
-              Edit
-            </button>
-          </Text>
-        )}
       </div>
 
-      {isEditing || !isAddressComplete ? (
-        <div className="pb-8">
+      {/* User Information Section */}
+      <div className="mb-8">
+        <div className="flex flex-row items-center justify-between mb-4">
+          <Heading level="h3" className="text-xl font-semibold">
+            Contact Information
+          </Heading>
+          <LocalizedClientLink href="/account/profile">
+            <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+              Edit in Profile
+            </button>
+          </LocalizedClientLink>
+        </div>
+
+        <div className="p-4 border rounded-lg bg-gray-50">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Text className="text-sm font-medium text-gray-600">
+                Full Name
+              </Text>
+              <Text className="text-base">
+                {userInfo.fullName || "Not provided"}
+              </Text>
+            </div>
+            <div>
+              <Text className="text-sm font-medium text-gray-600">Email</Text>
+              <Text className="text-base">
+                {userInfo.email || "Not provided"}
+              </Text>
+            </div>
+            <div>
+              <Text className="text-sm font-medium text-gray-600">Mobile</Text>
+              <Text className="text-base">
+                {userInfo.mobile || "Not provided"}
+              </Text>
+            </div>
+          </div>
+
+          {!isUserInfoComplete && (
+            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <Text className="text-yellow-800 text-sm">
+                Please complete your contact information in your profile before
+                proceeding.
+              </Text>
+              <LocalizedClientLink href="/account/profile">
+                <Button className="mt-2 bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700 text-sm">
+                  Go to Profile
+                </Button>
+              </LocalizedClientLink>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Address Section */}
+      <div className="mb-8">
+        <div className="flex flex-row items-center justify-between mb-4">
+          <Heading level="h3" className="text-xl font-semibold">
+            Delivery Address
+          </Heading>
+          <LocalizedClientLink href="/account/addresses">
+            <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+              Manage Addresses
+            </button>
+          </LocalizedClientLink>
+        </div>
+
+        <div className="p-4 border rounded-lg bg-gray-50">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="fullName">Full Name *</Label>
-              <Input
-                id="fullName"
-                value={address.fullName}
-                onChange={(e) => handleInputChange("fullName", e.target.value)}
-                className={errors.fullName ? "border-red-500" : ""}
-              />
-              {errors.fullName && (
-                <Text className="text-red-500 text-sm">{errors.fullName}</Text>
-              )}
+              <Text className="text-sm font-medium text-gray-600">
+                Street Address
+              </Text>
+              <Text className="text-base">
+                {address.street || "Not provided"}
+              </Text>
             </div>
-
             <div>
-              <Label htmlFor="email">Email *</Label>
-              <Input
-                id="email"
-                type="email"
-                value={address.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
-                className={errors.email ? "border-red-500" : ""}
-              />
-              {errors.email && (
-                <Text className="text-red-500 text-sm">{errors.email}</Text>
-              )}
+              <Text className="text-sm font-medium text-gray-600">City</Text>
+              <Text className="text-base">
+                {address.city || "Not provided"}
+              </Text>
             </div>
-
             <div>
-              <Label htmlFor="phone">Phone Number *</Label>
-              <Input
-                id="phone"
-                value={address.phone}
-                onChange={(e) => handleInputChange("phone", e.target.value)}
-                className={errors.phone ? "border-red-500" : ""}
-              />
-              {errors.phone && (
-                <Text className="text-red-500 text-sm">{errors.phone}</Text>
-              )}
+              <Text className="text-sm font-medium text-gray-600">State</Text>
+              <Text className="text-base">
+                {address.state || "Not provided"}
+              </Text>
             </div>
-
             <div>
-              <Label htmlFor="pincode">Pincode *</Label>
-              <Input
-                id="pincode"
-                value={address.pincode}
-                onChange={(e) => handleInputChange("pincode", e.target.value)}
-                className={errors.pincode ? "border-red-500" : ""}
-              />
-              {errors.pincode && (
-                <Text className="text-red-500 text-sm">{errors.pincode}</Text>
-              )}
-            </div>
-
-            <div className="md:col-span-2">
-              <Label htmlFor="address">Address *</Label>
-              <Input
-                id="address"
-                value={address.address}
-                onChange={(e) => handleInputChange("address", e.target.value)}
-                className={errors.address ? "border-red-500" : ""}
-              />
-              {errors.address && (
-                <Text className="text-red-500 text-sm">{errors.address}</Text>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="city">City *</Label>
-              <Input
-                id="city"
-                value={address.city}
-                onChange={(e) => handleInputChange("city", e.target.value)}
-                className={errors.city ? "border-red-500" : ""}
-              />
-              {errors.city && (
-                <Text className="text-red-500 text-sm">{errors.city}</Text>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="state">State *</Label>
-              <Input
-                id="state"
-                value={address.state}
-                onChange={(e) => handleInputChange("state", e.target.value)}
-                className={errors.state ? "border-red-500" : ""}
-              />
-              {errors.state && (
-                <Text className="text-red-500 text-sm">{errors.state}</Text>
-              )}
+              <Text className="text-sm font-medium text-gray-600">Pincode</Text>
+              <Text className="text-base">
+                {address.pincode || "Not provided"}
+              </Text>
             </div>
           </div>
 
-          <div className="mt-6 flex gap-4">
-            {isEditing && (
-              <Button
-                onClick={handleSaveAddress}
-                disabled={isSaving}
-                className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-              >
-                {isSaving ? "Saving..." : "Save Address"}
-              </Button>
-            )}
-            {isAddressComplete && (
-              <Button
-                onClick={handlePlaceOrder}
-                className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
-              >
-                Place Order
-              </Button>
-            )}
-          </div>
+          {!isAddressComplete && (
+            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <Text className="text-yellow-800 text-sm">
+                Please add a delivery address before proceeding.
+              </Text>
+              <LocalizedClientLink href="/account/addresses">
+                <Button className="mt-2 bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700 text-sm">
+                  Add Address
+                </Button>
+              </LocalizedClientLink>
+            </div>
+          )}
         </div>
-      ) : (
-        <div>
-          <div className="text-small-regular">
-            <div className="flex flex-col gap-2">
-              <Text className="txt-medium-plus text-ui-fg-base">
-                Delivery Address
-              </Text>
-              <Text className="txt-medium text-ui-fg-subtle">
-                {address.fullName}
-              </Text>
-              <Text className="txt-medium text-ui-fg-subtle">
-                {address.address}
-              </Text>
-              <Text className="txt-medium text-ui-fg-subtle">
-                {address.city}, {address.state} - {address.pincode}
-              </Text>
-              <Text className="txt-medium text-ui-fg-subtle">
-                Phone: {address.phone}
-              </Text>
-              <Text className="txt-medium text-ui-fg-subtle">
-                Email: {address.email}
-              </Text>
-            </div>
-          </div>
+      </div>
 
-          <div className="mt-6">
-            <Button
-              onClick={handlePlaceOrder}
-              className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
-            >
-              Place Order
-            </Button>
-          </div>
+      {/* Continue to Payment Button */}
+      {isAllComplete && (
+        <div className="mt-6">
+          <Button
+            onClick={handleSelectAddress}
+            className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 text-lg font-medium w-full"
+          >
+            Continue to Payment
+          </Button>
         </div>
       )}
+
       <Divider className="mt-8" />
     </div>
   );

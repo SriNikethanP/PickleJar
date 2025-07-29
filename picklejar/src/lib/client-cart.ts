@@ -92,6 +92,19 @@ export const removeCartItem = async (
   }
 };
 
+// Clear entire cart for current authenticated user
+export const clearCart = async (): Promise<boolean> => {
+  try {
+    await apiClient.delete("/cart/clear");
+    toast.success("Cart cleared successfully!");
+    return true;
+  } catch (error: any) {
+    console.error("Error clearing cart:", error);
+    toast.error(error.message || "Failed to clear cart");
+    return false;
+  }
+};
+
 // Checkout cart for current authenticated user
 export const checkoutCart = async () => {
   try {

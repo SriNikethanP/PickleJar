@@ -28,16 +28,16 @@ export const listOrders = async (
   filters?: Record<string, any>
 ) => {
   try {
-    const params: Record<string, any> = {
-      limit,
-      offset,
-      order: "-created_at",
-      ...filters,
-    };
-    const res = await api.get("/orders", { params });
+    const authHeaders = await getAuthHeaders();
+    const res = await api.get("/users/me/orders", {
+      headers: authHeaders,
+    });
     return res.data;
-  } catch (error) {
-    console.error("Error listing orders:", error);
+  } catch (error: any) {
+    // Don't log 403 errors as they're expected when user is not authenticated
+    if (error?.response?.status !== 403) {
+      console.error("Error listing orders:", error);
+    }
     return [];
   }
 };
