@@ -2,6 +2,7 @@ package com.pickle_company.pickle.mapper;
 
 import com.pickle_company.pickle.dto.UserRegistrationDTO;
 import com.pickle_company.pickle.dto.UserResponseDTO;
+import com.pickle_company.pickle.dto.AddressDTO;
 import com.pickle_company.pickle.entity.User;
 import org.springframework.stereotype.Component;
 import java.util.List;
@@ -28,12 +29,23 @@ public class UserMapper {
             return null;
         }
         
+        AddressDTO addressDTO = null;
+        if (user.getAddress() != null) {
+            addressDTO = AddressDTO.builder()
+                    .street(user.getAddress().getStreet())
+                    .city(user.getAddress().getCity())
+                    .state(user.getAddress().getState())
+                    .pincode(user.getAddress().getPincode())
+                    .build();
+        }
+        
         return UserResponseDTO.builder()
                 .id(user.getId())
                 .fullName(user.getFullName())
                 .email(user.getEmail())
                 .mobile(user.getMobile())
                 .role(user.getRole() != null ? user.getRole().name() : null)
+                .address(addressDTO)
                 .build();
     }
     

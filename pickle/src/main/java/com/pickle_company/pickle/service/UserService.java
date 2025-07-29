@@ -20,6 +20,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import com.pickle_company.pickle.dto.AddressDTO;
+import com.pickle_company.pickle.entity.Address;
+import com.pickle_company.pickle.dto.UserUpdateDTO;
 
 @Service
 public class UserService {
@@ -167,5 +170,36 @@ public class UserService {
                 .expiresIn(86400000L)
                 .user(userMapper.toDto(saved))
                 .build();
+    }
+
+    public UserResponseDTO updateUserAddress(Long userId, AddressDTO addressDTO) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+        
+        Address address = Address.builder()
+                .street(addressDTO.getStreet())
+                .city(addressDTO.getCity())
+                .state(addressDTO.getState())
+                .pincode(addressDTO.getPincode())
+                .build();
+        
+        user.setAddress(address);
+        User savedUser = userRepository.save(user);
+        return userMapper.toDto(savedUser);
+    }
+
+    public UserResponseDTO updateUser(Long userId, UserUpdateDTO updateDTO) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+        
+        if (updateDTO.getFullName() != null) {
+            user.setFullName(updateDTO.getFullName());
+        }
+        if (updateDTO.getMobile() != null) {
+            user.setMobile(updateDTO.getMobile());
+        }
+        
+        User savedUser = userRepository.save(user);
+        return userMapper.toDto(savedUser);
     }
 }

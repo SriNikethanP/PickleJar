@@ -2,6 +2,8 @@ package com.pickle_company.pickle.controller.v1;
 
 import com.pickle_company.pickle.dto.UserResponseDTO;
 import com.pickle_company.pickle.dto.OrderDTO;
+import com.pickle_company.pickle.dto.UserUpdateDTO;
+import com.pickle_company.pickle.dto.AddressDTO;
 import com.pickle_company.pickle.service.UserService;
 import com.pickle_company.pickle.util.SecurityUtil;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +43,26 @@ public class UserController {
         }
         UserResponseDTO userDTO = userService.getUserById(userId);
         return ResponseEntity.ok(userDTO);
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<UserResponseDTO> updateCurrentUser(@RequestBody UserUpdateDTO updateDTO) {
+        Long userId = SecurityUtil.getCurrentUserId();
+        if (userId == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        UserResponseDTO updatedUser = userService.updateUser(userId, updateDTO);
+        return ResponseEntity.ok(updatedUser);
+    }
+
+    @PutMapping("/me/address")
+    public ResponseEntity<UserResponseDTO> updateCurrentUserAddress(@RequestBody AddressDTO addressDTO) {
+        Long userId = SecurityUtil.getCurrentUserId();
+        if (userId == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        UserResponseDTO updatedUser = userService.updateUserAddress(userId, addressDTO);
+        return ResponseEntity.ok(updatedUser);
     }
 
     @GetMapping("/me/orders")

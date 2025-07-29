@@ -7,6 +7,7 @@ import { codCheckout } from "@lib/client-cart";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import ErrorMessage from "../error-message";
 import Divider from "@modules/common/components/divider";
+import { toast } from "sonner";
 
 const Payment = ({ cart, userDetails }: { cart: any; userDetails?: any }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -28,7 +29,7 @@ const Payment = ({ cart, userDetails }: { cart: any; userDetails?: any }) => {
   );
 
   const handleEdit = () => {
-    router.push(pathname + "?" + createQueryString("step", "payment"), {
+    router.push(pathname + "?" + createQueryString("step", "delivery"), {
       scroll: false,
     });
   };
@@ -36,6 +37,7 @@ const Payment = ({ cart, userDetails }: { cart: any; userDetails?: any }) => {
   const handlePlaceOrder = async () => {
     if (!userDetails) {
       setError("Please provide delivery details first");
+      toast.error("Please provide delivery details first");
       return;
     }
 
@@ -45,13 +47,16 @@ const Payment = ({ cart, userDetails }: { cart: any; userDetails?: any }) => {
     try {
       const result = await codCheckout(userDetails);
       if (result) {
+        toast.success("Order placed successfully!");
         // Redirect to thank you page with order details
         router.push(
           `/thank-you?orderId=${result.orderId}&total=${result.totalAmount}`
         );
       }
     } catch (err: any) {
-      setError(err.message || "Failed to place order");
+      const errorMessage = err.message || "Failed to place order";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

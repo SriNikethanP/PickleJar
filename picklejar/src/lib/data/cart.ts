@@ -174,7 +174,10 @@ export const retrieveCart = async (): Promise<Cart | null> => {
     });
     return res.data;
   } catch (error: any) {
-    console.error("Error retrieving cart:", error);
+    // Don't log 403 errors as they're expected when user is not authenticated
+    if (error?.response?.status !== 403) {
+      console.error("Error retrieving cart:", error);
+    }
     // For any authentication errors, just return null instead of throwing
     // The client-side components will handle authentication
     return null;
@@ -188,8 +191,11 @@ export const listCartOptions = async () => {
       headers: authHeaders,
     });
     return res.data;
-  } catch (error) {
-    console.error("Error fetching cart options:", error);
+  } catch (error: any) {
+    // Don't log 403 errors as they're expected when user is not authenticated
+    if (error?.response?.status !== 403) {
+      console.error("Error fetching cart options:", error);
+    }
     return { shipping_options: [] };
   }
 };

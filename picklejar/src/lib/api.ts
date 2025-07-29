@@ -154,3 +154,16 @@ class ApiClient {
 }
 
 export const apiClient = new ApiClient();
+
+// User API functions
+export const getCurrentUser = async () => {
+  return apiClient.get("/users/me");
+};
+
+export const updateUser = async (userData: any) => {
+  return apiClient.put("/users/me", userData);
+};
+
+export const updateUserAddress = async (addressData: any) => {
+  return apiClient.put("/users/me/address", addressData);
+};
