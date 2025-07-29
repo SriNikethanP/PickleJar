@@ -19,6 +19,7 @@ interface AuthContextType {
   register: (userData: RegisterData) => Promise<boolean>;
   logout: () => void;
   refreshToken: () => Promise<boolean>;
+  isAuthenticated: () => boolean;
 }
 
 interface RegisterData {
@@ -62,6 +63,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
+      console.log(
+        "Checking auth status with token:",
+        token ? "Present" : "Missing"
+      );
+
       // Verify token by calling the /me endpoint
       const response = await fetch(`${API_BASE_URL}/users/me`, {
         headers: {
@@ -70,21 +76,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         },
       });
 
+      console.log("Auth status response:", response.status);
+
       if (response.ok) {
         const userData = await response.json();
+        console.log("User data received:", userData);
         setUser(userData);
       } else {
+        console.log("Token validation failed, attempting refresh");
         // Token is invalid, try to refresh
         const refreshSuccess = await refreshToken();
         if (!refreshSuccess) {
+          console.log("Token refresh failed, clearing auth data");
           // Refresh failed, clear everything
           localStorage.removeItem("accessToken");
           localStorage.removeItem("refreshToken");
           localStorage.removeItem("user");
+          setUser(null);
         }
       }
     } catch (error) {
       console.error("Error checking auth status:", error);
+      // Clear auth data on error
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user");
+      setUser(null);
     } finally {
       setIsLoading(false);
     }
@@ -92,6 +109,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
+      console.log("Attempting login for:", email);
+
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: {
@@ -100,8 +119,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         body: JSON.stringify({ email, password }),
       });
 
+      console.log("Login response status:", response.status);
+
       if (response.ok) {
         const data = await response.json();
+        console.log("Login successful, user data:", data);
 
         // Store tokens and user data
         localStorage.setItem("accessToken", data.accessToken);
@@ -112,19 +134,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         toast.success("Login successful!");
         return true;
       } else {
-        const errorData = await response.json();
-        toast.error(errorData.message || "Login failed");
+        let errorMessage = "Login failed";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch (parseError) {
+          console.error("Failed to parse login error response:", parseError);
+          // Try to get text content
+          try {
+            const textContent = await response.text();
+            if (textContent && textContent.trim()) {
+              errorMessage = textContent;
+            }
+          } catch (textError) {
+            console.error("Failed to get error text:", textError);
+          }
+        }
+        toast.error(errorMessage);
         return false;
       }
     } catch (error) {
       console.error("Login error:", error);
-      toast.error("Login failed. Please try again.");
+      toast.error("Login failed. Please check your connection and try again.");
       return false;
     }
   };
 
   const register = async (userData: RegisterData): Promise<boolean> => {
     try {
+      console.log("Attempting registration for:", userData.email);
+
       const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: "POST",
         headers: {
@@ -133,8 +172,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         body: JSON.stringify(userData),
       });
 
+      console.log("Registration response status:", response.status);
+
       if (response.ok) {
         const data = await response.json();
+        console.log("Registration successful, user data:", data);
 
         // Store tokens and user data
         localStorage.setItem("accessToken", data.accessToken);
@@ -145,18 +187,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         toast.success("Registration successful!");
         return true;
       } else {
-        const errorData = await response.json();
-        toast.error(errorData.message || "Registration failed");
+        let errorMessage = "Registration failed";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch (parseError) {
+          console.error(
+            "Failed to parse registration error response:",
+            parseError
+          );
+          // Try to get text content
+          try {
+            const textContent = await response.text();
+            if (textContent && textContent.trim()) {
+              errorMessage = textContent;
+            }
+          } catch (textError) {
+            console.error("Failed to get error text:", textError);
+          }
+        }
+        toast.error(errorMessage);
         return false;
       }
     } catch (error) {
       console.error("Registration error:", error);
-      toast.error("Registration failed. Please try again.");
+      toast.error(
+        "Registration failed. Please check your connection and try again."
+      );
       return false;
     }
   };
 
   const logout = () => {
+    console.log("Logging out user");
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("user");
@@ -168,8 +231,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       const refreshToken = localStorage.getItem("refreshToken");
       if (!refreshToken) {
+        console.log("No refresh token found");
         return false;
       }
+
+      console.log("Attempting token refresh");
 
       const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
         method: "POST",
@@ -179,8 +245,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         body: JSON.stringify({ refreshToken }),
       });
 
+      console.log("Token refresh response status:", response.status);
+
       if (response.ok) {
         const data = await response.json();
+        console.log("Token refresh successful");
 
         // Update tokens
         localStorage.setItem("accessToken", data.accessToken);
@@ -190,12 +259,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setUser(data.user);
         return true;
       } else {
+        console.log("Token refresh failed");
+        let errorMessage = "Token refresh failed";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch (parseError) {
+          console.error("Failed to parse refresh error response:", parseError);
+        }
+        console.error("Token refresh error:", errorMessage);
         return false;
       }
     } catch (error) {
       console.error("Token refresh error:", error);
       return false;
     }
+  };
+
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("accessToken");
+    return !!(token && user);
   };
 
   const value: AuthContextType = {
@@ -205,6 +288,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     register,
     logout,
     refreshToken,
+    isAuthenticated,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
