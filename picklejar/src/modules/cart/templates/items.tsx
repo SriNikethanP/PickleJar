@@ -32,10 +32,11 @@ const ItemsTemplate = ({ cart }: ItemsTemplateProps) => {
         <Table.Body>
           {items
             ? items
-                .map((item) => {
+                .filter(item => item && item.id) // Filter out invalid items
+                .map((item, index) => {
                   return (
                     <Item
-                      key={item.id}
+                      key={item.id || `item-${index}`}
                       item={item}
                       currencyCode="INR"
                     />

@@ -26,13 +26,14 @@ const ItemsPreviewTemplate = ({ cart }: ItemsTemplateProps) => {
         <Table.Body data-testid="items-table">
           {items
             ? items
+                .filter(item => item && item.id) // Filter out invalid items
                 .sort((a, b) => {
                   return (a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1
                 })
-                .map((item) => {
+                .map((item, index) => {
                   return (
                     <Item
-                      key={item.id}
+                      key={item.id || `item-${index}`}
                       item={item}
                       type="preview"
                       currencyCode={cart.currency_code}

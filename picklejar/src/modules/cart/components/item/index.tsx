@@ -39,19 +39,24 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
   const maxQtyFromInventory = 10;
   const maxQuantity = item.variant?.manage_inventory ? 10 : maxQtyFromInventory;
 
+  // Handle cases where item or item.product might be undefined
+  if (!item || !item.product) {
+    return null; // Don't render anything if item is invalid
+  }
+
   return (
     <Table.Row className="w-full" data-testid="product-row">
       <Table.Cell className="!pl-0 p-4 w-24">
         <LocalizedClientLink
-          href={`/products/${item.product.id}`}
+          href={`/products/${item.product?.id}`}
           className={clx("flex", {
             "w-16": type === "preview",
             "small:w-24 w-12": type === "full",
           })}
         >
           <img
-            src={item.product.imageUrls?.[0] || "/placeholder.png"}
-            alt={item.product.name}
+            src={item.product?.imageUrls?.[0] || "/placeholder.png"}
+            alt={item.product?.name || "Product"}
             className="w-24 h-24 object-cover rounded"
           />
         </LocalizedClientLink>
@@ -62,7 +67,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
           className="txt-medium-plus text-ui-fg-base"
           data-testid="product-title"
         >
-          {item.product.name}
+          {item.product?.name || "Unknown Product"}
         </Text>
       </Table.Cell>
 
@@ -100,9 +105,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
 
       {type === "full" && (
         <Table.Cell className="hidden small:table-cell">
-          <span className="text-base-regular">
-            ₹{item.product.price}
-          </span>
+          <span className="text-base-regular">₹{item.product?.price || 0}</span>
         </Table.Cell>
       )}
 
@@ -114,12 +117,14 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
         >
           {type === "preview" && (
             <span className="flex gap-x-1 ">
-              <Text className="text-ui-fg-muted">{item.quantity}x </Text>
-              <span className="text-base-regular">₹{item.product.price}</span>
+              <Text className="text-ui-fg-muted">{item.quantity || 0}x </Text>
+              <span className="text-base-regular">
+                ₹{item.product?.price || 0}
+              </span>
             </span>
           )}
           <span className="text-base-regular font-semibold">
-            ₹{item.product.price * item.quantity}
+            ₹{(item.product?.price || 0) * (item.quantity || 0)}
           </span>
         </span>
       </Table.Cell>

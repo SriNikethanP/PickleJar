@@ -11,7 +11,10 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
   // Calculate totals from cart items
   const subtotal =
     totals?.items?.reduce((acc: number, item: any) => {
-      return acc + item.product.price * item.quantity;
+      // Handle cases where item.product might be undefined or missing price
+      const price = item?.product?.price || 0;
+      const quantity = item?.quantity || 0;
+      return acc + (price * quantity);
     }, 0) || 0;
 
   const shipping = 0; // Free shipping for now
