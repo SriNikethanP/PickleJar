@@ -9,10 +9,16 @@ class ApiClient {
       tokenLength: token ? token.length : 0,
       tokenPreview: token ? `${token.substring(0, 20)}...` : "None",
     });
-    return {
+
+    const headers: HeadersInit = {
       "Content-Type": "application/json",
-      ...(token && { Authorization: `Bearer ${token}` }),
     };
+
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    return headers;
   }
 
   private async refreshTokenIfNeeded(): Promise<boolean> {

@@ -17,14 +17,13 @@ public class PaymentController {
     @GetMapping
     public List<PaymentDTO> getAllPayments(@RequestParam(value = "orderId", required = false) Long orderId) {
         if (orderId != null) {
-            PaymentDTO payment = paymentService.getByOrderId(orderId);
-            return payment != null ? List.of(payment) : List.of();
+            return paymentService.getPaymentsByOrderId(orderId);
         }
         return paymentService.getAllPayments();
     }
 
     @GetMapping("/{id}")
     public PaymentDTO getById(@PathVariable Long id) {
-        return paymentService.getById(id);
+        return paymentService.getPaymentById(id);
     }
 }

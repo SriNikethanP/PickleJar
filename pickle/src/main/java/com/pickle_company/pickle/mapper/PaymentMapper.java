@@ -18,8 +18,8 @@ public class PaymentMapper {
                 .id(payment.getId())
                 .orderId(payment.getOrder() != null ? payment.getOrder().getId() : null)
                 .amount(payment.getAmount())
-                .method(payment.getMethod())
-                .status(payment.getStatus())
+                .paymentMethod(payment.getPaymentMethod() != null ? payment.getPaymentMethod().name() : null)
+                .status(payment.getStatus() != null ? payment.getStatus().name() : null)
                 .build();
     }
     

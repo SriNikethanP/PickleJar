@@ -98,6 +98,13 @@ public class PaymentService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
     
+    public List<PaymentDTO> getPaymentsByOrderId(Long orderId) {
+        return paymentRepository.findByOrderId(orderId)
+            .stream()
+            .map(this::convertToDTO)
+            .collect(Collectors.toList());
+    }
+    
     private PaymentDTO convertToDTO(Payment payment) {
         return PaymentDTO.builder()
                 .id(payment.getId())

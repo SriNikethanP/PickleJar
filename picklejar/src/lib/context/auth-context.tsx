@@ -3,6 +3,13 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { apiClient } from "@lib/api";
+import {
+  AUTH_KEYS,
+  getLocalStorage,
+  setLocalStorage,
+  removeLocalStorage,
+  clearUserAuth,
+} from "@lib/util/auth-persistence";
 
 export interface User {
   id: number;
@@ -57,8 +64,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const checkAuthStatus = async () => {
     try {
-      const token = localStorage.getItem("accessToken");
+      // First try to get user from localStorage
+      const storedUser = getLocalStorage(AUTH_KEYS.USER.USER_DATA);
+      if (storedUser) {
+        const userData = JSON.parse(storedUser);
+        setUser(userData);
+        console.log("User restored from localStorage:", userData);
+      }
 
+      const token = getLocalStorage(AUTH_KEYS.USER.ACCESS_TOKEN);
       if (!token) {
         console.log("No access token found in localStorage");
         setIsLoading(false);
@@ -74,14 +88,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       // Use apiClient to verify token by calling the /me endpoint
       // This will handle token refresh automatically if needed
       const userData = await apiClient.get<User>("/users/me");
-      console.log("User data received:", userData);
-      setUser(userData);
+      if (userData) {
+        console.log("User data received from API:", userData);
+        setUser(userData);
+        // Store updated user data
+        setLocalStorage(AUTH_KEYS.USER.USER_DATA, JSON.stringify(userData));
+      }
     } catch (error) {
       console.error("Error checking auth status:", error);
       // Clear auth data on error
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      localStorage.removeItem("user");
+      clearUserAuth();
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -113,12 +129,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         });
 
         // Store tokens and user data
-        localStorage.setItem("accessToken", data.accessToken);
-        localStorage.setItem("refreshToken", data.refreshToken);
-        localStorage.setItem("user", JSON.stringify(data.user));
+        setLocalStorage(AUTH_KEYS.USER.ACCESS_TOKEN, data.accessToken);
+        setLocalStorage(AUTH_KEYS.USER.REFRESH_TOKEN, data.refreshToken);
+        setLocalStorage(AUTH_KEYS.USER.USER_DATA, JSON.stringify(data.user));
 
         // Verify tokens were stored
-        const storedToken = localStorage.getItem("accessToken");
+        const storedToken = getLocalStorage(AUTH_KEYS.USER.ACCESS_TOKEN);
         console.log("Stored token verification:", {
           stored: storedToken ? "Present" : "Missing",
           length: storedToken ? storedToken.length : 0,
@@ -180,12 +196,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         });
 
         // Store tokens and user data
-        localStorage.setItem("accessToken", data.accessToken);
-        localStorage.setItem("refreshToken", data.refreshToken);
-        localStorage.setItem("user", JSON.stringify(data.user));
+        setLocalStorage(AUTH_KEYS.USER.ACCESS_TOKEN, data.accessToken);
+        setLocalStorage(AUTH_KEYS.USER.REFRESH_TOKEN, data.refreshToken);
+        setLocalStorage(AUTH_KEYS.USER.USER_DATA, JSON.stringify(data.user));
 
         // Verify tokens were stored
-        const storedToken = localStorage.getItem("accessToken");
+        const storedToken = getLocalStorage(AUTH_KEYS.USER.ACCESS_TOKEN);
         console.log("Stored token verification:", {
           stored: storedToken ? "Present" : "Missing",
           length: storedToken ? storedToken.length : 0,
@@ -229,16 +245,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const logout = () => {
     console.log("Logging out user");
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("user");
+    clearUserAuth();
     setUser(null);
     toast.success("Logged out successfully");
   };
 
   const refreshToken = async (): Promise<boolean> => {
     try {
-      const refreshToken = localStorage.getItem("refreshToken");
+      const refreshToken = getLocalStorage(AUTH_KEYS.USER.REFRESH_TOKEN);
       if (!refreshToken) {
         console.log("No refresh token found");
         return false;
@@ -261,9 +275,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         console.log("Token refresh successful");
 
         // Update tokens
-        localStorage.setItem("accessToken", data.accessToken);
-        localStorage.setItem("refreshToken", data.refreshToken);
-        localStorage.setItem("user", JSON.stringify(data.user));
+        setLocalStorage(AUTH_KEYS.USER.ACCESS_TOKEN, data.accessToken);
+        setLocalStorage(AUTH_KEYS.USER.REFRESH_TOKEN, data.refreshToken);
+        setLocalStorage(AUTH_KEYS.USER.USER_DATA, JSON.stringify(data.user));
 
         setUser(data.user);
         return true;
@@ -286,7 +300,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const isAuthenticated = () => {
-    const token = localStorage.getItem("accessToken");
+    const token = getLocalStorage(AUTH_KEYS.USER.ACCESS_TOKEN);
     return !!(token && user);
   };
 

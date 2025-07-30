@@ -1,37 +1,36 @@
+import {
+  AUTH_KEYS,
+  getLocalStorage,
+  setLocalStorage,
+  removeLocalStorage,
+} from "@lib/util/auth-persistence";
+
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "http://localhost:8080/api/v1";
-// Helper function to safely access localStorage
-const getLocalStorage = (key: string): string | null => {
-  if (typeof window !== "undefined") {
-    return localStorage.getItem(key);
-  }
-  return null;
-};
-
-const setLocalStorage = (key: string, value: string): void => {
-  if (typeof window !== "undefined") {
-    localStorage.setItem(key, value);
-  }
-};
-
-const removeLocalStorage = (key: string): void => {
-  if (typeof window !== "undefined") {
-    localStorage.removeItem(key);
-  }
-};
 
 class AdminApiClient {
   private async getAuthHeaders(): Promise<HeadersInit> {
-    const token = getLocalStorage("adminAccessToken");
-    return {
+    const token = getLocalStorage(AUTH_KEYS.ADMIN.ACCESS_TOKEN);
+    console.log("Admin API Client - Auth token check:", {
+      token: token ? "Present" : "Missing",
+      tokenLength: token ? token.length : 0,
+      tokenPreview: token ? `${token.substring(0, 20)}...` : "None",
+    });
+
+    const headers: HeadersInit = {
       "Content-Type": "application/json",
-      ...(token && { Authorization: `Bearer ${token}` }),
     };
+
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    return headers;
   }
 
   private async refreshTokenIfNeeded(): Promise<boolean> {
     try {
-      const refreshToken = getLocalStorage("adminRefreshToken");
+      const refreshToken = getLocalStorage(AUTH_KEYS.ADMIN.REFRESH_TOKEN);
       if (!refreshToken) {
         return false;
       }
@@ -46,9 +45,9 @@ class AdminApiClient {
 
       if (response.ok) {
         const data = await response.json();
-        setLocalStorage("adminAccessToken", data.accessToken);
-        setLocalStorage("adminRefreshToken", data.refreshToken);
-        setLocalStorage("adminUser", JSON.stringify(data.user));
+        setLocalStorage(AUTH_KEYS.ADMIN.ACCESS_TOKEN, data.accessToken);
+        setLocalStorage(AUTH_KEYS.ADMIN.REFRESH_TOKEN, data.refreshToken);
+        setLocalStorage(AUTH_KEYS.ADMIN.USER_DATA, JSON.stringify(data.user));
         return true;
       }
       return false;

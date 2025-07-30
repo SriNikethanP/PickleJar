@@ -2,26 +2,13 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
-
-// Helper function to safely access localStorage
-const getLocalStorage = (key: string): string | null => {
-  if (typeof window !== "undefined") {
-    return localStorage.getItem(key);
-  }
-  return null;
-};
-
-const setLocalStorage = (key: string, value: string): void => {
-  if (typeof window !== "undefined") {
-    localStorage.setItem(key, value);
-  }
-};
-
-const removeLocalStorage = (key: string): void => {
-  if (typeof window !== "undefined") {
-    localStorage.removeItem(key);
-  }
-};
+import {
+  AUTH_KEYS,
+  getLocalStorage,
+  setLocalStorage,
+  removeLocalStorage,
+  clearAdminAuth,
+} from "@lib/util/auth-persistence";
 
 export interface AdminUser {
   id: number;
@@ -65,11 +52,26 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const checkAdminAuthStatus = async () => {
     try {
-      const token = getLocalStorage("adminAccessToken");
+      // First try to get admin from localStorage
+      const storedAdmin = getLocalStorage(AUTH_KEYS.ADMIN.USER_DATA);
+      if (storedAdmin) {
+        const adminData = JSON.parse(storedAdmin);
+        setAdmin(adminData);
+        console.log("Admin restored from localStorage:", adminData);
+      }
+
+      const token = getLocalStorage(AUTH_KEYS.ADMIN.ACCESS_TOKEN);
       if (!token) {
+        console.log("No admin access token found in localStorage");
         setIsLoading(false);
         return;
       }
+
+      console.log("Checking admin auth status with token:", {
+        token: token ? "Present" : "Missing",
+        tokenLength: token ? token.length : 0,
+        tokenPreview: token ? `${token.substring(0, 20)}...` : "None",
+      });
 
       // Verify admin token by calling the /me endpoint
       const response = await fetch(`${API_BASE_URL}/users/me`, {
@@ -84,18 +86,24 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
         // Check if the user has admin role
         if (userData.role === "ADMIN") {
           setAdmin(userData);
+          // Store updated admin data
+          setLocalStorage(AUTH_KEYS.ADMIN.USER_DATA, JSON.stringify(userData));
+          console.log("Admin data received from API:", userData);
         } else {
           // User is not admin, clear token
-          removeLocalStorage("adminAccessToken");
-          removeLocalStorage("adminRefreshToken");
+          clearAdminAuth();
+          setAdmin(null);
         }
       } else {
         // Token is invalid, clear it
-        removeLocalStorage("adminAccessToken");
-        removeLocalStorage("adminRefreshToken");
+        clearAdminAuth();
+        setAdmin(null);
       }
     } catch (error) {
       console.error("Error checking admin auth status:", error);
+      // Clear admin data on error
+      clearAdminAuth();
+      setAdmin(null);
     } finally {
       setIsLoading(false);
     }
@@ -121,9 +129,9 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
         }
 
         // Store admin tokens separately from regular user tokens
-        setLocalStorage("adminAccessToken", data.accessToken);
-        setLocalStorage("adminRefreshToken", data.refreshToken);
-        setLocalStorage("adminUser", JSON.stringify(data.user));
+        setLocalStorage(AUTH_KEYS.ADMIN.ACCESS_TOKEN, data.accessToken);
+        setLocalStorage(AUTH_KEYS.ADMIN.REFRESH_TOKEN, data.refreshToken);
+        setLocalStorage(AUTH_KEYS.ADMIN.USER_DATA, JSON.stringify(data.user));
 
         setAdmin(data.user);
         toast.success("Admin login successful!");
@@ -141,9 +149,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const logout = () => {
-    removeLocalStorage("adminAccessToken");
-    removeLocalStorage("adminRefreshToken");
-    removeLocalStorage("adminUser");
+    clearAdminAuth();
     setAdmin(null);
     toast.success("Admin logged out successfully");
   };

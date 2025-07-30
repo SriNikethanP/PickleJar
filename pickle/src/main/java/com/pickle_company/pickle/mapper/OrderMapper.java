@@ -27,7 +27,7 @@ public class OrderMapper {
                 .id(order.getId())
                 .user(userMapper.toDto(order.getUser()))
                 .items(toOrderItemDtoList(order.getItems()))
-                .totalAmount(order.getTotalAmount())
+                .totalAmount(order.getTotalAmount() != null ? order.getTotalAmount().doubleValue() : 0.0)
                 .placedAt(order.getPlacedAt())
                 .status("PLACED") // Default status since it's not in the entity
                 .paymentMethod(order.getPaymentMethod())

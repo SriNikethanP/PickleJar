@@ -93,8 +93,11 @@ public class CartService {
         // Create Order
         Order order = Order.builder()
                 .user(user)
-                .totalAmount(cart.getItems().stream()
-                        .mapToDouble(ci -> ci.getProduct().getPrice() * ci.getQuantity()).sum())
+                .totalAmount(
+                    cart.getItems().stream()
+                        .map(ci -> java.math.BigDecimal.valueOf(ci.getProduct().getPrice()).multiply(java.math.BigDecimal.valueOf(ci.getQuantity())))
+                        .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add)
+                )
                 .placedAt(LocalDateTime.now())
                 .build();
         order = orderRepository.save(order);
@@ -119,7 +122,7 @@ public class CartService {
 
         return CheckoutResponseDTO.builder()
                 .orderId(order.getId())
-                .totalAmount(order.getTotalAmount())
+                .totalAmount(order.getTotalAmount() != null ? order.getTotalAmount().doubleValue() : 0.0)
                 .placedAt(order.getPlacedAt())
                 .build();
     }
@@ -177,8 +180,11 @@ public class CartService {
         // Create Order with COD details
         Order order = Order.builder()
                 .user(user)
-                .totalAmount(cart.getItems().stream()
-                        .mapToDouble(ci -> ci.getProduct().getPrice() * ci.getQuantity()).sum())
+                .totalAmount(
+                    cart.getItems().stream()
+                        .map(ci -> java.math.BigDecimal.valueOf(ci.getProduct().getPrice()).multiply(java.math.BigDecimal.valueOf(ci.getQuantity())))
+                        .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add)
+                )
                 .placedAt(LocalDateTime.now())
                 .paymentMethod("COD")
                 .shippingAddress(request.getAddress() + ", " + request.getCity() + ", " + request.getState() + " - " + request.getPincode())
@@ -208,7 +214,7 @@ public class CartService {
 
         return CheckoutResponseDTO.builder()
                 .orderId(order.getId())
-                .totalAmount(order.getTotalAmount())
+                .totalAmount(order.getTotalAmount() != null ? order.getTotalAmount().doubleValue() : 0.0)
                 .placedAt(order.getPlacedAt())
                 .paymentMethod("COD")
                 .build();
