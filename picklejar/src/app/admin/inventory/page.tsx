@@ -38,7 +38,7 @@ export default function InventoryPage() {
     if (admin) {
       try {
         const data = await listInventory();
-        setProducts(data);
+        setProducts(data as any[]);
       } catch (error) {
         console.error("Error fetching inventory:", error);
       } finally {

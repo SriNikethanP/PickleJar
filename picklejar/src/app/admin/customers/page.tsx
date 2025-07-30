@@ -21,7 +21,7 @@ import { useAdminAuth } from "@lib/context/admin-auth-context";
 
 export default function CustomersPage() {
   const { admin, isLoading: authLoading } = useAdminAuth();
-  const [customers, setCustomers] = useState([]);
+  const [customers, setCustomers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -29,7 +29,7 @@ export default function CustomersPage() {
       if (admin) {
         try {
           const customersData = await listCustomers();
-          setCustomers(customersData);
+          setCustomers(customersData as any[]);
         } catch (error) {
           console.error("Error fetching customers:", error);
         } finally {

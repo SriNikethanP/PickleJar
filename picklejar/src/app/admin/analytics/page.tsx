@@ -7,7 +7,7 @@ import { useAdminAuth } from "@lib/context/admin-auth-context";
 
 export default function AnalyticsPage() {
   const { admin, isLoading: authLoading } = useAdminAuth();
-  const [data, setData] = useState(null);
+  const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

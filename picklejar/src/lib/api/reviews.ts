@@ -26,7 +26,8 @@ export const getProductReviews = async (
   productId: number
 ): Promise<Review[]> => {
   try {
-    return await apiClient.get(`/products/${productId}/reviews`);
+    const result = await apiClient.get(`/products/${productId}/reviews`);
+    return result || [];
   } catch (error) {
     console.error("Error fetching reviews:", error);
     return [];

@@ -13,7 +13,7 @@ import { useAdminAuth } from "@lib/context/admin-auth-context";
 
 export default function ShippingPage() {
   const { admin, isLoading: authLoading } = useAdminAuth();
-  const [shipments, setShipments] = useState([]);
+  const [shipments, setShipments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export default function ShippingPage() {
       if (admin) {
         try {
           const shipmentsData = await listShipments();
-          setShipments(shipmentsData);
+          setShipments(shipmentsData as any[]);
         } catch (error) {
           console.error("Error fetching shipments:", error);
         } finally {

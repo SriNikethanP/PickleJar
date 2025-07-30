@@ -21,7 +21,7 @@ import { useAdminAuth } from "@lib/context/admin-auth-context";
 
 export default function OrdersPage() {
   const { admin, isLoading: authLoading } = useAdminAuth();
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -29,7 +29,7 @@ export default function OrdersPage() {
       if (admin) {
         try {
           const ordersData = await listOrders();
-          setOrders(ordersData);
+          setOrders(ordersData as any[]);
         } catch (error) {
           console.error("Error fetching orders:", error);
         } finally {
