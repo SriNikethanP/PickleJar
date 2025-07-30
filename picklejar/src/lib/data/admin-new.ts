@@ -236,10 +236,46 @@ export const deleteCategory = async (id: number) => {
 
 export const listPayments = async () => {
   try {
-    return await adminApiClient.get("/payments");
+    return await adminApiClient.get("/admin/payments");
   } catch (error) {
     console.error("Error fetching payments:", error);
     return [];
+  }
+};
+
+export const updatePaymentStatus = async (
+  paymentId: number,
+  status: string
+) => {
+  try {
+    return await adminApiClient.put(`/admin/payments/${paymentId}/status`, {
+      status,
+    });
+  } catch (error) {
+    console.error("Error updating payment status:", error);
+    throw error;
+  }
+};
+
+export const getPaymentStats = async () => {
+  try {
+    return await adminApiClient.get("/admin/payments/stats");
+  } catch (error) {
+    console.error("Error fetching payment stats:", error);
+    return {
+      pendingCount: 0,
+      completedCount: 0,
+      totalRevenue: 0,
+    };
+  }
+};
+
+export const createTestOrder = async () => {
+  try {
+    return await adminApiClient.post("/admin/orders/test");
+  } catch (error) {
+    console.error("Error creating test order:", error);
+    throw error;
   }
 };
 

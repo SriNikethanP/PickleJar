@@ -1,6 +1,12 @@
 package com.pickle_company.pickle.dto;
 
-import lombok.*;
+import com.pickle_company.pickle.entity.Payment;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -10,8 +16,18 @@ import java.time.LocalDateTime;
 public class PaymentDTO {
     private Long id;
     private Long orderId;
-    private double amount;
+    private BigDecimal amount;
+    private String paymentMethod;
+    private String paymentMethodDisplay;
     private String status;
-    private String method;
-    private LocalDateTime paidAt;
+    private String statusDisplay;
+    private String transactionId;
+    private LocalDateTime paymentDate;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    
+    // Order details for admin view
+    private String orderNumber;
+    private String customerName;
+    private String customerEmail;
 } 

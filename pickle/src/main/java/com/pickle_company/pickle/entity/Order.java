@@ -3,6 +3,7 @@ package com.pickle_company.pickle.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -24,11 +25,16 @@ public class Order {
     @Builder.Default
     private List<OrderItem> items = new ArrayList<>();
 
-    private double totalAmount;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<Payment> payments = new ArrayList<>();
+
+    private BigDecimal totalAmount;
     private LocalDateTime placedAt;
     private String paymentMethod;
     private String shippingAddress;
     private String customerName;
     private String customerEmail;
     private String customerPhone;
+    private String status;
 }
