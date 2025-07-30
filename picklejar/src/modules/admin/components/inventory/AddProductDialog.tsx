@@ -110,7 +110,7 @@ export default function AddProductDialog({
       <DialogTrigger asChild>
         <Button>Add Product</Button>
       </DialogTrigger>
-      <DialogContent className="bg-white dark:bg-zinc-900 shadow-2xl border border-gray-200 dark:border-zinc-800 max-w-md">
+      <DialogContent className="bg-white dark:bg-zinc-900 shadow-2xl border border-gray-200 dark:border-zinc-800 max-w-md w-[95vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add Product</DialogTitle>
         </DialogHeader>
@@ -152,34 +152,44 @@ export default function AddProductDialog({
           />
 
           {/* Category Selection */}
-          <select
-            name="categoryId"
-            value={form.categoryId}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Select Category (Optional)</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Category
+            </label>
+            <select
+              name="categoryId"
+              value={form.categoryId}
+              onChange={handleChange}
+              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select Category (Optional)</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
           {/* Collection Selection */}
-          <select
-            name="collectionId"
-            value={form.collectionId}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Select Collection (Optional)</option>
-            {collections.map((collection) => (
-              <option key={collection.id} value={collection.id}>
-                {collection.title}
-              </option>
-            ))}
-          </select>
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Collection
+            </label>
+            <select
+              name="collectionId"
+              value={form.collectionId}
+              onChange={handleChange}
+              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select Collection (Optional)</option>
+              {collections.map((collection) => (
+                <option key={collection.id} value={collection.id}>
+                  {collection.title}
+                </option>
+              ))}
+            </select>
+          </div>
 
           {/* Image Upload */}
           <div className="space-y-2">

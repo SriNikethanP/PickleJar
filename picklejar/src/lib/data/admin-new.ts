@@ -67,10 +67,12 @@ export const addProduct = async (product: any, images: File[] = []) => {
   try {
     let imageUrls: string[] = [];
     if (images.length > 0) {
+      console.log("Uploading", images.length, "images to Cloudinary...");
       const cloudinaryResults = await uploadMultipleFilesAsBase64ToCloudinary(
         images
       );
       imageUrls = cloudinaryResults.map((result) => result.secure_url);
+      console.log("Cloudinary upload successful. Image URLs:", imageUrls);
     }
 
     const productData = {
@@ -83,7 +85,10 @@ export const addProduct = async (product: any, images: File[] = []) => {
       imageUrls: imageUrls,
     };
 
-    return await adminApiClient.post("/products/admin", productData);
+    console.log("Sending product data to backend:", productData);
+    const result = await adminApiClient.post("/products/admin", productData);
+    console.log("Backend response:", result);
+    return result;
   } catch (error: any) {
     console.error("Error adding product:", error);
     throw new Error(error.message || "Failed to add product");
@@ -98,10 +103,12 @@ export const updateProduct = async (
   try {
     let imageUrls: string[] = [];
     if (images.length > 0) {
+      console.log("Uploading", images.length, "images to Cloudinary...");
       const cloudinaryResults = await uploadMultipleFilesAsBase64ToCloudinary(
         images
       );
       imageUrls = cloudinaryResults.map((result) => result.secure_url);
+      console.log("Cloudinary upload successful. Image URLs:", imageUrls);
     }
 
     const productData = {
@@ -114,7 +121,13 @@ export const updateProduct = async (
       imageUrls: imageUrls,
     };
 
-    return await adminApiClient.put(`/products/admin/${id}`, productData);
+    console.log("Sending product data to backend:", productData);
+    const result = await adminApiClient.put(
+      `/products/admin/${id}`,
+      productData
+    );
+    console.log("Backend response:", result);
+    return result;
   } catch (error: any) {
     console.error("Error updating product:", error);
     throw new Error(error.message || "Failed to update product");
@@ -136,7 +149,7 @@ export const deleteProductImage = async (
 ) => {
   try {
     return await adminApiClient.delete(`/products/admin/${productId}/images`, {
-      data: { imageUrl },
+      imageUrl,
     });
   } catch (error) {
     console.error("Error deleting product image:", error);
@@ -230,7 +243,17 @@ export const listPayments = async () => {
 
 export const listShipments = async () => {
   try {
-    return await adminApiClient.get("/shipping");
+    // For now, we'll use orders data to simulate shipments
+    const orders = (await listOrders()) as any[];
+    return orders.map((order: any, index: number) => ({
+      id: index + 1,
+      orderId: order.id,
+      carrier: "Standard Delivery",
+      trackingNumber: `TRK${order.id.toString().padStart(6, "0")}`,
+      status: order.status === "completed" ? "Delivered" : "In Transit",
+      shippedAt: order.placedAt,
+      deliveredAt: order.status === "completed" ? order.placedAt : null,
+    }));
   } catch (error) {
     console.error("Error fetching shipments:", error);
     return [];

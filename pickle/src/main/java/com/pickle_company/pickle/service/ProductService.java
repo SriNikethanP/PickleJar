@@ -73,15 +73,23 @@ public class ProductService {
         
         // Handle image URLs from Cloudinary
         if (dto.getImageUrls() != null && !dto.getImageUrls().isEmpty()) {
+            System.out.println("Received imageUrls from frontend: " + dto.getImageUrls());
             if (productId != null) {
                 // For updates, merge with existing images
                 List<String> existingImages = new ArrayList<>(product.getImageUrls());
                 existingImages.addAll(dto.getImageUrls());
                 product.setImageUrls(existingImages);
+                System.out.println("Updated product imageUrls: " + product.getImageUrls());
             } else {
                 // For new products, set the image URLs
                 product.setImageUrls(dto.getImageUrls());
+                System.out.println("Set new product imageUrls: " + product.getImageUrls());
             }
+        } else if (productId != null) {
+            // For updates with no new images, keep existing images
+            System.out.println("No new images provided, keeping existing images: " + product.getImageUrls());
+        } else {
+            System.out.println("No imageUrls received from frontend for new product");
         }
 
         Product saved = productRepo.save(product);
@@ -192,6 +200,23 @@ public class ProductService {
 
     public void deleteProduct(Long productId) {
         productRepo.deleteById(productId);
+    }
+
+    // Delete a specific product image
+    public ProductResponseDTO deleteProductImage(Long productId, String imageUrl) {
+        Product product = productRepo.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+        
+        List<String> currentImages = new ArrayList<>(product.getImageUrls());
+        boolean removed = currentImages.remove(imageUrl);
+        
+        if (!removed) {
+            throw new IllegalArgumentException("Image not found in product");
+        }
+        
+        product.setImageUrls(currentImages);
+        Product savedProduct = productRepo.save(product);
+        return productMapper.toDto(savedProduct);
     }
 
     public List<ProductResponseDTO> getAllProducts() {

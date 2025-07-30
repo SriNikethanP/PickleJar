@@ -101,5 +101,12 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
+    // Delete a specific product image
+    @DeleteMapping("/admin/{id}/images")
+    public ResponseEntity<ProductResponseDTO> deleteProductImage(
+            @PathVariable Long id, @RequestBody DeleteImageRequest request) {
+        return ResponseEntity.ok(productService.deleteProductImage(id, request.getImageUrl()));
+    }
+
 }
 

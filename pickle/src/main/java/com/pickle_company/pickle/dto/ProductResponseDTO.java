@@ -17,6 +17,8 @@ public class ProductResponseDTO {
     private int stock;
     private List<ReviewDTO> reviews; // Add DTO as needed (id, user, comment, rating...)
     private String categoryName;
+    private Long categoryId;
+    private Long collectionId;
     private double averageRating;
 }
 

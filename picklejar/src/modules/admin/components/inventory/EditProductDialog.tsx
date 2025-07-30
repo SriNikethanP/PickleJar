@@ -53,12 +53,32 @@ export default function EditProductDialog({
         ]);
         setCategories(categoriesData as any[]);
         setCollections(collectionsData as any[]);
+        console.log("Fetched categories:", categoriesData);
+        console.log("Fetched collections:", collectionsData);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
     fetchData();
   }, []);
+
+  // Update form when product changes
+  useEffect(() => {
+    console.log("Product data received:", product);
+    console.log("Product category:", product.category);
+    console.log("Product collection:", product.collection);
+
+    setForm({
+      name: product.name || "",
+      description: product.description || "",
+      price: product.price || "",
+      stock: product.stock || "",
+      categoryName: product.categoryName || "",
+      categoryId: product.categoryId || "",
+      collectionId: product.collectionId || "",
+    });
+    setExistingImages(product.imageUrls || []);
+  }, [product]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -115,7 +135,7 @@ export default function EditProductDialog({
           Edit
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-white dark:bg-zinc-900 shadow-2xl border border-gray-200 dark:border-zinc-800 max-w-md">
+      <DialogContent className="bg-white dark:bg-zinc-900 shadow-2xl border border-gray-200 dark:border-zinc-800 max-w-md w-[95vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Product</DialogTitle>
         </DialogHeader>
@@ -157,34 +177,44 @@ export default function EditProductDialog({
           />
 
           {/* Category Selection */}
-          <select
-            name="categoryId"
-            value={form.categoryId}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Select Category (Optional)</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Category
+            </label>
+            <select
+              name="categoryId"
+              value={form.categoryId}
+              onChange={handleChange}
+              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select Category (Optional)</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
           {/* Collection Selection */}
-          <select
-            name="collectionId"
-            value={form.collectionId}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Select Collection (Optional)</option>
-            {collections.map((collection) => (
-              <option key={collection.id} value={collection.id}>
-                {collection.title}
-              </option>
-            ))}
-          </select>
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Collection
+            </label>
+            <select
+              name="collectionId"
+              value={form.collectionId}
+              onChange={handleChange}
+              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select Collection (Optional)</option>
+              {collections.map((collection) => (
+                <option key={collection.id} value={collection.id}>
+                  {collection.title}
+                </option>
+              ))}
+            </select>
+          </div>
 
           {/* Existing Images */}
           {existingImages.length > 0 && (
@@ -192,9 +222,9 @@ export default function EditProductDialog({
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Existing Images
               </label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                 {existingImages.map((imageUrl, index) => (
-                  <div key={index} className="relative">
+                  <div key={index} className="relative group">
                     <img
                       src={imageUrl}
                       alt={`Existing ${index + 1}`}
@@ -203,7 +233,7 @@ export default function EditProductDialog({
                     <button
                       type="button"
                       onClick={() => removeExistingImage(imageUrl)}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm"
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -221,7 +251,7 @@ export default function EditProductDialog({
             <ImageUpload
               images={images}
               setImages={setImages}
-              maxImages={3}
+              maxImages={3 - existingImages.length}
               maxSize={10}
             />
           </div>

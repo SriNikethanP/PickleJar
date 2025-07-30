@@ -30,6 +30,8 @@ public class ProductMapper {
                 .price(product.getPrice())
                 .stock(product.getStock())
                 .categoryName(product.getCategory() != null ? product.getCategory().getName() : null)
+                .categoryId(product.getCategory() != null ? product.getCategory().getId() : null)
+                .collectionId(product.getCollection() != null ? product.getCollection().getId() : null)
                 .averageRating(averageRating)
                 .build();
     }
