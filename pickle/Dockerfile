@@ -70,7 +70,7 @@ ENV SPRING_DATASOURCE_HIKARI_MAX_LIFETIME=1200000
 # JPA/Hibernate settings (can be overridden by deployment environment)
 ENV SPRING_JPA_HIBERNATE_DDL_AUTO=update
 ENV SPRING_JPA_SHOW_SQL=false
-ENV SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQLDialect
+ENV SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQLDialect
 ENV SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=true
 
 # Note: Database connection details (URL, username, password) should be set in deployment environment
