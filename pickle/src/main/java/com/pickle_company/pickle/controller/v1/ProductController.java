@@ -98,7 +98,7 @@ public class ProductController {
     @DeleteMapping("/admin/{id}")
     public ResponseEntity<ProductResponseDTO> deleteProduct(@PathVariable Long id) {
         try {
-            productService.deleteProduct(id);
+        productService.deleteProduct(id);
             return ResponseEntity.ok(productService.getProductDetails(id));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest()

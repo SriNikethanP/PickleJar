@@ -14,7 +14,9 @@ import {
   FolderOpen,
   Tag,
   LogOut,
+  Menu,
 } from "lucide-react";
+import { useState } from "react";
 
 const navItems = [
   {
@@ -68,6 +70,7 @@ export function AdminNavbar() {
   const pathname = usePathname();
   const { admin, logout } = useAdminAuth();
   const router = useRouter();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -75,101 +78,89 @@ export function AdminNavbar() {
   };
 
   return (
-    <nav className="bg-white shadow-sm border-b">
+    <nav className="bg-white border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex">
-            <div className="flex-shrink-0 flex items-center">
-              <h1 className="text-xl font-semibold text-gray-900">
-                Admin Portal
-              </h1>
-            </div>
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = pathname === item.href;
-
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                      isActive
-                        ? "border-indigo-500 text-gray-900"
-                        : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                    }`}
-                  >
-                    <Icon className="w-4 h-4 mr-2" />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </div>
-            <button
-              onClick={handleLogout}
-              className="inline-flex justify-end ml-4 items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
-            </button>
+        <div className="flex justify-between h-16 items-center">
+          {/* Logo and brand */}
+          <div className="flex-shrink-0 flex items-center">
+            <h1 className="text-xl font-semibold text-gray-900">
+              Admin Portal
+            </h1>
           </div>
 
-          {/* <div className="hidden sm:flex items-center space-x-2 text-sm text-gray-700">
-              <span>Welcome, {admin?.fullName}</span>
-            </div> */}
-
-          {/* Mobile menu button */}
-          <div className="sm:hidden flex items-center">
-            <button
-              type="button"
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
-            >
-              <span className="sr-only">Open main menu</span>
-              <svg
-                className="block h-6 w-6"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            </button>
+          {/* Desktop nav */}
+          <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                    isActive
+                      ? "border-indigo-500 text-gray-900"
+                      : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                  }`}
+                >
+                  <Icon className="w-4 h-4 mr-2" />
+                  {item.label}
+                </Link>
+              );
+            })}
           </div>
+          <button
+            onClick={handleLogout}
+            className="hidden sm:inline-flex justify-end ml-4 items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Logout
+          </button>
+
+          {/* Hamburger for mobile */}
+          <button
+            className="sm:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-gray-700 focus:outline-none"
+            onClick={() => setMobileMenuOpen((open) => !open)}
+            aria-label="Open main menu"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
         </div>
       </div>
-
-      {/* Mobile menu */}
-      <div className="sm:hidden">
-        <div className="pt-2 pb-3 space-y-1">
+      {/* Mobile menu dropdown */}
+      {mobileMenuOpen && (
+        <div className="sm:hidden bg-white border-b border-gray-200 px-2 pt-2 pb-3 space-y-1 z-50 shadow-md">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
-
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
+                className={`flex items-center px-3 py-2 rounded-md text-base font-medium ${
                   isActive
-                    ? "bg-indigo-50 border-indigo-500 text-indigo-700"
-                    : "border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800"
+                    ? "bg-indigo-100 text-indigo-700"
+                    : "text-gray-700 hover:bg-gray-100"
                 }`}
+                onClick={() => setMobileMenuOpen(false)}
               >
-                <div className="flex items-center">
-                  <Icon className="w-4 h-4 mr-3" />
-                  {item.label}
-                </div>
+                <Icon className="w-4 h-4 mr-2" />
+                {item.label}
               </Link>
             );
           })}
+          <button
+            onClick={() => {
+              setMobileMenuOpen(false);
+              handleLogout();
+            }}
+            className="w-full flex items-center px-3 py-2 rounded-md text-base font-medium text-white bg-red-600 hover:bg-red-700 mt-2"
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Logout
+          </button>
         </div>
-      </div>
+      )}
     </nav>
   );
 }
