@@ -147,10 +147,8 @@ export const updateProduct = async (
       stock: product.stock,
       imageUrls: imageUrls, // Send Cloudinary URLs instead of files
     };
-    const res = await api.put(`/products/admin/${id}`, productData, {
-      headers: { "Content-Type": "application/json" },
-    });
-    return res.data;
+    const res = await adminApiClient.put(`/products/admin/${id}`, productData);
+    return res;
   } catch (error: any) {
     console.error("Error updating product:", error);
 
@@ -194,10 +192,13 @@ export const deleteProductImage = async (
   imageUrl: string
 ) => {
   try {
-    const res = await api.delete(`/products/admin/${productId}/images`, {
-      data: { imageUrl },
-    });
-    return res.data;
+    const res = await adminApiClient.delete(
+      `/products/admin/${productId}/images`,
+      {
+        data: { imageUrl },
+      }
+    );
+    return res;
   } catch (error) {
     console.error("Error deleting product image:", error);
     throw error;
@@ -207,8 +208,8 @@ export const deleteProductImage = async (
 // Delete an entire product (which should also delete its images)
 export const deleteProduct = async (productId: number) => {
   try {
-    const res = await api.delete(`/products/admin/${productId}`);
-    return res.data;
+    const res = await adminApiClient.delete(`/products/admin/${productId}`);
+    return res;
   } catch (error) {
     console.error("Error deleting product:", error);
     throw error;
@@ -218,8 +219,8 @@ export const deleteProduct = async (productId: number) => {
 // Collection Management
 export const listCollections = async () => {
   try {
-    const res = await api.get("/admin/collections");
-    return res.data;
+    const res = await adminApiClient.get("/collections");
+    return res;
   } catch (error) {
     console.error("Error fetching collections:", error);
     return [];
@@ -228,8 +229,8 @@ export const listCollections = async () => {
 
 export const getCollection = async (id: number) => {
   try {
-    const res = await api.get(`/admin/collections/${id}`);
-    return res.data;
+    const res = await adminApiClient.get(`/collections/${id}`);
+    return res;
   } catch (error) {
     console.error("Error fetching collection:", error);
     throw error;
@@ -238,14 +239,10 @@ export const getCollection = async (id: number) => {
 
 export const createCollection = async (collection: { title: string }) => {
   try {
-    const res = await api.post(
-      "/admin/collections",
-      { title: collection.title },
-      {
-        headers: { "Content-Type": "application/json" },
-      }
-    );
-    return res.data;
+    const res = await adminApiClient.post("/collections", {
+      title: collection.title,
+    });
+    return res;
   } catch (error) {
     console.error("Error creating collection:", error);
     throw error;
@@ -257,14 +254,10 @@ export const updateCollection = async (
   collection: { title: string }
 ) => {
   try {
-    const res = await api.put(
-      `/admin/collections/${id}`,
-      { title: collection.title },
-      {
-        headers: { "Content-Type": "application/json" },
-      }
-    );
-    return res.data;
+    const res = await adminApiClient.put(`/collections/${id}`, {
+      title: collection.title,
+    });
+    return res;
   } catch (error) {
     console.error("Error updating collection:", error);
     throw error;
@@ -273,8 +266,8 @@ export const updateCollection = async (
 
 export const deleteCollection = async (id: number) => {
   try {
-    const res = await api.delete(`/admin/collections/${id}`);
-    return res.data;
+    const res = await adminApiClient.delete(`/collections/${id}`);
+    return res;
   } catch (error) {
     console.error("Error deleting collection:", error);
     throw error;
@@ -284,8 +277,8 @@ export const deleteCollection = async (id: number) => {
 // Category Management
 export const listCategories = async () => {
   try {
-    const res = await api.get("/admin/categories");
-    return res.data;
+    const res = await adminApiClient.get("/categories");
+    return res;
   } catch (error) {
     console.error("Error fetching categories:", error);
     return [];
@@ -294,8 +287,8 @@ export const listCategories = async () => {
 
 export const getCategory = async (id: number) => {
   try {
-    const res = await api.get(`/admin/categories/${id}`);
-    return res.data;
+    const res = await adminApiClient.get(`/categories/${id}`);
+    return res;
   } catch (error) {
     console.error("Error fetching category:", error);
     throw error;
@@ -304,10 +297,8 @@ export const getCategory = async (id: number) => {
 
 export const createCategory = async (category: any) => {
   try {
-    const res = await api.post("/admin/categories", category, {
-      headers: { "Content-Type": "application/json" },
-    });
-    return res.data;
+    const res = await adminApiClient.post("/categories", category);
+    return res;
   } catch (error) {
     console.error("Error creating category:", error);
     throw error;
@@ -316,10 +307,8 @@ export const createCategory = async (category: any) => {
 
 export const updateCategory = async (id: number, category: any) => {
   try {
-    const res = await api.put(`/admin/categories/${id}`, category, {
-      headers: { "Content-Type": "application/json" },
-    });
-    return res.data;
+    const res = await adminApiClient.put(`/categories/${id}`, category);
+    return res;
   } catch (error) {
     console.error("Error updating category:", error);
     throw error;
@@ -328,8 +317,8 @@ export const updateCategory = async (id: number, category: any) => {
 
 export const deleteCategory = async (id: number) => {
   try {
-    const res = await api.delete(`/admin/categories/${id}`);
-    return res.data;
+    const res = await adminApiClient.delete(`/categories/${id}`);
+    return res;
   } catch (error) {
     console.error("Error deleting category:", error);
     throw error;
@@ -338,8 +327,8 @@ export const deleteCategory = async (id: number) => {
 
 export const listPayments = async () => {
   try {
-    const res = await api.get("/payments");
-    return res.data;
+    const res = await adminApiClient.get("/payments");
+    return res;
   } catch (error) {
     console.error("Error fetching payments:", error);
     return [];
@@ -367,8 +356,8 @@ export const listShipments = async () => {
 
 export const listInventory = async () => {
   try {
-    const res = await api.get("/products");
-    return res.data;
+    const res = await adminApiClient.get("/products");
+    return res;
   } catch (error) {
     console.error("Error fetching inventory:", error);
     return [];
