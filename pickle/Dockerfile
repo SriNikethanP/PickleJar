@@ -29,7 +29,10 @@ RUN ./mvnw clean package -DskipTests \
 FROM eclipse-temurin:21-jre-alpine
 
 # Install necessary packages
-RUN apk add --no-cache curl
+RUN apk add --no-cache curl tzdata
+
+# Set timezone
+ENV TZ=UTC
 
 # Create app user for security
 RUN addgroup -g 1001 -S appgroup && \
@@ -52,11 +55,16 @@ EXPOSE 8080
 
 # Set environment variables
 ENV SPRING_PROFILES_ACTIVE=docker
-ENV JAVA_OPTS="-Xmx512m -Xms256m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+ENV JAVA_OPTS="-Xmx1024m -Xms512m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/app/dumps"
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+# Health check with better error handling
+HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=5 \
     CMD curl -f http://localhost:8080/api/v1/actuator/health || exit 1
 
-# Run the application
+# Add labels for better container management
+LABEL maintainer="PickleJar Team"
+LABEL version="1.0"
+LABEL description="PickleJar Spring Boot Application"
+
+# Run the application with proper signal handling
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"] 
