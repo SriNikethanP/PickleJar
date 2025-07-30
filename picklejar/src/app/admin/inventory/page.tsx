@@ -14,10 +14,20 @@ import {
   TableHeader,
   TableRow,
 } from "@lib/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@lib/components/ui/dialog";
+import { Button } from "@lib/components/ui/button";
 import AddProductDialog from "@modules/admin/components/inventory/AddProductDialog";
 import EditProductDialog from "@modules/admin/components/inventory/EditProductDialog";
-import { listInventory } from "@lib/data/admin";
+import { listInventory, deleteProduct } from "@lib/data/admin-new";
 import { useAdminAuth } from "@lib/context/admin-auth-context";
+import { toast } from "sonner";
+import { Trash2 } from "lucide-react";
 
 export default function InventoryPage() {
   const { admin, isLoading: authLoading } = useAdminAuth();
@@ -42,6 +52,74 @@ export default function InventoryPage() {
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
+
+  const handleDeleteProduct = async (
+    productId: number,
+    productName: string
+  ) => {
+    try {
+      await deleteProduct(productId);
+      toast.success(`Product "${productName}" deactivated successfully`);
+      fetchProducts();
+    } catch (error) {
+      toast.error("Failed to deactivate product");
+      console.error("Error deactivating product:", error);
+    }
+  };
+
+  // Delete Confirmation Dialog Component
+  const DeleteProductDialog = ({ product }: { product: any }) => {
+    const [open, setOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+    const handleDelete = async () => {
+      setLoading(true);
+      try {
+        await handleDeleteProduct(product.id, product.name);
+        setOpen(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    return (
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button variant="ghost" size="icon">
+            <Trash2 className="h-4 w-4 text-red-500" />
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="bg-white dark:bg-zinc-900 shadow-2xl border border-gray-200 dark:border-zinc-800 max-w-md">
+          <DialogHeader>
+            <DialogTitle>Deactivate Product</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-gray-600 dark:text-gray-300">
+              Are you sure you want to deactivate{" "}
+              <strong>"{product.name}"</strong>? The product will be hidden from
+              customers but can be reactivated later.
+            </p>
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => setOpen(false)}
+                disabled={loading}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDelete}
+                disabled={loading}
+              >
+                {loading ? "Deactivating..." : "Deactivate"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  };
 
   if (authLoading || isLoading) {
     return (
@@ -129,6 +207,7 @@ export default function InventoryPage() {
                           product={product}
                           onSuccess={fetchProducts}
                         />
+                        <DeleteProductDialog product={product} />
                       </div>
                     </TableCell>
                   </TableRow>

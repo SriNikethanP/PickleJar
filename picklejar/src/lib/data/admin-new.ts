@@ -136,7 +136,9 @@ export const updateProduct = async (
 
 export const deleteProduct = async (productId: number) => {
   try {
-    return await adminApiClient.delete(`/products/admin/${productId}`);
+    const result = await adminApiClient.delete(`/products/admin/${productId}`);
+    // For soft delete operations, we return the updated product
+    return result;
   } catch (error) {
     console.error("Error deleting product:", error);
     throw new Error("Failed to delete product");

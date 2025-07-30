@@ -199,7 +199,10 @@ public class ProductService {
     }
 
     public void deleteProduct(Long productId) {
-        productRepo.deleteById(productId);
+        Product product = productRepo.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+        product.setActive(false);
+        productRepo.save(product);
     }
 
     // Delete a specific product image
@@ -221,6 +224,13 @@ public class ProductService {
 
     public List<ProductResponseDTO> getAllProducts() {
         return productRepo.findAll()
+                .stream()
+                .map(productMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<ProductResponseDTO> getActiveProducts() {
+        return productRepo.findByActiveTrue()
                 .stream()
                 .map(productMapper::toDto)
                 .collect(Collectors.toList());

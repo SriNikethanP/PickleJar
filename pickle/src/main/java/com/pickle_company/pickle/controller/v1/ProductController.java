@@ -24,7 +24,7 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<List<ProductResponseDTO>> getAllProducts() {
-        return ResponseEntity.ok(productService.getAllProducts());
+        return ResponseEntity.ok(productService.getActiveProducts());
     }
     // Product details page
     @GetMapping("/{id}")
@@ -96,9 +96,17 @@ public class ProductController {
         return ResponseEntity.ok(productService.getAverageRating(id));
     }
     @DeleteMapping("/admin/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
-        productService.deleteProduct(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<ProductResponseDTO> deleteProduct(@PathVariable Long id) {
+        try {
+            productService.deleteProduct(id);
+            return ResponseEntity.ok(productService.getProductDetails(id));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                .body(null);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                .body(null);
+        }
     }
 
     // Delete a specific product image

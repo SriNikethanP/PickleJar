@@ -97,7 +97,7 @@ export default function AdminLoginPage() {
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm"
                 placeholder="Password"
-                defaultValue="admin123"
+                defaultValue="admin@123"
               />
             </div>
           </div>
@@ -121,11 +121,11 @@ export default function AdminLoginPage() {
               </div>
               <div className="ml-3">
                 <h3 className="text-sm font-medium text-blue-800">
-                  Admin Credentials
+                  Admin Credentials (For Testing)
                 </h3>
                 <div className="mt-2 text-sm text-blue-700">
                   <p>Email: admin@picklejar.com</p>
-                  <p>Password: admin123</p>
+                  <p>Password: admin@123</p>
                 </div>
               </div>
             </div>

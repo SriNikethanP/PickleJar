@@ -105,20 +105,18 @@ export function AdminNavbar() {
                 );
               })}
             </div>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <div className="hidden sm:flex items-center space-x-2 text-sm text-gray-700">
-              <span>Welcome, {admin?.fullName}</span>
-            </div>
             <button
               onClick={handleLogout}
-              className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              className="inline-flex justify-end ml-4 items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
             >
               <LogOut className="w-4 h-4 mr-2" />
               Logout
             </button>
           </div>
+
+          {/* <div className="hidden sm:flex items-center space-x-2 text-sm text-gray-700">
+              <span>Welcome, {admin?.fullName}</span>
+            </div> */}
 
           {/* Mobile menu button */}
           <div className="sm:hidden flex items-center">

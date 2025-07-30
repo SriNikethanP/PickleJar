@@ -86,10 +86,19 @@ class AdminApiClient {
     }
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(
-        errorData.message || `HTTP error! status: ${response.status}`
-      );
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorMessage;
+      } catch (e) {
+        // If response is not JSON, use default error message
+      }
+      throw new Error(errorMessage);
+    }
+
+    // Handle 204 No Content responses
+    if (response.status === 204) {
+      return {} as T;
     }
 
     return response.json();
