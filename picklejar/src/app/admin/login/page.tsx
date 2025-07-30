@@ -2,7 +2,7 @@
 
 import { useAdminAuth } from "@lib/context/admin-auth-context";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function AdminLoginPage() {
   const { login, admin } = useAdminAuth();
@@ -10,10 +10,11 @@ export default function AdminLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   // Redirect if already logged in as admin
-  if (admin) {
-    router.push("/admin");
-    return null;
-  }
+  useEffect(() => {
+    if (admin) {
+      router.push("/admin");
+    }
+  }, [admin, router]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -34,6 +35,11 @@ export default function AdminLoginPage() {
       setIsLoading(false);
     }
   };
+
+  // Don't render the form if already logged in
+  if (admin) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
