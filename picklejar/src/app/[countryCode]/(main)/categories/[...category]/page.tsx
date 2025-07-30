@@ -55,7 +55,9 @@ export async function generateStaticParams() {
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   try {
-    const productCategory = await getCategoryByHandle(params.category);
+    const productCategory = await getCategoryByHandle(
+      params.category.join("/")
+    );
     if (!productCategory) notFound();
 
     const title = productCategory.name + " | Pickle Jar";
