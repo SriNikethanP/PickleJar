@@ -59,11 +59,11 @@ const navItems = [
     label: "Payments",
     icon: CreditCard,
   },
-  {
-    href: "/admin/shipping",
-    label: "Shipping",
-    icon: Truck,
-  },
+  // {
+  //   href: "/admin/shipping",
+  //   label: "Shipping",
+  //   icon: Truck,
+  // },
 ];
 
 export function AdminNavbar() {

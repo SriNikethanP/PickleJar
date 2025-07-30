@@ -37,7 +37,7 @@ export const getAdminDashboardData = async () => {
 
 export const listOrders = async () => {
   try {
-    return await adminApiClient.get("/orders");
+    return await adminApiClient.get("/admin/orders");
   } catch (error) {
     console.error("Error fetching orders:", error);
     return [];

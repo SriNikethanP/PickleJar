@@ -1,6 +1,5 @@
 -- Admin user creation (uncomment only for initial setup)
 -- Password is BCrypt hash of "admin123"
-/*
 INSERT INTO users (full_name, email, mobile, password, role, banned, address) 
 VALUES (
     'Admin User', 
@@ -16,5 +15,4 @@ VALUES (
     password = VALUES(password),
     role = VALUES(role),
     banned = VALUES(banned),
-    address = VALUES(address);
-*/ 
+    address = VALUES(address); 
