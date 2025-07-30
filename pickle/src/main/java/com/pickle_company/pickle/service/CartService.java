@@ -8,6 +8,7 @@ import com.pickle_company.pickle.dto.CODOrderRequestDTO;
 import com.pickle_company.pickle.entity.*;
 import com.pickle_company.pickle.repository.*;
 import com.pickle_company.pickle.mapper.CartMapper;
+import com.pickle_company.pickle.service.PaymentService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -23,12 +24,14 @@ public class CartService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final CartItemRepository cartItemRepository;
+    private final PaymentService paymentService;
 
     public CartService(CartRepository cartRepo, ProductRepository prodRepo,
                        UserRepository userRepository, CartMapper cartMapper,
                        OrderRepository orderRepository,
                        OrderItemRepository orderItemRepository,
-                       CartItemRepository cartItemRepository) {
+                       CartItemRepository cartItemRepository,
+                       PaymentService paymentService) {
         this.cartRepository = cartRepo;
         this.productRepository = prodRepo;
         this.userRepository = userRepository;
@@ -36,6 +39,7 @@ public class CartService {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.cartItemRepository = cartItemRepository;
+        this.paymentService = paymentService;
     }
 
     public CartResponseDTO addToCart(Long userId, AddToCartRequestDTO req) {
@@ -116,6 +120,9 @@ public class CartService {
                     .priceAtOrder(product.getPrice())
                     .build());
         }
+        // Create payment for the order (default to COD)
+        paymentService.createPaymentForOrder(order.getId(), Payment.PaymentMethod.COD);
+        
         // Clear cart
         cart.getItems().clear();
         cartRepository.save(cart);
@@ -208,6 +215,9 @@ public class CartService {
                     .priceAtOrder(product.getPrice())
                     .build());
         }
+        // Create payment for the order (COD)
+        paymentService.createPaymentForOrder(order.getId(), Payment.PaymentMethod.COD);
+        
         // Clear cart
         cart.getItems().clear();
         cartRepository.save(cart);
