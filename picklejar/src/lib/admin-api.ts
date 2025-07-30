@@ -61,6 +61,9 @@ class AdminApiClient {
     const url = `${API_BASE_URL}${endpoint}`;
     const headers = await this.getAuthHeaders();
 
+    console.log(`Admin API Request: ${options.method || "GET"} ${url}`);
+    console.log("Request headers:", headers);
+
     let response = await fetch(url, {
       ...options,
       headers: {
@@ -68,6 +71,10 @@ class AdminApiClient {
         ...options.headers,
       },
     });
+
+    console.log(
+      `Admin API Response: ${response.status} ${response.statusText}`
+    );
 
     // If 401, try to refresh token and retry once
     if (response.status === 401) {
@@ -88,10 +95,19 @@ class AdminApiClient {
       let errorMessage = `HTTP error! status: ${response.status}`;
       try {
         const errorData = await response.json();
-        errorMessage = errorData.message || errorMessage;
+        errorMessage = errorData.message || errorData.error || errorMessage;
       } catch (e) {
-        // If response is not JSON, use default error message
+        // If response is not JSON, try to get text content
+        try {
+          const textContent = await response.text();
+          if (textContent) {
+            errorMessage = `${errorMessage}: ${textContent}`;
+          }
+        } catch (textError) {
+          // If we can't get text either, use default error message
+        }
       }
+      console.error(`Admin API Error (${response.status}):`, errorMessage);
       throw new Error(errorMessage);
     }
 

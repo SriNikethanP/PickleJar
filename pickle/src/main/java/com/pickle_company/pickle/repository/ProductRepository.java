@@ -14,5 +14,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByCollection_Id(Long collectionId);
     List<Product> findByActiveTrue();
     long countByCategoryId(Long categoryId);
+    long countByCollectionId(Long collectionId);
 }
 

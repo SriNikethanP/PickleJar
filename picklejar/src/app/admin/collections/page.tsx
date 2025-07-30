@@ -21,7 +21,7 @@ export default function CollectionsPage() {
   const fetchCollections = async () => {
     try {
       const data = await listCollections();
-      setCollections(data);
+      setCollections(data as any[]);
     } catch (error) {
       toast.error("Failed to fetch collections");
     } finally {
@@ -76,7 +76,6 @@ export default function CollectionsPage() {
                   <tr className="border-b">
                     <th className="text-left p-2">ID</th>
                     <th className="text-left p-2">Title</th>
-                    <th className="text-left p-2">Handle</th>
                     <th className="text-left p-2">Products</th>
                     <th className="text-left p-2">Actions</th>
                   </tr>
@@ -89,10 +88,7 @@ export default function CollectionsPage() {
                     >
                       <td className="p-2">{collection.id}</td>
                       <td className="p-2 font-medium">{collection.title}</td>
-                      <td className="p-2 text-gray-600">{collection.handle}</td>
-                      <td className="p-2">
-                        {collection.products?.length || 0}
-                      </td>
+                      <td className="p-2">{collection.productCount || 0}</td>
                       <td className="p-2">
                         <div className="flex gap-2">
                           <EditCollectionDialog

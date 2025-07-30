@@ -3,6 +3,7 @@ import { adminApiClient } from "@lib/admin-api";
 
 export const getAdminDashboardData = async () => {
   try {
+    console.log("Starting to fetch dashboard data...");
     const [sales, orders, customers, pie, trend, timeline] = await Promise.all([
       adminApiClient.get("/admin/reports/total-sales"),
       adminApiClient.get("/admin/reports/total-orders"),
@@ -11,6 +12,7 @@ export const getAdminDashboardData = async () => {
       adminApiClient.get("/admin/reports/revenue-trend"),
       adminApiClient.get("/admin/reports/monthly-revenue-timeline"),
     ]);
+    console.log("All API calls completed successfully");
 
     return {
       totalSales: sales,

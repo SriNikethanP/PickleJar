@@ -58,27 +58,54 @@ public class AdminReportService {
     public List<Map<String, Object>> getRevenueTrendLast30Days() {
         List<Map<String, Object>> trend = new java.util.ArrayList<>();
         LocalDate today = LocalDate.now();
-        LocalDate startDate = today.minusDays(29);
-
-        // Get revenue per day from DB
-        List<Object[]> dailyRevenue = paymentRepository.findDailyRevenueSince(startDate);
-
-        // Map date to revenue for quick lookup
-        Map<LocalDate, Double> revenueMap = new HashMap<>();
-        for (Object[] row : dailyRevenue) {
-            LocalDate date = ((java.sql.Date) row[0]).toLocalDate();
-            Double revenue = row[1] != null ? ((Number) row[1]).doubleValue() : 0.0;
-            revenueMap.put(date, revenue);
-        }
-
-        // Fill in all 30 days (even if 0 revenue)
+        
+        // Generate 30 days of data (even if no revenue)
         for (int i = 29; i >= 0; i--) {
             LocalDate date = today.minusDays(i);
             Map<String, Object> day = new HashMap<>();
             day.put("date", date.toString());
-            day.put("revenue", revenueMap.getOrDefault(date, 0.0));
+            day.put("revenue", 0.0); // Default to 0, will be updated if data exists
             trend.add(day);
         }
+        
+        try {
+            // Get revenue per day from DB
+            LocalDate startDate = today.minusDays(29);
+            List<Object[]> dailyRevenue = paymentRepository.findDailyRevenueSince(startDate);
+
+            // Update trend with actual revenue data
+            for (Object[] row : dailyRevenue) {
+                try {
+                    LocalDate date;
+                    if (row[0] instanceof java.sql.Date) {
+                        date = ((java.sql.Date) row[0]).toLocalDate();
+                    } else if (row[0] instanceof java.time.LocalDate) {
+                        date = (java.time.LocalDate) row[0];
+                    } else if (row[0] instanceof java.sql.Timestamp) {
+                        date = ((java.sql.Timestamp) row[0]).toLocalDateTime().toLocalDate();
+                    } else {
+                        // Handle as string if needed
+                        date = java.time.LocalDate.parse(row[0].toString());
+                    }
+                    Double revenue = row[1] != null ? ((Number) row[1]).doubleValue() : 0.0;
+                    
+                    // Find and update the corresponding day in trend
+                    for (Map<String, Object> day : trend) {
+                        if (day.get("date").equals(date.toString())) {
+                            day.put("revenue", revenue);
+                            break;
+                        }
+                    }
+                } catch (Exception e) {
+                    // Log error but continue processing other rows
+                    System.err.println("Error processing revenue row: " + e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            // If database query fails, return trend with all zeros
+            System.err.println("Error fetching revenue data: " + e.getMessage());
+        }
+        
         return trend;
     }
 
@@ -106,14 +133,19 @@ public class AdminReportService {
 
     public List<Map<String, Object>> getMonthlyRevenueTimeline() {
         // Returns [{year: 2023, month: 1, revenue: 1234.56}, ...]
-        List<Object[]> results = orderRepository.findMonthlyRevenue();
         List<Map<String, Object>> timeline = new java.util.ArrayList<>();
-        for (Object[] row : results) {
-            Map<String, Object> entry = new HashMap<>();
-            entry.put("year", row[0]);
-            entry.put("month", row[1]);
-            entry.put("revenue", row[2]);
-            timeline.add(entry);
+        try {
+            List<Object[]> results = orderRepository.findMonthlyRevenue();
+            for (Object[] row : results) {
+                Map<String, Object> entry = new HashMap<>();
+                entry.put("year", row[0]);
+                entry.put("month", row[1]);
+                entry.put("revenue", row[2] != null ? ((Number) row[2]).doubleValue() : 0.0);
+                timeline.add(entry);
+            }
+        } catch (Exception e) {
+            // If database query fails, return empty timeline
+            System.err.println("Error fetching monthly revenue timeline: " + e.getMessage());
         }
         return timeline;
     }

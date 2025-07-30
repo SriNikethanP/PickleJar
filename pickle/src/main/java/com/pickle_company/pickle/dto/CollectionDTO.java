@@ -9,4 +9,5 @@ import lombok.*;
 public class CollectionDTO {
     private Long id;
     private String title;
+    private Long productCount;
 } 

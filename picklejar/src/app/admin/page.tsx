@@ -7,14 +7,16 @@ import { useAdminAuth } from "@lib/context/admin-auth-context";
 
 export default function AdminDashboard() {
   const { admin, isLoading: authLoading } = useAdminAuth();
-  const [data, setData] = useState(null);
+  const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       if (admin) {
         try {
+          console.log("Fetching dashboard data...");
           const dashboardData = await getAdminDashboardData();
+          console.log("Dashboard data received:", dashboardData);
           setData(dashboardData);
         } catch (error) {
           console.error("Error fetching dashboard data:", error);

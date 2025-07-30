@@ -67,43 +67,28 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
-      console.log("Checking admin auth status with token:", {
-        token: token ? "Present" : "Missing",
-        tokenLength: token ? token.length : 0,
-        tokenPreview: token ? `${token.substring(0, 20)}...` : "None",
-      });
-
-      // Verify admin token by calling the /me endpoint
-      const response = await fetch(`${API_BASE_URL}/users/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.ok) {
-        const userData = await response.json();
-        // Check if the user has admin role
-        if (userData.role === "ADMIN") {
-          setAdmin(userData);
-          // Store updated admin data
-          setLocalStorage(AUTH_KEYS.ADMIN.USER_DATA, JSON.stringify(userData));
-          console.log("Admin data received from API:", userData);
-        } else {
-          // User is not admin, clear token
-          clearAdminAuth();
-          setAdmin(null);
+      // Only check /me endpoint for background validation, but do not clear session on error
+      try {
+        const response = await fetch(`${API_BASE_URL}/users/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        if (response.ok) {
+          const userData = await response.json();
+          if (userData.role === "ADMIN") {
+            setAdmin(userData);
+            setLocalStorage(
+              AUTH_KEYS.ADMIN.USER_DATA,
+              JSON.stringify(userData)
+            );
+          }
         }
-      } else {
-        // Token is invalid, clear it
-        clearAdminAuth();
-        setAdmin(null);
+      } catch (err) {
+        // Do not clear session, just log
+        console.warn("/me check failed, but session persists until logout");
       }
-    } catch (error) {
-      console.error("Error checking admin auth status:", error);
-      // Clear admin data on error
-      clearAdminAuth();
-      setAdmin(null);
     } finally {
       setIsLoading(false);
     }
