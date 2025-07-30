@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@lib/components/ui/button";
 import {
   Card,
@@ -14,6 +14,7 @@ import { Plus, Edit, Trash2 } from "lucide-react";
 import AddCollectionDialog from "@modules/admin/components/collections/AddCollectionDialog";
 import EditCollectionDialog from "@modules/admin/components/collections/EditCollectionDialog";
 import ConfirmationDialog from "../../../components/ConfirmationDialog";
+import LoadingSpinner from "components/LoadingSpinner";
 
 export default function CollectionsPage() {
   const [collections, setCollections] = useState<any[]>([]);
@@ -28,7 +29,7 @@ export default function CollectionsPage() {
     collectionTitle: "",
   });
 
-  const fetchCollections = async () => {
+  const fetchCollections = useCallback(async () => {
     try {
       const data = await listCollections();
       setCollections(data as any[]);
@@ -37,11 +38,11 @@ export default function CollectionsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchCollections();
-  }, []);
+  }, [fetchCollections]);
 
   const handleDeleteClick = (id: number, title: string) => {
     setDeleteDialog({
@@ -74,7 +75,7 @@ export default function CollectionsPage() {
   if (loading) {
     return (
       <div className="p-6">
-        <div className="text-center">Loading collections...</div>
+        <LoadingSpinner size="md" className="py-8" />
       </div>
     );
   }

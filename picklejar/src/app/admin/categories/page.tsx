@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@lib/components/ui/button";
 import {
   Card,
@@ -14,6 +14,7 @@ import { Plus, Edit, Trash2 } from "lucide-react";
 import AddCategoryDialog from "@modules/admin/components/categories/AddCategoryDialog";
 import EditCategoryDialog from "@modules/admin/components/categories/EditCategoryDialog";
 import ConfirmationDialog from "../../../components/ConfirmationDialog";
+import LoadingSpinner from "components/LoadingSpinner";
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<any[]>([]);
@@ -28,7 +29,7 @@ export default function CategoriesPage() {
     categoryName: "",
   });
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       const data = await listCategories();
       setCategories(data as any[]);
@@ -37,11 +38,11 @@ export default function CategoriesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [fetchCategories]);
 
   const handleDeleteClick = (id: number, name: string) => {
     setDeleteDialog({
@@ -74,7 +75,7 @@ export default function CategoriesPage() {
   if (loading) {
     return (
       <div className="p-6">
-        <div className="text-center">Loading categories...</div>
+        <LoadingSpinner size="md" className="py-8" />
       </div>
     );
   }

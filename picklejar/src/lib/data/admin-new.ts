@@ -1,40 +1,65 @@
 import { uploadMultipleFilesAsBase64ToCloudinary } from "@lib/util/cloudinary";
 import { adminApiClient } from "@lib/admin-api";
+import { measureAsync } from "@lib/util/performance";
+
+// Simple cache for dashboard data
+let dashboardCache: any = null;
+let dashboardCacheTime = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 export const getAdminDashboardData = async () => {
-  try {
-    console.log("Starting to fetch dashboard data...");
-    const [sales, orders, customers, pie, trend, timeline] = await Promise.all([
-      adminApiClient.get("/admin/reports/total-sales"),
-      adminApiClient.get("/admin/reports/total-orders"),
-      adminApiClient.get("/admin/reports/total-customers"),
-      adminApiClient.get("/admin/reports/category-distribution"),
-      adminApiClient.get("/admin/reports/revenue-trend"),
-      adminApiClient.get("/admin/reports/monthly-revenue-timeline"),
-    ]);
-    console.log("All API calls completed successfully");
+  return measureAsync("getAdminDashboardData", async () => {
+    // Check cache first
+    const now = Date.now();
+    if (dashboardCache && now - dashboardCacheTime < CACHE_DURATION) {
+      return dashboardCache;
+    }
 
-    return {
-      totalSales: sales,
-      totalOrders: orders,
-      totalCustomers: customers,
-      categoryPieData: pie,
-      trendLabels: (trend as any[]).map((d: any) => d.date),
-      revenueTrend: (trend as any[]).map((d: any) => d.revenue),
-      revenueTimeline: timeline,
-    };
-  } catch (error) {
-    console.error("Error fetching admin dashboard data:", error);
-    return {
-      totalSales: 0,
-      totalOrders: 0,
-      totalCustomers: 0,
-      categoryPieData: [],
-      trendLabels: [],
-      revenueTrend: [],
-      revenueTimeline: [],
-    };
-  }
+    try {
+      const [sales, orders, customers, pie, trend, timeline] =
+        await Promise.all([
+          adminApiClient.get("/admin/reports/total-sales"),
+          adminApiClient.get("/admin/reports/total-orders"),
+          adminApiClient.get("/admin/reports/total-customers"),
+          adminApiClient.get("/admin/reports/category-distribution"),
+          adminApiClient.get("/admin/reports/revenue-trend"),
+          adminApiClient.get("/admin/reports/monthly-revenue-timeline"),
+        ]);
+
+      const result = {
+        totalSales: sales,
+        totalOrders: orders,
+        totalCustomers: customers,
+        categoryPieData: pie,
+        trendLabels: (trend as any[]).map((d: any) => d.date),
+        revenueTrend: (trend as any[]).map((d: any) => d.revenue),
+        revenueTimeline: timeline,
+      };
+
+      // Cache the result
+      dashboardCache = result;
+      dashboardCacheTime = now;
+
+      return result;
+    } catch (error) {
+      console.error("Error fetching admin dashboard data:", error);
+      return {
+        totalSales: 0,
+        totalOrders: 0,
+        totalCustomers: 0,
+        categoryPieData: [],
+        trendLabels: [],
+        revenueTrend: [],
+        revenueTimeline: [],
+      };
+    }
+  });
+};
+
+// Clear cache when needed
+export const clearDashboardCache = async () => {
+  dashboardCache = null;
+  dashboardCacheTime = 0;
 };
 
 export const listOrders = async () => {
@@ -69,12 +94,10 @@ export const addProduct = async (product: any, images: File[] = []) => {
   try {
     let imageUrls: string[] = [];
     if (images.length > 0) {
-      console.log("Uploading", images.length, "images to Cloudinary...");
       const cloudinaryResults = await uploadMultipleFilesAsBase64ToCloudinary(
         images
       );
       imageUrls = cloudinaryResults.map((result) => result.secure_url);
-      console.log("Cloudinary upload successful. Image URLs:", imageUrls);
     }
 
     const productData = {
@@ -87,9 +110,8 @@ export const addProduct = async (product: any, images: File[] = []) => {
       imageUrls: imageUrls,
     };
 
-    console.log("Sending product data to backend:", productData);
     const result = await adminApiClient.post("/products/admin", productData);
-    console.log("Backend response:", result);
+    await clearDashboardCache(); // Clear cache when data changes
     return result;
   } catch (error: any) {
     console.error("Error adding product:", error);
@@ -105,12 +127,10 @@ export const updateProduct = async (
   try {
     let imageUrls: string[] = [];
     if (images.length > 0) {
-      console.log("Uploading", images.length, "images to Cloudinary...");
       const cloudinaryResults = await uploadMultipleFilesAsBase64ToCloudinary(
         images
       );
       imageUrls = cloudinaryResults.map((result) => result.secure_url);
-      console.log("Cloudinary upload successful. Image URLs:", imageUrls);
     }
 
     const productData = {
@@ -123,12 +143,11 @@ export const updateProduct = async (
       imageUrls: imageUrls,
     };
 
-    console.log("Sending product data to backend:", productData);
     const result = await adminApiClient.put(
       `/products/admin/${id}`,
       productData
     );
-    console.log("Backend response:", result);
+    await clearDashboardCache(); // Clear cache when data changes
     return result;
   } catch (error: any) {
     console.error("Error updating product:", error);
@@ -139,7 +158,7 @@ export const updateProduct = async (
 export const deleteProduct = async (productId: number) => {
   try {
     const result = await adminApiClient.delete(`/products/admin/${productId}`);
-    // For soft delete operations, we return the updated product
+    await clearDashboardCache(); // Clear cache when data changes
     return result;
   } catch (error) {
     console.error("Error deleting product:", error);
@@ -172,7 +191,9 @@ export const listCollections = async () => {
 
 export const createCollection = async (collection: { title: string }) => {
   try {
-    return await adminApiClient.post("/collections", collection);
+    const result = await adminApiClient.post("/collections", collection);
+    await clearDashboardCache(); // Clear cache when data changes
+    return result;
   } catch (error) {
     console.error("Error creating collection:", error);
     throw new Error("Failed to create collection");
@@ -184,7 +205,9 @@ export const updateCollection = async (
   collection: { title: string }
 ) => {
   try {
-    return await adminApiClient.put(`/collections/${id}`, collection);
+    const result = await adminApiClient.put(`/collections/${id}`, collection);
+    await clearDashboardCache(); // Clear cache when data changes
+    return result;
   } catch (error) {
     console.error("Error updating collection:", error);
     throw new Error("Failed to update collection");
@@ -193,7 +216,9 @@ export const updateCollection = async (
 
 export const deleteCollection = async (id: number) => {
   try {
-    return await adminApiClient.delete(`/collections/${id}`);
+    const result = await adminApiClient.delete(`/collections/${id}`);
+    await clearDashboardCache(); // Clear cache when data changes
+    return result;
   } catch (error) {
     console.error("Error deleting collection:", error);
     throw new Error("Failed to delete collection");
@@ -211,7 +236,9 @@ export const listCategories = async () => {
 
 export const createCategory = async (category: any) => {
   try {
-    return await adminApiClient.post("/categories", category);
+    const result = await adminApiClient.post("/categories", category);
+    await clearDashboardCache(); // Clear cache when data changes
+    return result;
   } catch (error) {
     console.error("Error creating category:", error);
     throw new Error("Failed to create category");
@@ -220,7 +247,9 @@ export const createCategory = async (category: any) => {
 
 export const updateCategory = async (id: number, category: any) => {
   try {
-    return await adminApiClient.put(`/categories/${id}`, category);
+    const result = await adminApiClient.put(`/categories/${id}`, category);
+    await clearDashboardCache(); // Clear cache when data changes
+    return result;
   } catch (error) {
     console.error("Error updating category:", error);
     throw new Error("Failed to update category");
@@ -229,7 +258,9 @@ export const updateCategory = async (id: number, category: any) => {
 
 export const deleteCategory = async (id: number) => {
   try {
-    return await adminApiClient.delete(`/categories/${id}`);
+    const result = await adminApiClient.delete(`/categories/${id}`);
+    await clearDashboardCache(); // Clear cache when data changes
+    return result;
   } catch (error) {
     console.error("Error deleting category:", error);
     throw new Error("Failed to delete category");
@@ -250,9 +281,14 @@ export const updatePaymentStatus = async (
   status: string
 ) => {
   try {
-    return await adminApiClient.put(`/admin/payments/${paymentId}/status`, {
-      status,
-    });
+    const result = await adminApiClient.put(
+      `/admin/payments/${paymentId}/status`,
+      {
+        status,
+      }
+    );
+    await clearDashboardCache(); // Clear cache when data changes
+    return result;
   } catch (error) {
     console.error("Error updating payment status:", error);
     throw error;
@@ -274,7 +310,9 @@ export const getPaymentStats = async () => {
 
 export const createTestOrder = async () => {
   try {
-    return await adminApiClient.post("/admin/orders/test");
+    const result = await adminApiClient.post("/admin/orders/test");
+    await clearDashboardCache(); // Clear cache when data changes
+    return result;
   } catch (error) {
     console.error("Error creating test order:", error);
     throw error;

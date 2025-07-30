@@ -29,14 +29,14 @@ const Hero = () => {
           </p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          {/* <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <button className="px-8 py-4 bg-red-500 text-black text-lg font-semibold rounded-lg hover:bg-gray-100 transition-colors duration-300 shadow-lg hover:shadow-xl hover:text-red-500 transform hover:-translate-y-1">
               Shop Now
             </button>
             <button className="px-8 py-4 border-2 border-red-500 text-black text-lg font-semibold rounded-lg hover:bg-white hover:text-black hover:bg-red-500/10 transition-colors duration-300">
               Learn More
             </button>
-          </div>
+          </div> */}
 
           {/* Decorative Elements */}
           <div className="mt-16 flex justify-center space-x-8 opacity-60">

@@ -1,9 +1,8 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { listCollections } from "@lib/data/collections";
+import { Collection, listCollections } from "@lib/data/collections";
 // import { listRegions } from "@lib/data/regions";
-import { StoreCollection } from "@medusajs/types";
 import CollectionTemplate from "@modules/collections/templates";
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products";
 
@@ -33,7 +32,7 @@ export async function generateStaticParams() {
   // );
 
   const collectionHandles = collections
-    .map((collection: StoreCollection) => {
+    .map((collection: Collection) => {
       if (!collection.title) {
         console.warn("Collection without title found:", collection);
         return null;
@@ -89,7 +88,7 @@ export default async function CollectionPage(props: Props) {
 
   return (
     <CollectionTemplate
-      collection={collection}
+      collection={collection as any}
       page={page}
       sortBy={sortBy}
       countryCode={params.countryCode}

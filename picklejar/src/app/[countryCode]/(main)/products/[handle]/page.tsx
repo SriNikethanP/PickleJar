@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getAllProducts, Product } from "@lib/data/products";
+import { getAllProducts, Product, getProduct } from "@lib/data/products";
 import { getRegion } from "@lib/data/regions";
 import ProductTemplate from "@modules/products/templates";
 
@@ -76,16 +76,20 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
 export default async function ProductPage(props: Props) {
   const params = await props.params;
-  const region = await getRegion("in");
+  const { handle } = params;
+
+  // Fetch region and products in parallel
+  const [region, products] = await Promise.all([
+    getRegion("in"),
+    getAllProducts(),
+  ]);
 
   if (!region) {
     notFound();
   }
 
-  const products = await getAllProducts();
-
   const product = products.find(
-    (p: Product) => p.name.toLowerCase().replace(/\s+/g, "-") === params.handle
+    (p: Product) => p.name.toLowerCase().replace(/\s+/g, "-") === handle
   );
 
   if (!product) {

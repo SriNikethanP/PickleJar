@@ -1,12 +1,13 @@
 import { Metadata } from "next";
+import { Suspense } from "react";
 
 import Hero from "@modules/home/components/hero";
 import { Product } from "@lib/data/products";
 import { getRegion } from "@lib/data/regions";
-import { getAllProducts, listProductsByCollection } from "@lib/data/products";
-import ProductPreview from "@modules/products/components/product-preview";
+import { listProductsByCollection } from "@lib/data/products";
 import { listCollections } from "@lib/data/collections";
 import FeaturedProducts from "@modules/home/components/featured-products";
+import LoadingSpinner from "components/LoadingSpinner";
 
 export const metadata: Metadata = {
   title: "PickleJar - Fresh Pickles",
@@ -16,15 +17,58 @@ export const metadata: Metadata = {
 
 type Products = Product[];
 
-export default async function Home(props: {
-  params: Promise<{ countryCode: string }>;
-}) {
-  const params = await props.params;
+// Loading component for Suspense
+function FeaturedProductsSkeleton() {
+  return (
+    <div className="space-y-20 lg:space-y-32">
+      <div className="text-center py-20 lg:py-32">
+        <LoadingSpinner size="lg" className="py-8" />
+        <p className="text-lg text-gray-500 mt-4">Loading fresh pickles...</p>
+      </div>
+    </div>
+  );
+}
 
-  const region = await getRegion("in");
-  const collections = await listCollections();
-  let products: Products = [];
+// Async component for featured products
+async function FeaturedProductsSection() {
+  const [collections, region] = await Promise.all([
+    listCollections(),
+    getRegion("in"),
+  ]);
 
+  if (!collections || collections.length === 0 || !region) {
+    return (
+      <div className="text-center py-20 lg:py-32">
+        <div className="max-w-md mx-auto">
+          <div className="mb-8">
+            <svg
+              className="mx-auto h-16 w-16 text-gray-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+              />
+            </svg>
+          </div>
+          <h3 className="text-2xl font-semibold text-black mb-4">
+            No Products Available
+          </h3>
+          <p className="text-lg text-gray-500 leading-relaxed">
+            There are currently no products to display. Please check back later
+            for our fresh pickles.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Fetch products for each collection in parallel
   const collectionsWithProducts = await Promise.all(
     collections.map(async (collection) => ({
       ...collection,
@@ -40,6 +84,50 @@ export default async function Home(props: {
       collection.id.toString().startsWith("mock-")
     );
 
+  if (!hasRealData) {
+    return (
+      <div className="text-center py-20 lg:py-32">
+        <div className="max-w-md mx-auto">
+          <div className="mb-8">
+            <svg
+              className="mx-auto h-16 w-16 text-gray-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+              />
+            </svg>
+          </div>
+          <h3 className="text-2xl font-semibold text-black mb-4">
+            No Products Available
+          </h3>
+          <p className="text-lg text-gray-500 leading-relaxed">
+            There are currently no products to display. Please check back later
+            for our fresh pickles.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-20 lg:space-y-32">
+      <FeaturedProducts collections={collectionsWithProducts} region={region} />
+    </div>
+  );
+}
+
+export default async function Home(props: {
+  params: Promise<{ countryCode: string }>;
+}) {
+  const params = await props.params;
+
   return (
     <div className="min-h-screen bg-white">
       <Hero />
@@ -48,7 +136,7 @@ export default async function Home(props: {
       <section className="py-20 lg:py-32 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Header */}
-          <div className="text-center mb-16 lg:mb-20">
+          {/* <div className="text-center mb-16 lg:mb-20">
             <h2 className="text-4xl lg:text-5xl font-bold text-black mb-6 leading-tight">
               Our Fresh Pickles
             </h2>
@@ -56,44 +144,11 @@ export default async function Home(props: {
               Discover our handcrafted pickles made with the finest ingredients
               and traditional recipes passed down through generations
             </p>
-          </div>
+          </div> */}
 
-          {hasRealData ? (
-            <div className="space-y-20 lg:space-y-32">
-              <FeaturedProducts
-                collections={collectionsWithProducts}
-                region={region}
-              />
-            </div>
-          ) : (
-            <div className="text-center py-20 lg:py-32">
-              <div className="max-w-md mx-auto">
-                <div className="mb-8">
-                  <svg
-                    className="mx-auto h-16 w-16 text-gray-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-                    />
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-semibold text-black mb-4">
-                  No Products Available
-                </h3>
-                <p className="text-lg text-gray-500 leading-relaxed">
-                  There are currently no products to display. Please check back
-                  later for our fresh pickles.
-                </p>
-              </div>
-            </div>
-          )}
+          <Suspense fallback={<FeaturedProductsSkeleton />}>
+            <FeaturedProductsSection />
+          </Suspense>
         </div>
       </section>
 

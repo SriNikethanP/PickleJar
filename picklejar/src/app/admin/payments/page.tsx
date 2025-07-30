@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   Card,
   CardContent,
@@ -24,6 +24,7 @@ import {
 } from "@lib/data/admin-new";
 import { useAdminAuth } from "@lib/context/admin-auth-context";
 import { toast } from "sonner";
+import LoadingSpinner from "components/LoadingSpinner";
 
 export default function PaymentsPage() {
   const { admin, isLoading: authLoading } = useAdminAuth();
@@ -36,29 +37,29 @@ export default function PaymentsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("ALL");
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (admin) {
-        try {
-          const [paymentsData, statsData] = await Promise.all([
-            listPayments(),
-            getPaymentStats(),
-          ]);
-          setPayments(paymentsData as any[]);
-          setStats(statsData as any);
-        } catch (error) {
-          console.error("Error fetching payments:", error);
-          toast.error("Failed to fetch payments");
-        } finally {
-          setIsLoading(false);
-        }
-      } else if (!authLoading) {
+  const fetchData = useCallback(async () => {
+    if (admin) {
+      try {
+        const [paymentsData, statsData] = await Promise.all([
+          listPayments(),
+          getPaymentStats(),
+        ]);
+        setPayments(paymentsData as any[]);
+        setStats(statsData as any);
+      } catch (error) {
+        console.error("Error fetching payments:", error);
+        toast.error("Failed to fetch payments");
+      } finally {
         setIsLoading(false);
       }
-    };
-
-    fetchData();
+    } else if (!authLoading) {
+      setIsLoading(false);
+    }
   }, [admin, authLoading]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleStatusUpdate = async (paymentId: number, newStatus: string) => {
     try {
@@ -116,11 +117,7 @@ export default function PaymentsPage() {
       : payments.filter((payment: any) => payment.status === statusFilter);
 
   if (authLoading || isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
-      </div>
-    );
+    return <LoadingSpinner size="lg" className="min-h-screen" />;
   }
 
   if (!admin) {

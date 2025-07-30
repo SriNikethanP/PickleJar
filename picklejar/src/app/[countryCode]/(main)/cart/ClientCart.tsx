@@ -5,6 +5,7 @@ import { useAuth } from "@lib/context/auth-context";
 import CartTemplate from "@modules/cart/templates";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import LoadingSpinner from "@components/LoadingSpinner";
 
 export default function ClientCart() {
   const { cart, isLoading } = useCart();
@@ -20,7 +21,7 @@ export default function ClientCart() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+        <LoadingSpinner size="lg" />
       </div>
     );
   }

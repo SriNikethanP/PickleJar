@@ -11,11 +11,6 @@ const API_BASE_URL =
 class AdminApiClient {
   private async getAuthHeaders(): Promise<HeadersInit> {
     const token = getLocalStorage(AUTH_KEYS.ADMIN.ACCESS_TOKEN);
-    console.log("Admin API Client - Auth token check:", {
-      token: token ? "Present" : "Missing",
-      tokenLength: token ? token.length : 0,
-      tokenPreview: token ? `${token.substring(0, 20)}...` : "None",
-    });
 
     const headers: HeadersInit = {
       "Content-Type": "application/json",
@@ -61,9 +56,6 @@ class AdminApiClient {
     const url = `${API_BASE_URL}${endpoint}`;
     const headers = await this.getAuthHeaders();
 
-    console.log(`Admin API Request: ${options.method || "GET"} ${url}`);
-    console.log("Request headers:", headers);
-
     let response = await fetch(url, {
       ...options,
       headers: {
@@ -71,10 +63,6 @@ class AdminApiClient {
         ...options.headers,
       },
     });
-
-    console.log(
-      `Admin API Response: ${response.status} ${response.statusText}`
-    );
 
     // If 401, try to refresh token and retry once
     if (response.status === 401) {
@@ -107,7 +95,6 @@ class AdminApiClient {
           // If we can't get text either, use default error message
         }
       }
-      console.error(`Admin API Error (${response.status}):`, errorMessage);
       throw new Error(errorMessage);
     }
 
