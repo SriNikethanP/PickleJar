@@ -6,6 +6,7 @@ import com.pickle_company.pickle.repository.OrderItemRepository;
 import com.pickle_company.pickle.repository.ProductRepository;
 import com.pickle_company.pickle.repository.OrderRepository;
 import com.pickle_company.pickle.repository.UserRepository;
+import com.pickle_company.pickle.repository.PaymentRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -22,17 +23,20 @@ public class AdminReportService {
     private final OrderRepository orderRepository;
     private final ProductMapper productMapper;
     private final UserRepository userRepository;
+    private final PaymentRepository paymentRepository;
 
     public AdminReportService(OrderItemRepository orderItemRepository,
                               ProductRepository productRepository,
                               OrderRepository orderRepository,
                               ProductMapper productMapper,
-                              UserRepository userRepository) {
+                              UserRepository userRepository,
+                              PaymentRepository paymentRepository) {
         this.orderItemRepository = orderItemRepository;
         this.productRepository = productRepository;
         this.orderRepository = orderRepository;
         this.productMapper = productMapper;
         this.userRepository = userRepository;
+        this.paymentRepository = paymentRepository;
     }
 
     public List<ProductResponseDTO> getPopularProducts(int limit) {
@@ -52,13 +56,27 @@ public class AdminReportService {
     }
 
     public List<Map<String, Object>> getRevenueTrendLast30Days() {
-        // Example: return [{date: '2024-05-01', revenue: 100.0}, ...]
         List<Map<String, Object>> trend = new java.util.ArrayList<>();
         LocalDate today = LocalDate.now();
+        LocalDate startDate = today.minusDays(29);
+
+        // Get revenue per day from DB
+        List<Object[]> dailyRevenue = paymentRepository.findDailyRevenueSince(startDate);
+
+        // Map date to revenue for quick lookup
+        Map<LocalDate, Double> revenueMap = new HashMap<>();
+        for (Object[] row : dailyRevenue) {
+            LocalDate date = ((java.sql.Date) row[0]).toLocalDate();
+            Double revenue = row[1] != null ? ((Number) row[1]).doubleValue() : 0.0;
+            revenueMap.put(date, revenue);
+        }
+
+        // Fill in all 30 days (even if 0 revenue)
         for (int i = 29; i >= 0; i--) {
+            LocalDate date = today.minusDays(i);
             Map<String, Object> day = new HashMap<>();
-            day.put("date", today.minusDays(i).format(DateTimeFormatter.ISO_DATE));
-            day.put("revenue", Math.random() * 1000); // Replace with real query
+            day.put("date", date.toString());
+            day.put("revenue", revenueMap.getOrDefault(date, 0.0));
             trend.add(day);
         }
         return trend;

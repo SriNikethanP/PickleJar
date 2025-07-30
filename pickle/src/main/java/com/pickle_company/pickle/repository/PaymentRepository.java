@@ -3,8 +3,10 @@
 import com.pickle_company.pickle.entity.Payment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,4 +25,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     
     @Query("SELECT COUNT(p) FROM Payment p WHERE p.status = :status")
     long countByStatus(Payment.PaymentStatus status);
+
+    @Query("SELECT DATE(p.paymentDate), SUM(p.amount) FROM Payment p WHERE p.status = 'COMPLETED' AND p.paymentDate >= :startDate GROUP BY DATE(p.paymentDate) ORDER BY DATE(p.paymentDate)")
+    List<Object[]> findDailyRevenueSince(@Param("startDate") LocalDate startDate);
 }
