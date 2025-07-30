@@ -13,10 +13,20 @@ import { listCollections, deleteCollection } from "@lib/data/admin";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import AddCollectionDialog from "@modules/admin/components/collections/AddCollectionDialog";
 import EditCollectionDialog from "@modules/admin/components/collections/EditCollectionDialog";
+import ConfirmationDialog from "../../../components/ConfirmationDialog";
 
 export default function CollectionsPage() {
   const [collections, setCollections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteDialog, setDeleteDialog] = useState<{
+    isOpen: boolean;
+    collectionId: number | null;
+    collectionTitle: string;
+  }>({
+    isOpen: false,
+    collectionId: null,
+    collectionTitle: "",
+  });
 
   const fetchCollections = async () => {
     try {
@@ -33,16 +43,32 @@ export default function CollectionsPage() {
     fetchCollections();
   }, []);
 
-  const handleDelete = async (id: number) => {
-    if (confirm("Are you sure you want to delete this collection?")) {
+  const handleDeleteClick = (id: number, title: string) => {
+    setDeleteDialog({
+      isOpen: true,
+      collectionId: id,
+      collectionTitle: title,
+    });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (deleteDialog.collectionId) {
       try {
-        await deleteCollection(id);
+        await deleteCollection(deleteDialog.collectionId);
         toast.success("Collection deleted successfully");
         fetchCollections();
       } catch (error) {
         toast.error("Failed to delete collection");
       }
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialog({
+      isOpen: false,
+      collectionId: null,
+      collectionTitle: "",
+    });
   };
 
   if (loading) {
@@ -98,7 +124,9 @@ export default function CollectionsPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleDelete(collection.id)}
+                            onClick={() =>
+                              handleDeleteClick(collection.id, collection.title)
+                            }
                             className="text-red-600 hover:text-red-700"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -113,6 +141,17 @@ export default function CollectionsPage() {
           )}
         </CardContent>
       </Card>
+
+      <ConfirmationDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Collection"
+        description={`Are you sure you want to delete "${deleteDialog.collectionTitle}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </div>
   );
 }

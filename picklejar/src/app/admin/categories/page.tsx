@@ -21,7 +21,7 @@ export default function CategoriesPage() {
   const fetchCategories = async () => {
     try {
       const data = await listCategories();
-      setCategories(data);
+      setCategories(data as any[]);
     } catch (error) {
       toast.error("Failed to fetch categories");
     } finally {
