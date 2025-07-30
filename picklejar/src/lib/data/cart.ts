@@ -102,3 +102,15 @@ export const codCheckout = async (userDetails: any): Promise<any> => {
     throw error;
   }
 };
+
+// Legacy exports for backward compatibility
+export const retrieveCart = getCart;
+export const assignCart = async (cartId: number, customerId: number): Promise<any> => {
+  try {
+    const result = await apiClient.put("/cart/assign", { cartId, customerId });
+    return result || null;
+  } catch (error) {
+    console.error("Error assigning cart:", error);
+    throw error;
+  }
+};

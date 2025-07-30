@@ -31,8 +31,8 @@ export const getAdminDashboardData = async (): Promise<any> => {
         totalOrders: orders || 0,
         totalCustomers: customers || 0,
         categoryPieData: pie || [],
-        trendLabels: (trend as any[] || []).map((d: any) => d.date),
-        revenueTrend: (trend as any[] || []).map((d: any) => d.revenue),
+        trendLabels: ((trend as any[]) || []).map((d: any) => d.date),
+        revenueTrend: ((trend as any[]) || []).map((d: any) => d.revenue),
         revenueTimeline: timeline || [],
       };
 
@@ -85,14 +85,17 @@ export const listCustomers = async (): Promise<any[]> => {
 export const getOrderCount = async (userId: number): Promise<number> => {
   try {
     const res = await adminApiClient.get(`/admin/users/${userId}/orders`);
-    return (res as any[] || []).length;
+    return ((res as any[]) || []).length;
   } catch (error) {
     console.error("Error fetching order count:", error);
     return 0;
   }
 };
 
-export const addProduct = async (product: any, images: File[] = []): Promise<any> => {
+export const addProduct = async (
+  product: any,
+  images: File[] = []
+): Promise<any> => {
   try {
     let imageUrls: string[] = [];
     if (images.length > 0) {
@@ -135,7 +138,10 @@ export const updateProduct = async (
       imageUrls,
     };
 
-    const result = await adminApiClient.put(`/admin/products/${id}`, productData);
+    const result = await adminApiClient.put(
+      `/admin/products/${id}`,
+      productData
+    );
     await clearDashboardCache();
     return result;
   } catch (error) {
@@ -179,7 +185,9 @@ export const listCollections = async (): Promise<any[]> => {
   }
 };
 
-export const createCollection = async (collection: { title: string }): Promise<any> => {
+export const createCollection = async (collection: {
+  title: string;
+}): Promise<any> => {
   try {
     const result = await adminApiClient.post("/admin/collections", collection);
     await clearDashboardCache();
@@ -195,7 +203,10 @@ export const updateCollection = async (
   collection: { title: string }
 ): Promise<any> => {
   try {
-    const result = await adminApiClient.put(`/admin/collections/${id}`, collection);
+    const result = await adminApiClient.put(
+      `/admin/collections/${id}`,
+      collection
+    );
     await clearDashboardCache();
     return result;
   } catch (error) {
@@ -235,9 +246,15 @@ export const createCategory = async (category: any): Promise<any> => {
   }
 };
 
-export const updateCategory = async (id: number, category: any): Promise<any> => {
+export const updateCategory = async (
+  id: number,
+  category: any
+): Promise<any> => {
   try {
-    const result = await adminApiClient.put(`/admin/categories/${id}`, category);
+    const result = await adminApiClient.put(
+      `/admin/categories/${id}`,
+      category
+    );
     await clearDashboardCache();
     return result;
   } catch (error) {
@@ -271,9 +288,12 @@ export const updatePaymentStatus = async (
   status: string
 ): Promise<any> => {
   try {
-    const result = await adminApiClient.put(`/admin/payments/${paymentId}/status`, {
-      status,
-    });
+    const result = await adminApiClient.put(
+      `/admin/payments/${paymentId}/status`,
+      {
+        status,
+      }
+    );
     await clearDashboardCache();
     return result;
   } catch (error) {
@@ -285,12 +305,14 @@ export const updatePaymentStatus = async (
 export const getPaymentStats = async (): Promise<any> => {
   try {
     const result = await adminApiClient.get("/admin/payments/stats");
-    return result || {
-      totalPayments: 0,
-      pendingPayments: 0,
-      completedPayments: 0,
-      failedPayments: 0,
-    };
+    return (
+      result || {
+        totalPayments: 0,
+        pendingPayments: 0,
+        completedPayments: 0,
+        failedPayments: 0,
+      }
+    );
   } catch (error) {
     console.error("Error fetching payment stats:", error);
     return {

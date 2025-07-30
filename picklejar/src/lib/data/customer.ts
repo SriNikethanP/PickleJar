@@ -162,6 +162,9 @@ export const getCustomerOrders = async (): Promise<any[]> => {
   }
 };
 
+// Legacy exports for backward compatibility
+export const retrieveCustomer = getCustomer;
+
 export const signout = async (countryCode: string) => {
   try {
     // Remove the authentication token

@@ -107,3 +107,7 @@ export const addProductReview = async (productId: number, review: any): Promise<
     throw error;
   }
 };
+
+// Legacy exports for backward compatibility
+export const getAllProducts = getProducts;
+export const listProductsByCollection = getProductsByCollection;

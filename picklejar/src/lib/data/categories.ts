@@ -57,3 +57,7 @@ export const getCategoryProducts = async (categoryId: number): Promise<any[]> =>
     return [];
   }
 };
+
+// Legacy exports for backward compatibility
+export const listCategories = getCategories;
+export const getCategoryByHandle = getCategory;

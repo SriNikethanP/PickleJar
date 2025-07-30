@@ -57,3 +57,6 @@ export const getCollectionProducts = async (collectionId: number): Promise<any[]
     return [];
   }
 };
+
+// Legacy exports for backward compatibility
+export const listCollections = getCollections;
