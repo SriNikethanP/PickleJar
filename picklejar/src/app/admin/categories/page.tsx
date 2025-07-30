@@ -13,10 +13,20 @@ import { listCategories, deleteCategory } from "@lib/data/admin";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import AddCategoryDialog from "@modules/admin/components/categories/AddCategoryDialog";
 import EditCategoryDialog from "@modules/admin/components/categories/EditCategoryDialog";
+import ConfirmationDialog from "../../../components/ConfirmationDialog";
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteDialog, setDeleteDialog] = useState<{
+    isOpen: boolean;
+    categoryId: number | null;
+    categoryName: string;
+  }>({
+    isOpen: false,
+    categoryId: null,
+    categoryName: "",
+  });
 
   const fetchCategories = async () => {
     try {
@@ -33,16 +43,32 @@ export default function CategoriesPage() {
     fetchCategories();
   }, []);
 
-  const handleDelete = async (id: number) => {
-    if (confirm("Are you sure you want to delete this category?")) {
+  const handleDeleteClick = (id: number, name: string) => {
+    setDeleteDialog({
+      isOpen: true,
+      categoryId: id,
+      categoryName: name,
+    });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (deleteDialog.categoryId) {
       try {
-        await deleteCategory(id);
+        await deleteCategory(deleteDialog.categoryId);
         toast.success("Category deleted successfully");
         fetchCategories();
       } catch (error) {
         toast.error("Failed to delete category");
       }
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialog({
+      isOpen: false,
+      categoryId: null,
+      categoryName: "",
+    });
   };
 
   if (loading) {
@@ -85,7 +111,7 @@ export default function CategoriesPage() {
                     <tr key={category.id} className="border-b hover:bg-gray-50">
                       <td className="p-2">{category.id}</td>
                       <td className="p-2 font-medium">{category.name}</td>
-                      <td className="p-2">{category.products?.length || 0}</td>
+                      <td className="p-2">{category.productCount || 0}</td>
                       <td className="p-2">
                         <div className="flex gap-2">
                           <EditCategoryDialog
@@ -95,7 +121,9 @@ export default function CategoriesPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleDelete(category.id)}
+                            onClick={() =>
+                              handleDeleteClick(category.id, category.name)
+                            }
                             className="text-red-600 hover:text-red-700"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -110,6 +138,17 @@ export default function CategoriesPage() {
           )}
         </CardContent>
       </Card>
+
+      <ConfirmationDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Category"
+        description={`Are you sure you want to delete "${deleteDialog.categoryName}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </div>
   );
 }
