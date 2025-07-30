@@ -45,7 +45,24 @@ WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
 # Create uploads directory for file uploads
-RUN mkdir -p uploads && chown -R appuser:appgroup uploads
+RUN mkdir -p uploads
+
+# Create startup script for better connection handling
+RUN echo '#!/bin/sh' > /app/startup.sh && \
+    echo 'echo "Waiting for database connection..."' >> /app/startup.sh && \
+    echo 'while ! nc -z ${DB_HOST:-mysql} ${DB_PORT:-3306}; do' >> /app/startup.sh && \
+    echo '  echo "Database not ready, waiting..."' >> /app/startup.sh && \
+    echo '  sleep 2' >> /app/startup.sh && \
+    echo 'done' >> /app/startup.sh && \
+    echo 'echo "Database is ready!"' >> /app/startup.sh && \
+    echo 'java $JAVA_OPTS -jar app.jar' >> /app/startup.sh && \
+    chmod +x /app/startup.sh
+
+# Install netcat for connection checking
+RUN apk add --no-cache netcat-openbsd
+
+# Set ownership for appuser
+RUN chown -R appuser:appgroup /app
 
 # Switch to non-root user
 USER appuser
@@ -78,20 +95,6 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=5 \
 LABEL maintainer="PickleJar Team"
 LABEL version="1.0"
 LABEL description="PickleJar Spring Boot Application"
-
-# Create startup script for better connection handling
-RUN echo '#!/bin/sh' > /app/startup.sh && \
-    echo 'echo "Waiting for database connection..."' >> /app/startup.sh && \
-    echo 'while ! nc -z ${DB_HOST:-mysql} ${DB_PORT:-3306}; do' >> /app/startup.sh && \
-    echo '  echo "Database not ready, waiting..."' >> /app/startup.sh && \
-    echo '  sleep 2' >> /app/startup.sh && \
-    echo 'done' >> /app/startup.sh && \
-    echo 'echo "Database is ready!"' >> /app/startup.sh && \
-    echo 'java $JAVA_OPTS -jar app.jar' >> /app/startup.sh && \
-    chmod +x /app/startup.sh
-
-# Install netcat for connection checking
-RUN apk add --no-cache netcat-openbsd
 
 # Run the application with database connection check
 ENTRYPOINT ["/app/startup.sh"] 
