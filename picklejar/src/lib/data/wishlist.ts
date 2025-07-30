@@ -1,63 +1,51 @@
 "use server";
 
-import axios from "axios";
+import { apiClient } from "@lib/api";
 
-const api = axios.create({
-  baseURL:
-    process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "http://localhost:8080/api/v1",
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-export type Wishlist = {
-  id: number;
-  user: { id: number; fullName: string; email: string };
-  products: Array<{
-    id: number;
-    name: string;
-    price: number;
-    imageUrls: string[];
-    stock: number;
-  }>;
-};
-
-export const addToWishlist = async (
-  userId: number,
-  productId: number
-): Promise<Wishlist | null> => {
+export const getWishlist = async (): Promise<any[]> => {
   try {
-    const res = await api.post("/wishlist/add", null, {
-      params: { userId, productId },
-    });
-    return res.data;
-  } catch (error) {
-    console.error("Error adding to wishlist:", error);
-    return null;
-  }
-};
-
-export const removeFromWishlist = async (
-  userId: number,
-  productId: number
-): Promise<Wishlist | null> => {
-  try {
-    const res = await api.delete("/wishlist/remove", {
-      params: { userId, productId },
-    });
-    return res.data;
-  } catch (error) {
-    console.error("Error removing from wishlist:", error);
-    return null;
-  }
-};
-
-export const getWishlist = async (userId: number): Promise<Wishlist | null> => {
-  try {
-    const res = await api.get("/wishlist", { params: { userId } });
-    return res.data;
+    const result = await apiClient.get("/wishlist");
+    return result || [];
   } catch (error) {
     console.error("Error fetching wishlist:", error);
-    return null;
+    return [];
+  }
+};
+
+export const addToWishlist = async (productId: number): Promise<any> => {
+  try {
+    const result = await apiClient.post("/wishlist", { productId });
+    return result || null;
+  } catch (error) {
+    console.error("Error adding to wishlist:", error);
+    throw error;
+  }
+};
+
+export const removeFromWishlist = async (productId: number): Promise<void> => {
+  try {
+    await apiClient.delete(`/wishlist/${productId}`);
+  } catch (error) {
+    console.error("Error removing from wishlist:", error);
+    throw error;
+  }
+};
+
+export const clearWishlist = async (): Promise<void> => {
+  try {
+    await apiClient.delete("/wishlist");
+  } catch (error) {
+    console.error("Error clearing wishlist:", error);
+    throw error;
+  }
+};
+
+export const isInWishlist = async (productId: number): Promise<boolean> => {
+  try {
+    const wishlist = await getWishlist();
+    return wishlist.some((item: any) => item.productId === productId);
+  } catch (error) {
+    console.error("Error checking wishlist status:", error);
+    return false;
   }
 };

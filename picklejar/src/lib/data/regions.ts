@@ -1,60 +1,51 @@
-// REGIONS DISABLED: Only India is supported. All region functions return India.
+import { apiClient } from "@lib/api";
 
-export const listRegions = async () => {
-  return [
-    {
-      id: "IN",
-      name: "India",
-      currency_code: "INR",
-      countries: [
-        {
-          id: "in",
-          iso_2: "in",
-          iso_3: "ind",
-          num_code: "356",
-          name: "India",
-        },
-      ],
-    },
-  ];
+export const getRegions = async (): Promise<any[]> => {
+  try {
+    const result = await apiClient.get("/regions");
+    return result || [];
+  } catch (error) {
+    console.error("Error fetching regions:", error);
+    return [];
+  }
 };
 
-export const retrieveRegion = async (id: string) => {
-  if (id === "IN" || id === "in") {
-    return {
-      id: "IN",
-      name: "India",
-      currency_code: "INR",
-      countries: [
-        {
-          id: "in",
-          iso_2: "in",
-          iso_3: "ind",
-          num_code: "356",
-          name: "India",
-        },
-      ],
-    };
+export const getRegion = async (regionId: string): Promise<any> => {
+  try {
+    const result = await apiClient.get(`/regions/${regionId}`);
+    return result || null;
+  } catch (error) {
+    console.error("Error fetching region:", error);
+    return null;
   }
-  return null;
 };
 
-export const getRegion = async (countryCode: string) => {
-  if (countryCode.toLowerCase() === "in") {
-    return {
-      id: "IN",
-      name: "India",
-      currency_code: "INR",
-      countries: [
-        {
-          id: "in",
-          iso_2: "in",
-          iso_3: "ind",
-          num_code: "356",
-          name: "India",
-        },
-      ],
-    };
+export const getRegionCurrencies = async (): Promise<any[]> => {
+  try {
+    const result = await apiClient.get("/regions/currencies");
+    return result || [];
+  } catch (error) {
+    console.error("Error fetching region currencies:", error);
+    return [];
   }
-  return null;
+};
+
+export const getRegionPaymentProviders = async (regionId: string): Promise<any[]> => {
+  try {
+    const result = await apiClient.get(`/regions/${regionId}/payment-providers`);
+    return result || [];
+  } catch (error) {
+    console.error("Error fetching region payment providers:", error);
+    return [];
+  }
+};
+
+export const getRegionFulfillmentProviders = async (regionId: string): Promise<any[]> => {
+  try {
+    const result = await apiClient.get(`/regions/${regionId}/fulfillment-providers`);
+    return result || [];
+  } catch (error) {
+    console.error("Error fetching region fulfillment providers:", error);
+    return [];
+  }
 };

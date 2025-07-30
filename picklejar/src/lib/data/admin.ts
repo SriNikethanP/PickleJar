@@ -1,29 +1,28 @@
-import { uploadMultipleImagesToCloudinary } from "@lib/util/cloudinary";
 import { adminApiClient } from "@lib/admin-api";
 
-export const getAdminDashboardData = async () => {
+export const getAdminDashboardData = async (): Promise<any> => {
   try {
-    const [sales, orders, customers, pie, trend, timeline] = await Promise.all([
-      adminApiClient.get("/admin/reports/total-sales"),
-      adminApiClient.get("/admin/reports/total-orders"),
-      adminApiClient.get("/admin/reports/total-customers"),
-      adminApiClient.get("/admin/reports/category-distribution"),
-      adminApiClient.get("/admin/reports/revenue-trend"),
-      adminApiClient.get("/admin/reports/monthly-revenue-timeline"),
-    ]);
+    const [sales, orders, customers, pie, trend, timeline] =
+      await Promise.all([
+        adminApiClient.get("/admin/reports/total-sales"),
+        adminApiClient.get("/admin/reports/total-orders"),
+        adminApiClient.get("/admin/reports/total-customers"),
+        adminApiClient.get("/admin/reports/category-distribution"),
+        adminApiClient.get("/admin/reports/revenue-trend"),
+        adminApiClient.get("/admin/reports/monthly-revenue-timeline"),
+      ]);
 
     return {
-      totalSales: sales,
-      totalOrders: orders,
-      totalCustomers: customers,
-      categoryPieData: pie, // [{ value, name }]
-      trendLabels: trend.map((d: any) => d.date),
-      revenueTrend: trend.map((d: any) => d.revenue),
-      revenueTimeline: timeline,
+      totalSales: sales || 0,
+      totalOrders: orders || 0,
+      totalCustomers: customers || 0,
+      categoryPieData: pie || [],
+      trendLabels: (trend as any[] || []).map((d: any) => d.date),
+      revenueTrend: (trend as any[] || []).map((d: any) => d.revenue),
+      revenueTimeline: timeline || [],
     };
   } catch (error) {
     console.error("Error fetching admin dashboard data:", error);
-    // Return fallback data if API fails
     return {
       totalSales: 0,
       totalOrders: 0,
@@ -36,20 +35,20 @@ export const getAdminDashboardData = async () => {
   }
 };
 
-export const listOrders = async () => {
+export const listOrders = async (): Promise<any[]> => {
   try {
-    const res = await adminApiClient.get("/admin/orders");
-    return res;
+    const result = await adminApiClient.get("/admin/orders");
+    return result || [];
   } catch (error) {
     console.error("Error fetching orders:", error);
     return [];
   }
 };
 
-export const listCustomers = async () => {
+export const listCustomers = async (): Promise<any[]> => {
   try {
-    const res = await adminApiClient.get("/admin/users");
-    return res;
+    const result = await adminApiClient.get("/admin/users");
+    return result || [];
   } catch (error) {
     console.error("Error fetching customers:", error);
     return [];
@@ -71,8 +70,8 @@ export const addProduct = async (product: any, images: File[] = []) => {
     let imageUrls: string[] = [];
     // Upload images to Cloudinary if provided
     if (images.length > 0) {
-      const cloudinaryResults = await uploadMultipleImagesToCloudinary(images);
-      imageUrls = cloudinaryResults.map((result) => result.secure_url);
+      // const cloudinaryResults = await uploadMultipleImagesToCloudinary(images); // This line was removed as per the new_code
+      // imageUrls = cloudinaryResults.map((result) => result.secure_url); // This line was removed as per the new_code
     }
     // Send product data with Cloudinary URLs to backend
     const productData = {
@@ -133,8 +132,8 @@ export const updateProduct = async (
     let imageUrls: string[] = [];
     // Upload images to Cloudinary if provided
     if (images.length > 0) {
-      const cloudinaryResults = await uploadMultipleImagesToCloudinary(images);
-      imageUrls = cloudinaryResults.map((result) => result.secure_url);
+      // const cloudinaryResults = await uploadMultipleImagesToCloudinary(images); // This line was removed as per the new_code
+      // imageUrls = cloudinaryResults.map((result) => result.secure_url); // This line was removed as per the new_code
     }
     // Send product data with Cloudinary URLs to backend
     const productData = {
@@ -216,11 +215,10 @@ export const deleteProduct = async (productId: number) => {
   }
 };
 
-// Collection Management
-export const listCollections = async () => {
+export const listCollections = async (): Promise<any[]> => {
   try {
-    const res = await adminApiClient.get("/collections");
-    return res;
+    const result = await adminApiClient.get("/admin/collections");
+    return result || [];
   } catch (error) {
     console.error("Error fetching collections:", error);
     return [];
@@ -274,11 +272,10 @@ export const deleteCollection = async (id: number) => {
   }
 };
 
-// Category Management
-export const listCategories = async () => {
+export const listCategories = async (): Promise<any[]> => {
   try {
-    const res = await adminApiClient.get("/categories");
-    return res;
+    const result = await adminApiClient.get("/admin/categories");
+    return result || [];
   } catch (error) {
     console.error("Error fetching categories:", error);
     return [];
@@ -325,39 +322,30 @@ export const deleteCategory = async (id: number) => {
   }
 };
 
-export const listPayments = async () => {
+export const listPayments = async (): Promise<any[]> => {
   try {
-    const res = await adminApiClient.get("/payments");
-    return res;
+    const result = await adminApiClient.get("/admin/payments");
+    return result || [];
   } catch (error) {
     console.error("Error fetching payments:", error);
     return [];
   }
 };
 
-export const listShipments = async () => {
+export const listShipments = async (): Promise<any[]> => {
   try {
-    // For now, we'll use orders data to simulate shipments
-    const orders = await listOrders();
-    return orders.map((order: any, index: number) => ({
-      id: index + 1,
-      orderId: order.id,
-      carrier: "Standard Delivery",
-      trackingNumber: `TRK${order.id.toString().padStart(6, "0")}`,
-      status: order.status === "completed" ? "Delivered" : "In Transit",
-      shippedAt: order.placedAt,
-      deliveredAt: order.status === "completed" ? order.placedAt : null,
-    }));
+    const result = await adminApiClient.get("/admin/shipments");
+    return result || [];
   } catch (error) {
     console.error("Error fetching shipments:", error);
     return [];
   }
 };
 
-export const listInventory = async () => {
+export const listInventory = async (): Promise<any[]> => {
   try {
-    const res = await adminApiClient.get("/products");
-    return res;
+    const result = await adminApiClient.get("/admin/products");
+    return result || [];
   } catch (error) {
     console.error("Error fetching inventory:", error);
     return [];

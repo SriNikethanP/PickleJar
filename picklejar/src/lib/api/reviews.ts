@@ -37,7 +37,8 @@ export const getProductReviews = async (
 // Get average rating for a product
 export const getProductRating = async (productId: number): Promise<number> => {
   try {
-    return await apiClient.get(`/products/${productId}/rating`);
+    const result = await apiClient.get(`/products/${productId}/rating`);
+    return result || 0;
   } catch (error) {
     console.error("Error fetching rating:", error);
     return 0;

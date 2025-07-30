@@ -1,111 +1,71 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { frontendCache, CACHE_KEYS } from "@lib/data/frontend-cache";
+import { useState, useEffect, useCallback } from "react";
+import { frontendCache } from "@lib/data/frontend-cache";
 
-interface UseOptimizedDataOptions {
-  cacheKey: string;
-  fetchFunction: () => Promise<any>;
-  ttl?: number; // Time to live in milliseconds
-  enabled?: boolean;
+interface UseOptimizedDataOptions<T> {
+  key: string;
+  fetchFn: () => Promise<T>;
+  ttl?: number;
   dependencies?: any[];
+  enabled?: boolean;
 }
 
 export function useOptimizedData<T>({
-  cacheKey,
-  fetchFunction,
-  ttl = 5 * 60 * 1000, // 5 minutes default
-  enabled = true,
+  key,
+  fetchFn,
+  ttl = 5 * 60 * 1000,
   dependencies = [],
-}: UseOptimizedDataOptions) {
+  enabled = true,
+}: UseOptimizedDataOptions<T>) {
   const [data, setData] = useState<T | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
 
-  const fetchData = useCallback(
-    async (forceRefresh = false) => {
-      if (!enabled) {
-        setIsLoading(false);
-        return;
-      }
+  const fetchData = useCallback(async () => {
+    if (!enabled) return;
 
-      // Check cache first
-      if (!forceRefresh) {
-        const cachedData = frontendCache.get<T>(cacheKey);
-        if (cachedData) {
-          setData(cachedData);
-          setIsLoading(false);
-          setError(null);
-          return;
-        }
-      }
+    // Check cache first
+    const cachedData = frontendCache.get<T>(key);
+    if (cachedData) {
+      setData(cachedData);
+      return;
+    }
 
-      // Cancel previous request if it exists
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
+    setLoading(true);
+    setError(null);
 
-      // Create new abort controller
-      abortControllerRef.current = new AbortController();
-
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const result = await fetchFunction();
-
-        // Check if request was cancelled
-        if (abortControllerRef.current?.signal.aborted) {
-          return;
-        }
-
-        // Cache the result
-        frontendCache.set(cacheKey, result, ttl);
-
-        setData(result);
-        setIsLoading(false);
-      } catch (err) {
-        if (abortControllerRef.current?.signal.aborted) {
-          return;
-        }
-        setError(err as Error);
-        setIsLoading(false);
-      }
-    },
-    [cacheKey, fetchFunction, ttl, enabled]
-  );
+    try {
+      const result = await fetchFn();
+      setData(result);
+      frontendCache.set(key, result, ttl);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error("Unknown error"));
+    } finally {
+      setLoading(false);
+    }
+  }, [key, fetchFn, ttl, enabled]);
 
   useEffect(() => {
     fetchData();
-
-    return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-    };
   }, [fetchData, ...dependencies]);
 
   const refetch = useCallback(() => {
-    return fetchData(true);
-  }, [fetchData]);
-
-  const clearCache = useCallback(() => {
-    frontendCache.delete(cacheKey);
-  }, [cacheKey]);
+    frontendCache.delete(key);
+    fetchData();
+  }, [key, fetchData]);
 
   return {
     data,
-    isLoading,
+    loading,
     error,
     refetch,
-    clearCache,
   };
 }
 
 // Predefined hooks for common data types
 export function useProducts() {
   return useOptimizedData({
-    cacheKey: CACHE_KEYS.PRODUCTS,
-    fetchFunction: async () => {
+    key: "products",
+    fetchFn: async () => {
       const { getAllProducts } = await import("@lib/data/products");
       return getAllProducts();
     },
@@ -114,8 +74,8 @@ export function useProducts() {
 
 export function useCollections() {
   return useOptimizedData({
-    cacheKey: CACHE_KEYS.COLLECTIONS,
-    fetchFunction: async () => {
+    key: "collections",
+    fetchFn: async () => {
       const { listCollections } = await import("@lib/data/collections");
       return listCollections();
     },
@@ -124,8 +84,8 @@ export function useCollections() {
 
 export function useCategories() {
   return useOptimizedData({
-    cacheKey: CACHE_KEYS.CATEGORIES,
-    fetchFunction: async () => {
+    key: "categories",
+    fetchFn: async () => {
       const { listCategories } = await import("@lib/data/categories");
       return listCategories();
     },
@@ -134,8 +94,8 @@ export function useCategories() {
 
 export function useRegion(countryCode: string = "in") {
   return useOptimizedData({
-    cacheKey: `${CACHE_KEYS.REGION}-${countryCode}`,
-    fetchFunction: async () => {
+    key: `region-${countryCode}`,
+    fetchFn: async () => {
       const { getRegion } = await import("@lib/data/regions");
       return getRegion(countryCode);
     },

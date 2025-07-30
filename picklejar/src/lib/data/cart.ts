@@ -1,201 +1,104 @@
 "use server";
 
-import axios from "axios";
-import { getAuthHeaders } from "./cookies";
+import { apiClient } from "@lib/api";
+import { measureAsync } from "@lib/util/performance";
 
-const api = axios.create({
-  baseURL:
-    process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "http://localhost:8080/api/v1",
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+// Simple cache for cart data
+let cartCache: any = null;
+let cartCacheTime = 0;
+const CACHE_DURATION = 1 * 60 * 1000; // 1 minute (shorter for cart)
 
-export type CartItem = {
-  id: number;
-  product: {
-    id: number;
-    name: string;
-    price: number;
-    imageUrls: string[];
-    stock: number;
-  };
-  quantity: number;
+export const getCart = async (): Promise<any> => {
+  return measureAsync("getCart", async () => {
+    // Check cache first
+    const now = Date.now();
+    if (cartCache && now - cartCacheTime < CACHE_DURATION) {
+      return cartCache;
+    }
+
+    try {
+      const result = await apiClient.get("/cart");
+      const cart = result || null;
+      
+      // Cache the result
+      cartCache = cart;
+      cartCacheTime = now;
+
+      return cart;
+    } catch (error) {
+      console.error("Error fetching cart:", error);
+      return null;
+    }
+  });
 };
 
-export type Cart = {
-  id: number;
-  user: { id: number; fullName: string; email: string };
-  items: CartItem[];
-  customer_id?: number;
+// Clear cache when needed
+export const clearCartCache = async (): Promise<void> => {
+  cartCache = null;
+  cartCacheTime = 0;
 };
 
-// Placeholder: Replace with real session/user logic
-function getUserIdFromSession(): number | null {
-  return null; // Return userId if logged in, otherwise null
-}
-
-export const getCartByUserId = async (): Promise<Cart | null> => {
+export const addToCart = async (productId: number, quantity: number): Promise<any> => {
   try {
-    const authHeaders = await getAuthHeaders();
-    const res = await api.get("/cart", {
-      headers: authHeaders,
-    });
-    return res.data;
-  } catch (error) {
-    console.error("Error fetching cart:", error);
-    return null;
-  }
-};
-
-export const addToCart = async (
-  productId: number,
-  quantity: number
-): Promise<Cart | null> => {
-  try {
-    const authHeaders = await getAuthHeaders();
-    const res = await api.post(
-      "/cart",
-      { productId, quantity },
-      {
-        headers: authHeaders,
-      }
-    );
-    return res.data;
+    const result = await apiClient.post("/cart", { productId, quantity });
+    await clearCartCache();
+    return result || null;
   } catch (error) {
     console.error("Error adding to cart:", error);
-    return null;
+    throw error;
   }
 };
 
-export const updateCartItem = async (
-  cartItemId: number,
-  quantity: number
-): Promise<Cart | null> => {
+export const updateCartItem = async (cartItemId: number, quantity: number): Promise<any> => {
   try {
-    const authHeaders = await getAuthHeaders();
-    const res = await api.put(
-      "/cart/item",
-      { cartItemId, quantity },
-      {
-        headers: authHeaders,
-      }
-    );
-    return res.data;
+    const result = await apiClient.put("/cart/item", { cartItemId, quantity });
+    await clearCartCache();
+    return result || null;
   } catch (error) {
     console.error("Error updating cart item:", error);
-    return null;
+    throw error;
   }
 };
 
-// Wrapper function for cart item component
-export const updateLineItem = async ({
-  lineId,
-  quantity,
-}: {
-  lineId: string;
-  quantity: number;
-}) => {
-  const result = await updateCartItem(parseInt(lineId), quantity);
-  if (!result) {
-    throw new Error("Failed to update cart item");
-  }
-  return result;
-};
-
-// Wrapper function for adding to cart (compatible with Medusa interface)
-export const addToCartWrapper = async ({
-  productId,
-  quantity,
-  countryCode,
-}: {
-  productId: number;
-  quantity: number;
-  countryCode: string;
-}) => {
-  const result = await addToCart(productId, quantity);
-  if (!result) {
-    throw new Error("Failed to add to cart");
-  }
-  return result;
-};
-
-export const removeCartItem = async (
-  cartItemId: number
-): Promise<Cart | null> => {
+export const removeFromCart = async (cartItemId: number): Promise<any> => {
   try {
-    const authHeaders = await getAuthHeaders();
-    const res = await api.delete("/cart/item", {
-      params: { cartItemId },
-      headers: authHeaders,
-    });
-    return res.data;
+    const result = await apiClient.delete(`/cart/item?cartItemId=${cartItemId}`);
+    await clearCartCache();
+    return result || null;
   } catch (error) {
-    console.error("Error removing cart item:", error);
-    return null;
+    console.error("Error removing from cart:", error);
+    throw error;
   }
 };
 
-export const checkoutCart = async () => {
+export const clearCart = async (): Promise<void> => {
   try {
-    const authHeaders = await getAuthHeaders();
-    const res = await api.post("/cart/checkout", null, {
-      headers: authHeaders,
-    });
-    return res.data;
+    await apiClient.delete("/cart");
+    await clearCartCache();
   } catch (error) {
-    console.error("Error checking out cart:", error);
-    return null;
+    console.error("Error clearing cart:", error);
+    throw error;
   }
 };
 
-export const assignCart = async (cartId: number, customerId: number) => {
+export const checkout = async (checkoutData: any): Promise<any> => {
   try {
-    const authHeaders = await getAuthHeaders();
-    const res = await api.put(
-      "/cart/assign",
-      { cartId, customerId },
-      {
-        headers: authHeaders,
-      }
-    );
-    return res.data;
+    const result = await apiClient.post("/cart/checkout", checkoutData);
+    await clearCartCache();
+    return result || null;
   } catch (error) {
-    console.error("Error assigning cart:", error);
-    return null;
+    console.error("Error during checkout:", error);
+    throw error;
   }
 };
 
-export const retrieveCart = async (): Promise<Cart | null> => {
+export const codCheckout = async (userDetails: any): Promise<any> => {
   try {
-    const authHeaders = await getAuthHeaders();
-    const res = await api.get("/cart", {
-      headers: authHeaders,
-    });
-    return res.data;
-  } catch (error: any) {
-    // Don't log 403 errors as they're expected when user is not authenticated
-    if (error?.response?.status !== 403) {
-      console.error("Error retrieving cart:", error);
-    }
-    // For any authentication errors, just return null instead of throwing
-    // The client-side components will handle authentication
-    return null;
-  }
-};
-
-export const listCartOptions = async () => {
-  try {
-    const authHeaders = await getAuthHeaders();
-    const res = await api.get("/shipping-options", {
-      headers: authHeaders,
-    });
-    return res.data;
-  } catch (error: any) {
-    // Don't log 403 errors as they're expected when user is not authenticated
-    if (error?.response?.status !== 403) {
-      console.error("Error fetching cart options:", error);
-    }
-    return { shipping_options: [] };
+    const result = await apiClient.post("/cart/checkout/cod", userDetails);
+    await clearCartCache();
+    return result || null;
+  } catch (error) {
+    console.error("Error during COD checkout:", error);
+    throw error;
   }
 };

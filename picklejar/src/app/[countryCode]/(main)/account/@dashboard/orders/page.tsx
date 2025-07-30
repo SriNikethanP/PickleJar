@@ -55,21 +55,6 @@ export default function Orders() {
   const [orders, setOrders] = useState<CustomOrder[] | null>(null);
   const [ordersLoading, setOrdersLoading] = useState(true);
 
-  // Show loading state while checking authentication
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
-      </div>
-    );
-  }
-
-  // If user is not authenticated, redirect to login
-  if (!user) {
-    router.push("/account");
-    return null;
-  }
-
   // Fetch orders when user is authenticated
   useEffect(() => {
     const fetchOrders = async () => {
@@ -99,6 +84,21 @@ export default function Orders() {
       fetchOrders();
     }
   }, [user]);
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  // If user is not authenticated, redirect to login
+  if (!user) {
+    router.push("/account");
+    return null;
+  }
 
   if (ordersLoading) {
     return (

@@ -1,27 +1,33 @@
 "use server";
 
-import axios from "axios";
-import { getAuthHeaders, getCacheOptions } from "./cookies";
-import { HttpTypes } from "@medusajs/types";
+import { apiClient } from "@lib/api";
 
-const api = axios.create({
-  baseURL:
-    process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "http://localhost:8080/api/v1",
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-export const listCartPaymentMethods = async (regionId: string) => {
+export const getPaymentMethods = async (): Promise<any[]> => {
   try {
-    const res = await api.get("/payment-providers", {
-      params: { region_id: regionId },
-    });
-    return res.data.payment_providers.sort((a: any, b: any) =>
-      a.id > b.id ? 1 : -1
-    );
+    const result = await apiClient.get("/payment-methods");
+    return result || [];
   } catch (error) {
     console.error("Error fetching payment methods:", error);
     return [];
+  }
+};
+
+export const createPaymentIntent = async (paymentData: any): Promise<any> => {
+  try {
+    const result = await apiClient.post("/payments/create-intent", paymentData);
+    return result || null;
+  } catch (error) {
+    console.error("Error creating payment intent:", error);
+    throw error;
+  }
+};
+
+export const confirmPayment = async (paymentId: string, paymentData: any): Promise<any> => {
+  try {
+    const result = await apiClient.post(`/payments/${paymentId}/confirm`, paymentData);
+    return result || null;
+  } catch (error) {
+    console.error("Error confirming payment:", error);
+    throw error;
   }
 };

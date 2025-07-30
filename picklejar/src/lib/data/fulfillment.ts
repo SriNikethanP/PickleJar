@@ -1,41 +1,43 @@
 "use server";
 
-import axios from "axios";
-import { HttpTypes } from "@medusajs/types";
-import { getAuthHeaders, getCacheOptions } from "./cookies";
+import { apiClient } from "@lib/api";
 
-const api = axios.create({
-  baseURL:
-    process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "http://localhost:8080/api/v1",
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-export const listCartShippingMethods = async (cartId: string) => {
-  const params = {
-    cart_id: cartId,
-    fields:
-      "+service_zone.fulfllment_set.type,*service_zone.fulfillment_set.location.address",
-  };
+export const getFulfillmentOptions = async (): Promise<any[]> => {
   try {
-    const res = await api.get("/shipping-options", { params });
-    return res.data.shipping_options;
-  } catch {
+    const result = await apiClient.get("/fulfillment-options");
+    return result || [];
+  } catch (error) {
+    console.error("Error fetching fulfillment options:", error);
+    return [];
+  }
+};
+
+export const createFulfillment = async (fulfillmentData: any): Promise<any> => {
+  try {
+    const result = await apiClient.post("/fulfillments", fulfillmentData);
+    return result || null;
+  } catch (error) {
+    console.error("Error creating fulfillment:", error);
+    throw error;
+  }
+};
+
+export const getFulfillment = async (fulfillmentId: string): Promise<any> => {
+  try {
+    const result = await apiClient.get(`/fulfillments/${fulfillmentId}`);
+    return result || null;
+  } catch (error) {
+    console.error("Error fetching fulfillment:", error);
     return null;
   }
 };
 
-export const calculatePriceForShippingOption = async (
-  optionId: string,
-  cartId: string,
-  data?: Record<string, unknown>
-) => {
-  const body = { cart_id: cartId, data };
+export const cancelFulfillment = async (fulfillmentId: string): Promise<any> => {
   try {
-    const res = await api.post(`/shipping-options/${optionId}/calculate`, body);
-    return res.data.shipping_option;
-  } catch {
-    return null;
+    const result = await apiClient.post(`/fulfillments/${fulfillmentId}/cancel`);
+    return result || null;
+  } catch (error) {
+    console.error("Error canceling fulfillment:", error);
+    throw error;
   }
 };

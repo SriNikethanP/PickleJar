@@ -7,7 +7,7 @@ let dashboardCache: any = null;
 let dashboardCacheTime = 0;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-export const getAdminDashboardData = async () => {
+export const getAdminDashboardData = async (): Promise<any> => {
   return measureAsync("getAdminDashboardData", async () => {
     // Check cache first
     const now = Date.now();
@@ -27,13 +27,13 @@ export const getAdminDashboardData = async () => {
         ]);
 
       const result = {
-        totalSales: sales,
-        totalOrders: orders,
-        totalCustomers: customers,
-        categoryPieData: pie,
-        trendLabels: (trend as any[]).map((d: any) => d.date),
-        revenueTrend: (trend as any[]).map((d: any) => d.revenue),
-        revenueTimeline: timeline,
+        totalSales: sales || 0,
+        totalOrders: orders || 0,
+        totalCustomers: customers || 0,
+        categoryPieData: pie || [],
+        trendLabels: (trend as any[] || []).map((d: any) => d.date),
+        revenueTrend: (trend as any[] || []).map((d: any) => d.revenue),
+        revenueTimeline: timeline || [],
       };
 
       // Cache the result
@@ -57,40 +57,42 @@ export const getAdminDashboardData = async () => {
 };
 
 // Clear cache when needed
-export const clearDashboardCache = async () => {
+export const clearDashboardCache = async (): Promise<void> => {
   dashboardCache = null;
   dashboardCacheTime = 0;
 };
 
-export const listOrders = async () => {
+export const listOrders = async (): Promise<any[]> => {
   try {
-    return await adminApiClient.get("/admin/orders");
+    const result = await adminApiClient.get("/admin/orders");
+    return result || [];
   } catch (error) {
     console.error("Error fetching orders:", error);
     return [];
   }
 };
 
-export const listCustomers = async () => {
+export const listCustomers = async (): Promise<any[]> => {
   try {
-    return await adminApiClient.get("/admin/users");
+    const result = await adminApiClient.get("/admin/users");
+    return result || [];
   } catch (error) {
     console.error("Error fetching customers:", error);
     return [];
   }
 };
 
-export const getOrderCount = async (userId: number) => {
+export const getOrderCount = async (userId: number): Promise<number> => {
   try {
     const res = await adminApiClient.get(`/admin/users/${userId}/orders`);
-    return (res as any[]).length;
+    return (res as any[] || []).length;
   } catch (error) {
     console.error("Error fetching order count:", error);
     return 0;
   }
 };
 
-export const addProduct = async (product: any, images: File[] = []) => {
+export const addProduct = async (product: any, images: File[] = []): Promise<any> => {
   try {
     let imageUrls: string[] = [];
     if (images.length > 0) {
@@ -101,21 +103,16 @@ export const addProduct = async (product: any, images: File[] = []) => {
     }
 
     const productData = {
-      name: product.name,
-      description: product.description,
-      categoryId: product.categoryId,
-      collectionId: product.collectionId,
-      price: product.price,
-      stock: product.stock,
-      imageUrls: imageUrls,
+      ...product,
+      imageUrls,
     };
 
-    const result = await adminApiClient.post("/products/admin", productData);
-    await clearDashboardCache(); // Clear cache when data changes
+    const result = await adminApiClient.post("/admin/products", productData);
+    await clearDashboardCache();
     return result;
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error adding product:", error);
-    throw new Error(error.message || "Failed to add product");
+    throw error;
   }
 };
 
@@ -123,7 +120,7 @@ export const updateProduct = async (
   id: number,
   product: any,
   images: File[] = []
-) => {
+): Promise<any> => {
   try {
     let imageUrls: string[] = [];
     if (images.length > 0) {
@@ -134,142 +131,135 @@ export const updateProduct = async (
     }
 
     const productData = {
-      name: product.name,
-      description: product.description,
-      categoryId: product.categoryId,
-      collectionId: product.collectionId,
-      price: product.price,
-      stock: product.stock,
-      imageUrls: imageUrls,
+      ...product,
+      imageUrls,
     };
 
-    const result = await adminApiClient.put(
-      `/products/admin/${id}`,
-      productData
-    );
-    await clearDashboardCache(); // Clear cache when data changes
+    const result = await adminApiClient.put(`/admin/products/${id}`, productData);
+    await clearDashboardCache();
     return result;
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error updating product:", error);
-    throw new Error(error.message || "Failed to update product");
+    throw error;
   }
 };
 
-export const deleteProduct = async (productId: number) => {
+export const deleteProduct = async (productId: number): Promise<void> => {
   try {
-    const result = await adminApiClient.delete(`/products/admin/${productId}`);
-    await clearDashboardCache(); // Clear cache when data changes
-    return result;
+    await adminApiClient.delete(`/admin/products/${productId}`);
+    await clearDashboardCache();
   } catch (error) {
     console.error("Error deleting product:", error);
-    throw new Error("Failed to delete product");
+    throw error;
   }
 };
 
 export const deleteProductImage = async (
   productId: number,
   imageUrl: string
-) => {
+): Promise<void> => {
   try {
-    return await adminApiClient.delete(`/products/admin/${productId}/images`, {
+    await adminApiClient.delete(`/admin/products/${productId}/images`, {
       imageUrl,
     });
+    await clearDashboardCache();
   } catch (error) {
     console.error("Error deleting product image:", error);
-    throw new Error("Failed to delete product image");
+    throw error;
   }
 };
 
-export const listCollections = async () => {
+export const listCollections = async (): Promise<any[]> => {
   try {
-    return await adminApiClient.get("/collections");
+    const result = await adminApiClient.get("/admin/collections");
+    return result || [];
   } catch (error) {
     console.error("Error fetching collections:", error);
     return [];
   }
 };
 
-export const createCollection = async (collection: { title: string }) => {
+export const createCollection = async (collection: { title: string }): Promise<any> => {
   try {
-    const result = await adminApiClient.post("/collections", collection);
-    await clearDashboardCache(); // Clear cache when data changes
+    const result = await adminApiClient.post("/admin/collections", collection);
+    await clearDashboardCache();
     return result;
   } catch (error) {
     console.error("Error creating collection:", error);
-    throw new Error("Failed to create collection");
+    throw error;
   }
 };
 
 export const updateCollection = async (
   id: number,
   collection: { title: string }
-) => {
+): Promise<any> => {
   try {
-    const result = await adminApiClient.put(`/collections/${id}`, collection);
-    await clearDashboardCache(); // Clear cache when data changes
+    const result = await adminApiClient.put(`/admin/collections/${id}`, collection);
+    await clearDashboardCache();
     return result;
   } catch (error) {
     console.error("Error updating collection:", error);
-    throw new Error("Failed to update collection");
+    throw error;
   }
 };
 
-export const deleteCollection = async (id: number) => {
+export const deleteCollection = async (id: number): Promise<void> => {
   try {
-    const result = await adminApiClient.delete(`/collections/${id}`);
-    await clearDashboardCache(); // Clear cache when data changes
-    return result;
+    await adminApiClient.delete(`/admin/collections/${id}`);
+    await clearDashboardCache();
   } catch (error) {
     console.error("Error deleting collection:", error);
-    throw new Error("Failed to delete collection");
+    throw error;
   }
 };
 
-export const listCategories = async () => {
+export const listCategories = async (): Promise<any[]> => {
   try {
-    return await adminApiClient.get("/categories");
+    const result = await adminApiClient.get("/admin/categories");
+    return result || [];
   } catch (error) {
     console.error("Error fetching categories:", error);
     return [];
   }
 };
 
-export const createCategory = async (category: any) => {
+export const createCategory = async (category: any): Promise<any> => {
   try {
-    const result = await adminApiClient.post("/categories", category);
-    await clearDashboardCache(); // Clear cache when data changes
+    const result = await adminApiClient.post("/admin/categories", category);
+    await clearDashboardCache();
     return result;
   } catch (error) {
     console.error("Error creating category:", error);
-    throw new Error("Failed to create category");
+    throw error;
   }
 };
 
-export const updateCategory = async (id: number, category: any) => {
+export const updateCategory = async (id: number, category: any): Promise<any> => {
   try {
-    const result = await adminApiClient.put(`/categories/${id}`, category);
-    await clearDashboardCache(); // Clear cache when data changes
+    const result = await adminApiClient.put(`/admin/categories/${id}`, category);
+    await clearDashboardCache();
     return result;
   } catch (error) {
     console.error("Error updating category:", error);
-    throw new Error("Failed to update category");
+    throw error;
   }
 };
 
-export const deleteCategory = async (id: number) => {
+export const deleteCategory = async (id: number): Promise<void> => {
   try {
-    const result = await adminApiClient.delete(`/categories/${id}`);
-    await clearDashboardCache(); // Clear cache when data changes
-    return result;
+    await adminApiClient.delete(`/admin/categories/${id}`);
+    await clearDashboardCache();
   } catch (error) {
     console.error("Error deleting category:", error);
-    throw new Error("Failed to delete category");
+    throw error;
   }
 };
 
-export const listPayments = async () => {
+export const listPayments = async (): Promise<any[]> => {
   try {
-    return await adminApiClient.get("/admin/payments");
+    const result = await adminApiClient.get("/admin/payments");
+    return result || [];
   } catch (error) {
     console.error("Error fetching payments:", error);
     return [];
@@ -279,15 +269,12 @@ export const listPayments = async () => {
 export const updatePaymentStatus = async (
   paymentId: number,
   status: string
-) => {
+): Promise<any> => {
   try {
-    const result = await adminApiClient.put(
-      `/admin/payments/${paymentId}/status`,
-      {
-        status,
-      }
-    );
-    await clearDashboardCache(); // Clear cache when data changes
+    const result = await adminApiClient.put(`/admin/payments/${paymentId}/status`, {
+      status,
+    });
+    await clearDashboardCache();
     return result;
   } catch (error) {
     console.error("Error updating payment status:", error);
@@ -295,23 +282,30 @@ export const updatePaymentStatus = async (
   }
 };
 
-export const getPaymentStats = async () => {
+export const getPaymentStats = async (): Promise<any> => {
   try {
-    return await adminApiClient.get("/admin/payments/stats");
+    const result = await adminApiClient.get("/admin/payments/stats");
+    return result || {
+      totalPayments: 0,
+      pendingPayments: 0,
+      completedPayments: 0,
+      failedPayments: 0,
+    };
   } catch (error) {
     console.error("Error fetching payment stats:", error);
     return {
-      pendingCount: 0,
-      completedCount: 0,
-      totalRevenue: 0,
+      totalPayments: 0,
+      pendingPayments: 0,
+      completedPayments: 0,
+      failedPayments: 0,
     };
   }
 };
 
-export const createTestOrder = async () => {
+export const createTestOrder = async (): Promise<any> => {
   try {
-    const result = await adminApiClient.post("/admin/orders/test");
-    await clearDashboardCache(); // Clear cache when data changes
+    const result = await adminApiClient.post("/admin/test-order");
+    await clearDashboardCache();
     return result;
   } catch (error) {
     console.error("Error creating test order:", error);
@@ -319,28 +313,20 @@ export const createTestOrder = async () => {
   }
 };
 
-export const listShipments = async () => {
+export const listShipments = async (): Promise<any[]> => {
   try {
-    // For now, we'll use orders data to simulate shipments
-    const orders = (await listOrders()) as any[];
-    return orders.map((order: any, index: number) => ({
-      id: index + 1,
-      orderId: order.id,
-      carrier: "Standard Delivery",
-      trackingNumber: `TRK${order.id.toString().padStart(6, "0")}`,
-      status: order.status === "completed" ? "Delivered" : "In Transit",
-      shippedAt: order.placedAt,
-      deliveredAt: order.status === "completed" ? order.placedAt : null,
-    }));
+    const result = await adminApiClient.get("/admin/shipments");
+    return result || [];
   } catch (error) {
     console.error("Error fetching shipments:", error);
     return [];
   }
 };
 
-export const listInventory = async () => {
+export const listInventory = async (): Promise<any[]> => {
   try {
-    return await adminApiClient.get("/products");
+    const result = await adminApiClient.get("/admin/products");
+    return result || [];
   } catch (error) {
     console.error("Error fetching inventory:", error);
     return [];

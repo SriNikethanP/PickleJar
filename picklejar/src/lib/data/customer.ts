@@ -3,6 +3,8 @@ import axios from "axios";
 import { removeAuthToken } from "./cookies";
 import { redirect } from "next/navigation";
 import { getAuthHeaders } from "./cookies";
+import { apiClient } from "@lib/api";
+import { measureAsync } from "@lib/util/performance";
 
 const api = axios.create({
   baseURL:
@@ -79,21 +81,84 @@ export const signup = async (_: any, formData: FormData) => {
   }
 };
 
-export const retrieveCustomer = async (): Promise<User | null> => {
-  try {
-    const authHeaders = await getAuthHeaders();
-    const res = await api.get("/users/me", {
-      headers: authHeaders,
-    });
-    return res.data;
-  } catch (error: any) {
-    // Don't log 403 errors as they're expected when user is not authenticated
-    if (error?.response?.status !== 403) {
-      console.error("Error retrieving customer:", error);
+export const getCustomer = async (): Promise<any> => {
+  return measureAsync("getCustomer", async () => {
+    try {
+      const result = await apiClient.get("/users/me");
+      return result || null;
+    } catch (error) {
+      console.error("Error fetching customer:", error);
+      return null;
     }
-    // For any authentication errors, just return null instead of throwing
-    // The client-side components will handle authentication
-    return null;
+  });
+};
+
+export const updateCustomer = async (customerData: any): Promise<any> => {
+  try {
+    const result = await apiClient.put("/users/me", customerData);
+    return result || null;
+  } catch (error) {
+    console.error("Error updating customer:", error);
+    throw error;
+  }
+};
+
+export const updateCustomerAddress = async (addressData: any): Promise<any> => {
+  try {
+    const result = await apiClient.put("/users/me/address", addressData);
+    return result || null;
+  } catch (error) {
+    console.error("Error updating customer address:", error);
+    throw error;
+  }
+};
+
+export const getCustomerAddresses = async (): Promise<any[]> => {
+  try {
+    const result = await apiClient.get("/users/me/addresses");
+    return result || [];
+  } catch (error) {
+    console.error("Error fetching customer addresses:", error);
+    return [];
+  }
+};
+
+export const addCustomerAddress = async (addressData: any): Promise<any> => {
+  try {
+    const result = await apiClient.post("/users/me/addresses", addressData);
+    return result || null;
+  } catch (error) {
+    console.error("Error adding customer address:", error);
+    throw error;
+  }
+};
+
+export const updateCustomerAddressById = async (addressId: number, addressData: any): Promise<any> => {
+  try {
+    const result = await apiClient.put(`/users/me/addresses/${addressId}`, addressData);
+    return result || null;
+  } catch (error) {
+    console.error("Error updating customer address:", error);
+    throw error;
+  }
+};
+
+export const deleteCustomerAddress = async (addressId: number): Promise<void> => {
+  try {
+    await apiClient.delete(`/users/me/addresses/${addressId}`);
+  } catch (error) {
+    console.error("Error deleting customer address:", error);
+    throw error;
+  }
+};
+
+export const getCustomerOrders = async (): Promise<any[]> => {
+  try {
+    const result = await apiClient.get("/users/me/orders");
+    return result || [];
+  } catch (error) {
+    console.error("Error fetching customer orders:", error);
+    return [];
   }
 };
 
