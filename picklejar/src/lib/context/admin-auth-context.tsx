@@ -3,6 +3,26 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
 
+// Helper function to safely access localStorage
+const getLocalStorage = (key: string): string | null => {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem(key);
+  }
+  return null;
+};
+
+const setLocalStorage = (key: string, value: string): void => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem(key, value);
+  }
+};
+
+const removeLocalStorage = (key: string): void => {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem(key);
+  }
+};
+
 export interface AdminUser {
   id: number;
   fullName: string;
@@ -45,7 +65,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const checkAdminAuthStatus = async () => {
     try {
-      const token = localStorage.getItem("adminAccessToken");
+      const token = getLocalStorage("adminAccessToken");
       if (!token) {
         setIsLoading(false);
         return;
@@ -66,13 +86,13 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
           setAdmin(userData);
         } else {
           // User is not admin, clear token
-          localStorage.removeItem("adminAccessToken");
-          localStorage.removeItem("adminRefreshToken");
+          removeLocalStorage("adminAccessToken");
+          removeLocalStorage("adminRefreshToken");
         }
       } else {
         // Token is invalid, clear it
-        localStorage.removeItem("adminAccessToken");
-        localStorage.removeItem("adminRefreshToken");
+        removeLocalStorage("adminAccessToken");
+        removeLocalStorage("adminRefreshToken");
       }
     } catch (error) {
       console.error("Error checking admin auth status:", error);
@@ -101,9 +121,9 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
         }
 
         // Store admin tokens separately from regular user tokens
-        localStorage.setItem("adminAccessToken", data.accessToken);
-        localStorage.setItem("adminRefreshToken", data.refreshToken);
-        localStorage.setItem("adminUser", JSON.stringify(data.user));
+        setLocalStorage("adminAccessToken", data.accessToken);
+        setLocalStorage("adminRefreshToken", data.refreshToken);
+        setLocalStorage("adminUser", JSON.stringify(data.user));
 
         setAdmin(data.user);
         toast.success("Admin login successful!");
@@ -121,9 +141,9 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const logout = () => {
-    localStorage.removeItem("adminAccessToken");
-    localStorage.removeItem("adminRefreshToken");
-    localStorage.removeItem("adminUser");
+    removeLocalStorage("adminAccessToken");
+    removeLocalStorage("adminRefreshToken");
+    removeLocalStorage("adminUser");
     setAdmin(null);
     toast.success("Admin logged out successfully");
   };

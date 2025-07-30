@@ -1,9 +1,28 @@
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "http://localhost:8080/api/v1";
+// Helper function to safely access localStorage
+const getLocalStorage = (key: string): string | null => {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem(key);
+  }
+  return null;
+};
+
+const setLocalStorage = (key: string, value: string): void => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem(key, value);
+  }
+};
+
+const removeLocalStorage = (key: string): void => {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem(key);
+  }
+};
 
 class AdminApiClient {
   private async getAuthHeaders(): Promise<HeadersInit> {
-    const token = localStorage.getItem("adminAccessToken");
+    const token = getLocalStorage("adminAccessToken");
     return {
       "Content-Type": "application/json",
       ...(token && { Authorization: `Bearer ${token}` }),
@@ -12,7 +31,7 @@ class AdminApiClient {
 
   private async refreshTokenIfNeeded(): Promise<boolean> {
     try {
-      const refreshToken = localStorage.getItem("adminRefreshToken");
+      const refreshToken = getLocalStorage("adminRefreshToken");
       if (!refreshToken) {
         return false;
       }
@@ -27,9 +46,9 @@ class AdminApiClient {
 
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem("adminAccessToken", data.accessToken);
-        localStorage.setItem("adminRefreshToken", data.refreshToken);
-        localStorage.setItem("adminUser", JSON.stringify(data.user));
+        setLocalStorage("adminAccessToken", data.accessToken);
+        setLocalStorage("adminRefreshToken", data.refreshToken);
+        setLocalStorage("adminUser", JSON.stringify(data.user));
         return true;
       }
       return false;
