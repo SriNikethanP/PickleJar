@@ -60,18 +60,21 @@ EXPOSE 8080
 ENV SPRING_PROFILES_ACTIVE=docker
 ENV JAVA_OPTS="-Xmx1024m -Xms512m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/app/dumps"
 
-# Database connection retry settings
+# Database connection retry settings (can be overridden by deployment environment)
 ENV SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT=30000
 ENV SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=10
 ENV SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE=5
 ENV SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT=300000
 ENV SPRING_DATASOURCE_HIKARI_MAX_LIFETIME=1200000
 
-# JPA/Hibernate settings for better connection handling
+# JPA/Hibernate settings (can be overridden by deployment environment)
 ENV SPRING_JPA_HIBERNATE_DDL_AUTO=update
 ENV SPRING_JPA_SHOW_SQL=false
 ENV SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQLDialect
 ENV SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=true
+
+# Note: Database connection details (URL, username, password) should be set in deployment environment
+# SPRING_DATASOURCE_URL, SPRING_DATASOURCE_USERNAME, SPRING_DATASOURCE_PASSWORD
 
 # Health check with better error handling
 HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=5 \
