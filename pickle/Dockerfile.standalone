@@ -45,29 +45,7 @@ WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
 # Create uploads directory for file uploads
-RUN mkdir -p uploads
-
-# Create startup script for better connection handling
-RUN echo '#!/bin/sh' > /app/startup.sh && \
-    echo 'echo "Starting PickleJar application..."' >> /app/startup.sh && \
-    echo 'if [ -n "$DB_HOST" ] && [ "$DB_HOST" != "localhost" ]; then' >> /app/startup.sh && \
-    echo '  echo "Waiting for database connection to $DB_HOST:$DB_PORT..."' >> /app/startup.sh && \
-    echo '  while ! nc -z $DB_HOST ${DB_PORT:-3306}; do' >> /app/startup.sh && \
-    echo '    echo "Database not ready, waiting..."' >> /app/startup.sh && \
-    echo '    sleep 2' >> /app/startup.sh && \
-    echo '  done' >> /app/startup.sh && \
-    echo '  echo "Database is ready!"' >> /app/startup.sh && \
-    echo 'else' >> /app/startup.sh && \
-    echo '  echo "No external database host specified, starting application..."' >> /app/startup.sh && \
-    echo 'fi' >> /app/startup.sh && \
-    echo 'java $JAVA_OPTS -jar app.jar' >> /app/startup.sh && \
-    chmod +x /app/startup.sh
-
-# Install netcat for connection checking
-RUN apk add --no-cache netcat-openbsd
-
-# Set ownership for appuser
-RUN chown -R appuser:appgroup /app
+RUN mkdir -p uploads && chown -R appuser:appgroup uploads
 
 # Switch to non-root user
 USER appuser
@@ -101,5 +79,5 @@ LABEL maintainer="PickleJar Team"
 LABEL version="1.0"
 LABEL description="PickleJar Spring Boot Application"
 
-# Run the application with database connection check
-ENTRYPOINT ["/app/startup.sh"] 
+# Run the application directly
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"] 
