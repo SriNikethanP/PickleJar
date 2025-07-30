@@ -47,7 +47,14 @@ export const addToCart = async (
     return result;
   } catch (error: any) {
     console.error("Error adding to cart:", error);
-    toast.error(error.message || "Failed to add to cart");
+
+    // Handle authentication errors specifically
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      toast.error("Please log in to add items to cart");
+    } else {
+      toast.error(error.message || "Failed to add to cart");
+    }
+
     return null;
   }
 };

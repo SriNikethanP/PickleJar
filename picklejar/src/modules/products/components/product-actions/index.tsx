@@ -4,7 +4,7 @@ import { useIntersection } from "@lib/hooks/use-in-view";
 import { Product } from "@lib/data/products";
 import { Button } from "@medusajs/ui";
 import Divider from "@modules/common/components/divider";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ProductPrice from "../product-price";
 import MobileActions from "./mobile-actions";
@@ -34,11 +34,14 @@ export default function ProductActions({
 
   const inView = useIntersection(actionsRef, "0px");
 
+  const router = useRouter();
+
   // add the product to the cart
   const handleAddToCart = async () => {
     if (!product.id) return null;
     if (!user) {
-      // Redirect to login or show login prompt
+      // Redirect to login page when user is not authenticated
+      router.push("/account/login");
       return;
     }
 

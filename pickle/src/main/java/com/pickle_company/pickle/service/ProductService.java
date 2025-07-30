@@ -201,7 +201,14 @@ public class ProductService {
     public void deleteProduct(Long productId) {
         Product product = productRepo.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+        
+        // Set product as inactive (soft delete)
         product.setActive(false);
+        
+        // Remove product from its category and collection
+        product.setCategory(null);
+        product.setCollection(null);
+        
         productRepo.save(product);
     }
 
