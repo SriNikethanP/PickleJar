@@ -1,12 +1,10 @@
-import { Category } from "@lib/data/categories";
-import { Product } from "@lib/data/products";
 import { sortProducts } from "@lib/util/sort-products";
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products";
 import LocalizedClientLink from "@modules/common/components/localized-client-link";
 import ProductPreview from "@modules/products/components/product-preview";
 
 type CategoryTemplateProps = {
-  category: Category;
+  category: any;
   countryCode: string;
   sortBy?: SortOptions;
   page?: string;
@@ -30,7 +28,7 @@ const CategoryTemplate = ({
         <h1 className="text-3xl font-bold">{category.name}</h1>
       </div>
       <div className="grid grid-cols-2 small:grid-cols-4 gap-x-4 gap-y-8">
-        {products.map((product: Product) => (
+        {products.map((product: any) => (
           <LocalizedClientLink
             key={product.id}
             href={`/${countryCode}/products/${product.name.toLowerCase()}`}

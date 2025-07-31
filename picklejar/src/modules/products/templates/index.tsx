@@ -1,4 +1,3 @@
-import { Product } from "@lib/data/products";
 import ProductActions from "@modules/products/components/product-actions";
 import ProductInfo from "@modules/products/templates/product-info";
 import ProductTabs from "@modules/products/components/product-tabs";
@@ -8,7 +7,7 @@ import { Suspense } from "react";
 import Skeleton from "@modules/skeletons/components/skeleton";
 
 type ProductTemplateProps = {
-  product: Product;
+  product: any;
   region: any;
   countryCode: string;
 };

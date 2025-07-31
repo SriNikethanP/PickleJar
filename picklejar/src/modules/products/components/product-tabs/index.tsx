@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Product } from "@lib/data/products";
 import { ProductReviewSystem } from "../../../../components/product/ProductReviewSystem";
 
 type ProductTabsProps = {
-  product: Product;
+  product: any;
 };
 
 const ProductTabs = ({ product }: ProductTabsProps) => {

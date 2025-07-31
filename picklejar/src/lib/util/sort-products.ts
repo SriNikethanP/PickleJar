@@ -1,9 +1,8 @@
-import { Product } from "@lib/data/products";
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products";
 
-interface MinPricedProduct extends Product {
+type MinPricedProduct = any & {
   _minPrice?: number;
-}
+};
 
 /**
  * Helper function to sort products by price and creation order
@@ -12,9 +11,9 @@ interface MinPricedProduct extends Product {
  * @returns products sorted according to the specified criteria
  */
 export function sortProducts(
-  products: Product[],
+  products: any[],
   sortBy: SortOptions
-): Product[] {
+): any[] {
   let sortedProducts = [...products] as MinPricedProduct[];
 
   switch (sortBy) {

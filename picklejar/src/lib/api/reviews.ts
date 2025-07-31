@@ -58,15 +58,20 @@ export const addProductReview = async (
     if (
       !result ||
       typeof result !== 'object' ||
-      typeof result.id !== 'number' ||
-      typeof result.username !== 'string' ||
-      typeof result.rating !== 'number' ||
-      typeof result.createdAt !== 'string' ||
-      typeof result.verified !== 'boolean'
+      !('id' in result) ||
+      !('username' in result) ||
+      !('rating' in result) ||
+      !('createdAt' in result) ||
+      !('verified' in result) ||
+      typeof (result as any).id !== 'number' ||
+      typeof (result as any).username !== 'string' ||
+      typeof (result as any).rating !== 'number' ||
+      typeof (result as any).createdAt !== 'string' ||
+      typeof (result as any).verified !== 'boolean'
     ) {
       throw new Error("Failed to add review: Invalid response");
     }
-    return result;
+    return result as Review;
   } catch (error: any) {
     console.error("Error adding review:", error);
     throw new Error(error.message || "Failed to add review");

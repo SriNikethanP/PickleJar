@@ -1,9 +1,7 @@
 import ProductRail from "@modules/home/components/featured-products/product-rail";
-import { Collection } from "@lib/data/collections";
-import { Product } from "@lib/data/products";
 
-type CollectionWithProducts = Collection & {
-  products: Product[];
+type CollectionWithProducts = any & {
+  products: any[];
 };
 
 export default async function FeaturedProducts({

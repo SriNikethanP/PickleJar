@@ -1,8 +1,6 @@
-import { Product } from "@lib/data/products";
-
 type LineItemOptionsProps = {
-  product: Product;
-  "data-value"?: Product;
+  product: any;
+  "data-value"?: any;
 };
 
 const LineItemOptions = ({ product }: LineItemOptionsProps) => {

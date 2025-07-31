@@ -1,5 +1,4 @@
 import { Text } from "@medusajs/ui";
-import { Product } from "@lib/data/products";
 import LocalizedClientLink from "@modules/common/components/localized-client-link";
 import Thumbnail from "../thumbnail";
 
@@ -8,7 +7,7 @@ export default async function ProductPreview({
   isFeatured,
   region,
 }: {
-  product: Product;
+  product: any;
   isFeatured?: boolean;
   region?: any;
 }) {
@@ -25,7 +24,7 @@ export default async function ProductPreview({
         <div className="relative aspect-square overflow-hidden">
           <Thumbnail
             thumbnail={product.imageUrls?.[0] || null}
-            images={product.imageUrls?.map((url) => ({ url })) || []}
+            images={product.imageUrls?.map((url: string) => ({ url })) || []}
             size="full"
             isFeatured={isFeatured}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"

@@ -193,77 +193,98 @@ const UserDetails = ({ onComplete, isLoading = false }: UserDetailsProps) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
+          <Text className="text-sm font-medium mb-2">Full Name</Text>
           <Input
-            label="Full Name"
+            name="fullName"
             value={details.fullName}
             onChange={(e) => handleInputChange("fullName", e.target.value)}
-            error={errors.fullName}
             placeholder="Enter your full name"
           />
+          {errors.fullName && (
+            <Text className="text-red-500 text-sm mt-1">{errors.fullName}</Text>
+          )}
         </div>
 
         <div>
+          <Text className="text-sm font-medium mb-2">Email</Text>
           <Input
-            label="Email"
+            name="email"
             type="email"
             value={details.email}
             onChange={(e) => handleInputChange("email", e.target.value)}
-            error={errors.email}
             placeholder="Enter your email"
           />
+          {errors.email && (
+            <Text className="text-red-500 text-sm mt-1">{errors.email}</Text>
+          )}
         </div>
 
         <div>
+          <Text className="text-sm font-medium mb-2">Phone Number</Text>
           <Input
-            label="Phone Number"
+            name="phone"
             value={details.phone}
             onChange={(e) => handleInputChange("phone", e.target.value)}
-            error={errors.phone}
             placeholder="Enter 10-digit phone number"
           />
+          {errors.phone && (
+            <Text className="text-red-500 text-sm mt-1">{errors.phone}</Text>
+          )}
         </div>
 
         <div>
+          <Text className="text-sm font-medium mb-2">Pincode</Text>
           <Input
-            label="Pincode"
+            name="pincode"
             value={details.pincode}
             onChange={(e) => handleInputChange("pincode", e.target.value)}
-            error={errors.pincode}
             placeholder="Enter 6-digit pincode"
           />
+          {errors.pincode && (
+            <Text className="text-red-500 text-sm mt-1">{errors.pincode}</Text>
+          )}
         </div>
       </div>
 
       <div>
+        <Text className="text-sm font-medium mb-2">Address</Text>
         <Textarea
-          label="Address"
+          name="address"
           value={details.address}
           onChange={(e) => handleInputChange("address", e.target.value)}
-          error={errors.address}
           placeholder="Enter your complete address"
           rows={3}
         />
+        {errors.address && (
+          <Text className="text-red-500 text-sm mt-1">{errors.address}</Text>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
+          <Text className="text-sm font-medium mb-2">City</Text>
           <Input
-            label="City"
+            name="city"
             value={details.city}
             onChange={(e) => handleInputChange("city", e.target.value)}
-            error={errors.city}
             placeholder="Enter your city"
           />
+          {errors.city && (
+            <Text className="text-red-500 text-sm mt-1">{errors.city}</Text>
+          )}
         </div>
 
         <div>
+          <Text className="text-sm font-medium mb-2">State</Text>
           <Input
-            label="State"
+            name="state"
             value={details.state}
             onChange={(e) => handleInputChange("state", e.target.value)}
-            error={errors.state}
             placeholder="Enter your state"
           />
+          {errors.state && (
+            <Text className="text-red-500 text-sm mt-1">{errors.state}</Text>
+          )}
         </div>
       </div>
 

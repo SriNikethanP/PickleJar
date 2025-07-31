@@ -1,9 +1,8 @@
-import { Product } from "@lib/data/products";
 import { getAllProducts } from "@lib/data/products";
 import ProductPreview from "@modules/products/components/product-preview";
 
 type RelatedProductsProps = {
-  product: Product;
+  product: any;
   countryCode: string;
 };
 

@@ -46,12 +46,15 @@ const Payment = ({ cart, userDetails }: { cart: any; userDetails?: any }) => {
 
     try {
       const result = await codCheckout(userDetails);
-      if (result) {
+      if (result && typeof result === 'object' && 'orderId' in result && 'totalAmount' in result) {
         toast.success("Order placed successfully!");
         // Redirect to thank you page with order details
         router.push(
-          `/thank-you?orderId=${result.orderId}&total=${result.totalAmount}`
+          `/thank-you?orderId=${(result as any).orderId}&total=${(result as any).totalAmount}`
         );
+      } else {
+        toast.success("Order placed successfully!");
+        router.push("/thank-you");
       }
     } catch (err: any) {
       const errorMessage = err.message || "Failed to place order";

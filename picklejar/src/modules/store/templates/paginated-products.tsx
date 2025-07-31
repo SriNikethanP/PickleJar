@@ -1,4 +1,3 @@
-import { Product } from "@lib/data/products";
 import { getAllProducts, listProductsByCollection } from "@lib/data/products";
 import { getRegion } from "@lib/data/regions";
 import { sortProducts } from "@lib/util/sort-products";
@@ -9,7 +8,7 @@ import ProductPreview from "@modules/products/components/product-preview";
 import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid";
 
 const PRODUCT_LIMIT = 12;
-type Products = Product[];
+type Products = any[];
 export default async function PaginatedProducts({
   sortBy,
   page,
@@ -22,7 +21,7 @@ export default async function PaginatedProducts({
   collectionId?: string;
 }) {
   let region = null;
-  let products: Product[] = [];
+  let products: any[] = [];
   let count = 0;
 
   try {
@@ -142,7 +141,7 @@ export default async function PaginatedProducts({
   return (
     <div className="space-y-6 z-10">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {products.map((product: Product) => (
+        {products.map((product: any) => (
           <div key={product.id} className="group">
             <ProductPreview product={product} region={region} />
           </div>

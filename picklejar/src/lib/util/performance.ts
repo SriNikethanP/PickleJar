@@ -46,9 +46,9 @@ export class PerformanceMonitor {
 
   getMetrics(): Record<string, number> {
     const result: Record<string, number> = {};
-    for (const [name, times] of this.metrics.entries()) {
+    Array.from(this.metrics.entries()).forEach(([name, times]) => {
       result[name] = this.getAverageTime(name);
-    }
+    });
     return result;
   }
 }

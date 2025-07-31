@@ -223,7 +223,6 @@ const Register = ({ setCurrentView }: Props) => {
         <SubmitButton
           className="w-full mt-6"
           data-testid="register-button"
-          disabled={isLoading}
         >
           {isLoading ? "Creating Account..." : "Join"}
         </SubmitButton>

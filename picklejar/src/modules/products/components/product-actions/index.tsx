@@ -1,7 +1,6 @@
 "use client";
 
 import { useIntersection } from "@lib/hooks/use-in-view";
-import { Product } from "@lib/data/products";
 import { Button } from "@medusajs/ui";
 import Divider from "@modules/common/components/divider";
 import { useParams, useRouter } from "next/navigation";
@@ -12,7 +11,7 @@ import { useCart } from "@lib/context/cart-context";
 import { useAuth } from "@lib/context/auth-context";
 
 type ProductActionsProps = {
-  product: Product;
+  product: any;
   region: any;
   disabled?: boolean;
 };

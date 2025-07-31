@@ -5,10 +5,9 @@ import React, { Fragment, useMemo } from "react";
 import useToggleState from "@lib/hooks/use-toggle-state";
 import ChevronDown from "@modules/common/icons/chevron-down";
 import X from "@modules/common/icons/x";
-import { Product } from "@lib/data/products";
 
 type MobileActionsProps = {
-  product: Product;
+  product: any;
   region: any;
   disabled?: boolean;
   inStock?: boolean;
@@ -47,7 +46,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
             onClick={onAddToCart}
             disabled={disabled || !inStock || isAdding}
             className="w-full"
-            size="lg"
+            size="large"
           >
             {!inStock ? "Out of stock" : isAdding ? "Adding..." : "Add to cart"}
           </Button>

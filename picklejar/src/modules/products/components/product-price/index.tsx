@@ -1,8 +1,7 @@
 import { clx } from "@medusajs/ui";
-import { Product } from "@lib/data/products";
 
 type ProductPriceProps = {
-  product: Product;
+  product: any;
 };
 
 const ProductPrice = ({ product }: ProductPriceProps) => {

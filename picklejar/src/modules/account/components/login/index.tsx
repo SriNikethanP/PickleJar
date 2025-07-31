@@ -118,7 +118,6 @@ const Login = ({ setCurrentView, onSuccessfulLogin }: Props) => {
         <SubmitButton
           data-testid="sign-in-button"
           className="w-full mt-6"
-          disabled={isLoading}
         >
           {isLoading ? "Signing in..." : "Log in"}
         </SubmitButton>

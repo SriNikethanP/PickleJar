@@ -34,8 +34,8 @@ const ProfileEmail: React.FC<MyInformationProps> = ({ customer }) => {
   };
 
   const [state, formAction] = useActionState(
-    async (...args) => {
-      const result = await updateCustomerEmail(...args);
+    async (currentState: Record<string, unknown>, formData: FormData) => {
+      const result = await updateCustomerEmail(currentState, formData);
       if (result.success) {
         toast.success("Email updated successfully");
       } else if (result.error) {

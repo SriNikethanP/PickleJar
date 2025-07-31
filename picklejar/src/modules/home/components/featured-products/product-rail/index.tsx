@@ -1,13 +1,11 @@
 import { Text } from "@medusajs/ui";
-import { Collection } from "@lib/data/collections";
-import { Product } from "@lib/data/products";
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link";
 import ProductPreview from "@modules/products/components/product-preview";
 import { ArrowRightIcon } from "lucide-react";
 
-type CollectionWithProducts = Collection & {
-  products: Product[];
+type CollectionWithProducts = any & {
+  products: any[];
 };
 
 export default async function ProductRail({
@@ -49,7 +47,7 @@ export default async function ProductRail({
 
         {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
-          {collectionProducts.map((product: Product) => (
+          {collectionProducts.map((product: any) => (
             <div key={product.id} className="group">
               <ProductPreview product={product} region={region} isFeatured />
             </div>

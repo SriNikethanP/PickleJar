@@ -68,7 +68,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
   const removeAddress = async () => {
     setRemoving(true);
     try {
-      await deleteCustomerAddress(address.id);
+      await deleteCustomerAddress(Number(address.id));
       toast.success("Address removed successfully");
       setRemoving(false);
       close();

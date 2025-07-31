@@ -31,8 +31,8 @@ const ProfileName: React.FC<ProfileNameProps> = ({ customer }) => {
   };
 
   const [state, formAction] = useActionState(
-    async (...args) => {
-      const result = await updateCustomerName(...args);
+    async (currentState: Record<string, unknown>, formData: FormData) => {
+      const result = await updateCustomerName(currentState, formData);
       if (result.success) {
         toast.success("Profile updated successfully");
       } else if (result.error) {

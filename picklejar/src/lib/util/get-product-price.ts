@@ -1,9 +1,8 @@
-import { Product } from "@lib/data/products";
 import { getPercentageDiff } from "./get-precentage-diff";
 import { convertToLocale } from "./money";
 
 // This is a placeholder. Update this logic if you add variants to Product.
-export const getPricesForProduct = (product: Product) => {
+export const getPricesForProduct = (product: any) => {
   return {
     calculated_price_number: product.price,
     calculated_price: convertToLocale({
@@ -21,7 +20,7 @@ export const getPricesForProduct = (product: Product) => {
   };
 };
 
-export function getProductPrice({ product }: { product: Product }) {
+export function getProductPrice({ product }: { product: any }) {
   if (!product || !product.id) {
     throw new Error("No product provided");
   }

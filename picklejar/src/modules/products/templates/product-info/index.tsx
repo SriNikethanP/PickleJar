@@ -1,9 +1,8 @@
-import { Product } from "@lib/data/products";
 import ProductPrice from "@modules/products/components/product-price";
 import { ProductRating } from "../../../../components/product/ProductRating";
 
 type ProductInfoProps = {
-  product: Product;
+  product: any;
 };
 
 const ProductInfo = ({ product }: ProductInfoProps) => {
