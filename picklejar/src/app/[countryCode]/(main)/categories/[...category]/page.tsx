@@ -6,11 +6,11 @@ import { getCategoryByHandle, listCategories } from "@lib/data/categories";
 import { getAllProducts } from "@lib/data/products";
 import { getRegion } from "@lib/data/regions";
 import { sortProducts } from "@lib/util/sort-products";
-import { SortOptions } from "@modules/store/components/refinement-list/sort-products";
-import RefinementList from "@modules/store/components/refinement-list";
-import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid";
-import ProductPreview from "@modules/products/components/product-preview";
 import LocalizedClientLink from "@modules/common/components/localized-client-link";
+import ProductPreview from "@modules/products/components/product-preview";
+import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid";
+import RefinementList from "@modules/store/components/refinement-list";
+import { SortOptions } from "@modules/store/components/refinement-list/sort-products";
 
 type Props = {
   params: Promise<{ category: string[]; countryCode: string }>;
