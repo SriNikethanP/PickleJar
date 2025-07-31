@@ -116,7 +116,7 @@ export const updateCustomerAddress = async (addressData: any): Promise<any> => {
 export const getCustomerAddresses = async (): Promise<any[]> => {
   try {
     const result = await apiClient.get("/users/me/addresses");
-    return result || [];
+    return Array.isArray(result) ? result : [];
   } catch (error) {
     console.error("Error fetching customer addresses:", error);
     return [];
@@ -155,7 +155,7 @@ export const deleteCustomerAddress = async (addressId: number): Promise<void> =>
 export const getCustomerOrders = async (): Promise<any[]> => {
   try {
     const result = await apiClient.get("/users/me/orders");
-    return result || [];
+    return Array.isArray(result) ? result : [];
   } catch (error) {
     console.error("Error fetching customer orders:", error);
     return [];

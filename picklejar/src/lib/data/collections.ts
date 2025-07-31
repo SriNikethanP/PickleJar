@@ -51,7 +51,7 @@ export const getCollection = async (handle: string): Promise<any> => {
 export const getCollectionProducts = async (collectionId: number): Promise<any[]> => {
   try {
     const result = await apiClient.get(`/collections/${collectionId}/products`);
-    return result || [];
+    return Array.isArray(result) ? result : [];
   } catch (error) {
     console.error("Error fetching collection products:", error);
     return [];

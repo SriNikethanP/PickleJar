@@ -51,7 +51,7 @@ export const getProduct = async (handle: string): Promise<any> => {
 export const getProductsByCategory = async (categoryId: number): Promise<any[]> => {
   try {
     const result = await apiClient.get(`/categories/${categoryId}/products`);
-    return result || [];
+    return Array.isArray(result) ? result : [];
   } catch (error) {
     console.error("Error fetching products by category:", error);
     return [];
@@ -61,7 +61,7 @@ export const getProductsByCategory = async (categoryId: number): Promise<any[]> 
 export const getProductsByCollection = async (collectionId: number): Promise<any[]> => {
   try {
     const result = await apiClient.get(`/collections/${collectionId}/products`);
-    return result || [];
+    return Array.isArray(result) ? result : [];
   } catch (error) {
     console.error("Error fetching products by collection:", error);
     return [];
@@ -71,7 +71,7 @@ export const getProductsByCollection = async (collectionId: number): Promise<any
 export const searchProducts = async (query: string): Promise<any[]> => {
   try {
     const result = await apiClient.get(`/products/search?q=${encodeURIComponent(query)}`);
-    return result || [];
+    return Array.isArray(result) ? result : [];
   } catch (error) {
     console.error("Error searching products:", error);
     return [];
@@ -81,7 +81,7 @@ export const searchProducts = async (query: string): Promise<any[]> => {
 export const getFeaturedProducts = async (): Promise<any[]> => {
   try {
     const result = await apiClient.get("/products/featured");
-    return result || [];
+    return Array.isArray(result) ? result : [];
   } catch (error) {
     console.error("Error fetching featured products:", error);
     return [];
@@ -91,7 +91,7 @@ export const getFeaturedProducts = async (): Promise<any[]> => {
 export const getProductReviews = async (productId: number): Promise<any[]> => {
   try {
     const result = await apiClient.get(`/products/${productId}/reviews`);
-    return result || [];
+    return Array.isArray(result) ? result : [];
   } catch (error) {
     console.error("Error fetching product reviews:", error);
     return [];

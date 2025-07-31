@@ -43,7 +43,7 @@ export const getOrders = async (): Promise<any[]> => {
   return measureAsync("getOrders", async () => {
     try {
       const result = await apiClient.get("/users/me/orders");
-      return result || [];
+      return Array.isArray(result) ? result : [];
     } catch (error) {
       console.error("Error fetching orders:", error);
       return [];

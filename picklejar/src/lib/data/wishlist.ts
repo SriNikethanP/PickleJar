@@ -5,7 +5,7 @@ import { apiClient } from "@lib/api";
 export const getWishlist = async (): Promise<any[]> => {
   try {
     const result = await apiClient.get("/wishlist");
-    return result || [];
+    return Array.isArray(result) ? result : [];
   } catch (error) {
     console.error("Error fetching wishlist:", error);
     return [];

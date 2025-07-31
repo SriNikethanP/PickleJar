@@ -5,7 +5,7 @@ import { apiClient } from "@lib/api";
 export const getPaymentMethods = async (): Promise<any[]> => {
   try {
     const result = await apiClient.get("/payment-methods");
-    return result || [];
+    return Array.isArray(result) ? result : [];
   } catch (error) {
     console.error("Error fetching payment methods:", error);
     return [];

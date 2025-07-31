@@ -5,7 +5,7 @@ import { apiClient } from "@lib/api";
 export const getFulfillmentOptions = async (): Promise<any[]> => {
   try {
     const result = await apiClient.get("/fulfillment-options");
-    return result || [];
+    return Array.isArray(result) ? result : [];
   } catch (error) {
     console.error("Error fetching fulfillment options:", error);
     return [];

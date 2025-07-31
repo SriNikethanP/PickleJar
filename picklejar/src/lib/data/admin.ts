@@ -2,23 +2,22 @@ import { adminApiClient } from "@lib/admin-api";
 
 export const getAdminDashboardData = async (): Promise<any> => {
   try {
-    const [sales, orders, customers, pie, trend, timeline] =
-      await Promise.all([
-        adminApiClient.get("/admin/reports/total-sales"),
-        adminApiClient.get("/admin/reports/total-orders"),
-        adminApiClient.get("/admin/reports/total-customers"),
-        adminApiClient.get("/admin/reports/category-distribution"),
-        adminApiClient.get("/admin/reports/revenue-trend"),
-        adminApiClient.get("/admin/reports/monthly-revenue-timeline"),
-      ]);
+    const [sales, orders, customers, pie, trend, timeline] = await Promise.all([
+      adminApiClient.get("/admin/reports/total-sales"),
+      adminApiClient.get("/admin/reports/total-orders"),
+      adminApiClient.get("/admin/reports/total-customers"),
+      adminApiClient.get("/admin/reports/category-distribution"),
+      adminApiClient.get("/admin/reports/revenue-trend"),
+      adminApiClient.get("/admin/reports/monthly-revenue-timeline"),
+    ]);
 
     return {
       totalSales: sales || 0,
       totalOrders: orders || 0,
       totalCustomers: customers || 0,
       categoryPieData: pie || [],
-      trendLabels: (trend as any[] || []).map((d: any) => d.date),
-      revenueTrend: (trend as any[] || []).map((d: any) => d.revenue),
+      trendLabels: ((trend as any[]) || []).map((d: any) => d.date),
+      revenueTrend: ((trend as any[]) || []).map((d: any) => d.revenue),
       revenueTimeline: timeline || [],
     };
   } catch (error) {
@@ -38,7 +37,7 @@ export const getAdminDashboardData = async (): Promise<any> => {
 export const listOrders = async (): Promise<any[]> => {
   try {
     const result = await adminApiClient.get("/admin/orders");
-    return result || [];
+    return Array.isArray(result) ? result : [];
   } catch (error) {
     console.error("Error fetching orders:", error);
     return [];
@@ -48,7 +47,7 @@ export const listOrders = async (): Promise<any[]> => {
 export const listCustomers = async (): Promise<any[]> => {
   try {
     const result = await adminApiClient.get("/admin/users");
-    return result || [];
+    return Array.isArray(result) ? result : [];
   } catch (error) {
     console.error("Error fetching customers:", error);
     return [];
@@ -58,7 +57,7 @@ export const listCustomers = async (): Promise<any[]> => {
 export const getOrderCount = async (userId: number) => {
   try {
     const res = await adminApiClient.get(`/admin/users/${userId}/orders`);
-    return res.length;
+    return Array.isArray(res) ? res.length : 0;
   } catch (error) {
     console.error("Error fetching order count:", error);
     return 0;
@@ -218,7 +217,7 @@ export const deleteProduct = async (productId: number) => {
 export const listCollections = async (): Promise<any[]> => {
   try {
     const result = await adminApiClient.get("/admin/collections");
-    return result || [];
+    return Array.isArray(result) ? result : [];
   } catch (error) {
     console.error("Error fetching collections:", error);
     return [];
@@ -275,7 +274,7 @@ export const deleteCollection = async (id: number) => {
 export const listCategories = async (): Promise<any[]> => {
   try {
     const result = await adminApiClient.get("/admin/categories");
-    return result || [];
+    return Array.isArray(result) ? result : [];
   } catch (error) {
     console.error("Error fetching categories:", error);
     return [];
@@ -325,7 +324,7 @@ export const deleteCategory = async (id: number) => {
 export const listPayments = async (): Promise<any[]> => {
   try {
     const result = await adminApiClient.get("/admin/payments");
-    return result || [];
+    return Array.isArray(result) ? result : [];
   } catch (error) {
     console.error("Error fetching payments:", error);
     return [];
@@ -335,7 +334,7 @@ export const listPayments = async (): Promise<any[]> => {
 export const listShipments = async (): Promise<any[]> => {
   try {
     const result = await adminApiClient.get("/admin/shipments");
-    return result || [];
+    return Array.isArray(result) ? result : [];
   } catch (error) {
     console.error("Error fetching shipments:", error);
     return [];
@@ -345,7 +344,7 @@ export const listShipments = async (): Promise<any[]> => {
 export const listInventory = async (): Promise<any[]> => {
   try {
     const result = await adminApiClient.get("/admin/products");
-    return result || [];
+    return Array.isArray(result) ? result : [];
   } catch (error) {
     console.error("Error fetching inventory:", error);
     return [];
