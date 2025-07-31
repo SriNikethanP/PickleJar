@@ -27,7 +27,7 @@ export const getProductReviews = async (
 ): Promise<Review[]> => {
   try {
     const result = await apiClient.get(`/products/${productId}/reviews`);
-    return result || [];
+    return Array.isArray(result) ? result : [];
   } catch (error) {
     console.error("Error fetching reviews:", error);
     return [];
@@ -38,7 +38,7 @@ export const getProductReviews = async (
 export const getProductRating = async (productId: number): Promise<number> => {
   try {
     const result = await apiClient.get(`/products/${productId}/rating`);
-    return result || 0;
+    return typeof result === "number" ? result : 0;
   } catch (error) {
     console.error("Error fetching rating:", error);
     return 0;
@@ -51,7 +51,22 @@ export const addProductReview = async (
   review: CreateReviewRequest
 ): Promise<Review> => {
   try {
-    return await apiClient.post(`/products/${productId}/reviews`, review);
+    const result = await apiClient.post(
+      `/products/${productId}/reviews`,
+      review
+    );
+    if (
+      !result ||
+      typeof result !== 'object' ||
+      typeof result.id !== 'number' ||
+      typeof result.username !== 'string' ||
+      typeof result.rating !== 'number' ||
+      typeof result.createdAt !== 'string' ||
+      typeof result.verified !== 'boolean'
+    ) {
+      throw new Error("Failed to add review: Invalid response");
+    }
+    return result;
   } catch (error: any) {
     console.error("Error adding review:", error);
     throw new Error(error.message || "Failed to add review");

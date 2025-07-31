@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getAllProducts, Product, getProduct } from "@lib/data/products";
+import { getAllProducts, getProduct } from "@lib/data/products";
 import { getRegion } from "@lib/data/regions";
 import ProductTemplate from "@modules/products/templates";
 
@@ -13,7 +13,7 @@ export async function generateStaticParams() {
     const products = await getAllProducts();
 
     return products
-      .map((product: Product) => {
+      .map((product: any) => {
         if (!product.name) {
           console.warn("Product without name found:", product);
           return null;
@@ -49,7 +49,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const products = await getAllProducts();
 
   const product = products.find(
-    (p: Product) => p.name.toLowerCase().replace(/\s+/g, "-") === handle
+    (p: any) => p.name.toLowerCase().replace(/\s+/g, "-") === handle
   );
 
   if (!product) {
@@ -89,7 +89,7 @@ export default async function ProductPage(props: Props) {
   }
 
   const product = products.find(
-    (p: Product) => p.name.toLowerCase().replace(/\s+/g, "-") === handle
+    (p: any) => p.name.toLowerCase().replace(/\s+/g, "-") === handle
   );
 
   if (!product) {

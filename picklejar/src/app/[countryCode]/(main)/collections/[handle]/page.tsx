@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { Collection, listCollections } from "@lib/data/collections";
+import { listCollections } from "@lib/data/collections";
 // import { listRegions } from "@lib/data/regions";
 import CollectionTemplate from "@modules/collections/templates";
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products";
@@ -32,7 +32,7 @@ export async function generateStaticParams() {
   // );
 
   const collectionHandles = collections
-    .map((collection: Collection) => {
+    .map((collection: any) => {
       if (!collection.title) {
         console.warn("Collection without title found:", collection);
         return null;

@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { Suspense } from "react";
 
-import { Cart, retrieveCart } from "@lib/data/cart";
+import { retrieveCart } from "@lib/data/cart";
 import { retrieveCustomer } from "@lib/data/customer";
 import { getBaseURL } from "@lib/util/env";
 import CartMismatchBanner from "@modules/layout/components/cart-mismatch-banner";

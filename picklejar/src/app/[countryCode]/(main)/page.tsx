@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { Suspense } from "react";
 
 import Hero from "@modules/home/components/hero";
-import { Product } from "@lib/data/products";
+
 import { getRegion } from "@lib/data/regions";
 import { listProductsByCollection } from "@lib/data/products";
 import { listCollections } from "@lib/data/collections";
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     "A premium pickle e-commerce store with the freshest and tastiest pickles.",
 };
 
-type Products = Product[];
+type Products = any[];
 
 // Loading component for Suspense
 function FeaturedProductsSkeleton() {
