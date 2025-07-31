@@ -31,6 +31,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.addAllowedOrigin("http://localhost:3000");
+        configuration.addAllowedOrigin("https://pickle-jar-srinikethanps-projects.vercel.app/in");
+        configuration.addAllowedOrigin("https://pickle-jar-srinikethanps-projects.vercel.app");
         configuration.addAllowedOrigin("http://localhost:8000");
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
