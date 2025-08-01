@@ -82,7 +82,7 @@ export default function AdminLoginPage() {
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm"
                 placeholder="Email address"
-                defaultValue="admin@picklejar.com"
+                // defaultValue="admin@picklejar.com"
               />
             </div>
             <div>
@@ -97,12 +97,12 @@ export default function AdminLoginPage() {
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm"
                 placeholder="Password"
-                defaultValue="admin@123"
+                // defaultValue="admin@123"
               />
             </div>
           </div>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+          {/* <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
             <div className="flex">
               <div className="flex-shrink-0">
                 <svg
@@ -118,8 +118,8 @@ export default function AdminLoginPage() {
                     d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-              </div>
-              <div className="ml-3">
+              </div> */}
+          {/* <div className="ml-3">
                 <h3 className="text-sm font-medium text-blue-800">
                   Admin Credentials (For Testing)
                 </h3>
@@ -127,9 +127,9 @@ export default function AdminLoginPage() {
                   <p>Email: admin@picklejar.com</p>
                   <p>Password: admin@123</p>
                 </div>
-              </div>
-            </div>
-          </div>
+              </div> */}
+          {/* </div>
+          </div> */}
 
           <div>
             <button

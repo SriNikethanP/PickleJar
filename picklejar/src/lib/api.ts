@@ -2,8 +2,19 @@ const API_BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "http://localhost:8080/api/v1";
 
 class ApiClient {
+  private isClient(): boolean {
+    return typeof window !== "undefined";
+  }
+
+  private getToken(): string | null {
+    if (!this.isClient()) {
+      return null;
+    }
+    return localStorage.getItem("accessToken");
+  }
+
   private async getAuthHeaders(): Promise<HeadersInit> {
-    const token = localStorage.getItem("accessToken");
+    const token = this.getToken();
     console.log("API Client - Auth token check:", {
       token: token ? "Present" : "Missing",
       tokenLength: token ? token.length : 0,
@@ -22,6 +33,10 @@ class ApiClient {
   }
 
   private async refreshTokenIfNeeded(): Promise<boolean> {
+    if (!this.isClient()) {
+      return false;
+    }
+
     try {
       const refreshToken = localStorage.getItem("refreshToken");
       if (!refreshToken) {

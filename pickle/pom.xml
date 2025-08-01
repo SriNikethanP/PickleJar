@@ -79,6 +79,13 @@
 			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
+		<!-- Database Connector - MySQL for local development -->
+		<dependency>
+			<groupId>com.mysql</groupId>
+			<artifactId>mysql-connector-j</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		
 		<!-- Database Connector - PostgreSQL for Render deployment -->
 		<dependency>
 			<groupId>org.postgresql</groupId>

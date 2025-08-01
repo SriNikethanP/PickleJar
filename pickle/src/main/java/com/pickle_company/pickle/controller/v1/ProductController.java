@@ -41,6 +41,12 @@ public class ProductController {
         return ResponseEntity.ok(productService.searchProducts(name, category, inStock));
     }
 
+    // Admin: Get all products (including inactive)
+    @GetMapping("/admin")
+    public ResponseEntity<List<ProductResponseDTO>> getAllProductsForAdmin() {
+        return ResponseEntity.ok(productService.getAllProducts());
+    }
+
     // Admin: Add or update product
     @PostMapping("/admin")
     public ResponseEntity<ProductResponseDTO> addProduct(@RequestBody ProductRequestDTO dto) {

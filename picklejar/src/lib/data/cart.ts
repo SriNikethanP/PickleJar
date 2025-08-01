@@ -19,13 +19,31 @@ export const getCart = async (): Promise<any> => {
     try {
       const result = await apiClient.get("/cart");
       const cart = result || null;
-      
+
       // Cache the result
       cartCache = cart;
       cartCacheTime = now;
 
       return cart;
-    } catch (error) {
+    } catch (error: any) {
+      // Handle authentication errors gracefully
+      if (
+        error?.message?.includes("Forbidden") ||
+        error?.message?.includes("401") ||
+        error?.message?.includes("403")
+      ) {
+        console.warn("User not authenticated, returning empty cart");
+        return {
+          id: null,
+          items: [],
+          total: 0,
+          subtotal: 0,
+          tax_total: 0,
+          shipping_total: 0,
+          discount_total: 0,
+          gift_card_total: 0,
+        };
+      }
       console.error("Error fetching cart:", error);
       return null;
     }
@@ -38,23 +56,47 @@ export const clearCartCache = async (): Promise<void> => {
   cartCacheTime = 0;
 };
 
-export const addToCart = async (productId: number, quantity: number): Promise<any> => {
+export const addToCart = async (
+  productId: number,
+  quantity: number
+): Promise<any> => {
   try {
     const result = await apiClient.post("/cart", { productId, quantity });
     await clearCartCache();
     return result || null;
-  } catch (error) {
+  } catch (error: any) {
+    // Handle authentication errors gracefully
+    if (
+      error?.message?.includes("Forbidden") ||
+      error?.message?.includes("401") ||
+      error?.message?.includes("403")
+    ) {
+      console.warn("User not authenticated, cannot add to cart");
+      throw new Error("Please log in to add items to cart");
+    }
     console.error("Error adding to cart:", error);
     throw error;
   }
 };
 
-export const updateCartItem = async (cartItemId: number, quantity: number): Promise<any> => {
+export const updateCartItem = async (
+  cartItemId: number,
+  quantity: number
+): Promise<any> => {
   try {
     const result = await apiClient.put("/cart/item", { cartItemId, quantity });
     await clearCartCache();
     return result || null;
-  } catch (error) {
+  } catch (error: any) {
+    // Handle authentication errors gracefully
+    if (
+      error?.message?.includes("Forbidden") ||
+      error?.message?.includes("401") ||
+      error?.message?.includes("403")
+    ) {
+      console.warn("User not authenticated, cannot update cart");
+      throw new Error("Please log in to update cart");
+    }
     console.error("Error updating cart item:", error);
     throw error;
   }
@@ -62,10 +104,21 @@ export const updateCartItem = async (cartItemId: number, quantity: number): Prom
 
 export const removeFromCart = async (cartItemId: number): Promise<any> => {
   try {
-    const result = await apiClient.delete(`/cart/item?cartItemId=${cartItemId}`);
+    const result = await apiClient.delete(
+      `/cart/item?cartItemId=${cartItemId}`
+    );
     await clearCartCache();
     return result || null;
-  } catch (error) {
+  } catch (error: any) {
+    // Handle authentication errors gracefully
+    if (
+      error?.message?.includes("Forbidden") ||
+      error?.message?.includes("401") ||
+      error?.message?.includes("403")
+    ) {
+      console.warn("User not authenticated, cannot remove from cart");
+      throw new Error("Please log in to remove items from cart");
+    }
     console.error("Error removing from cart:", error);
     throw error;
   }
@@ -75,7 +128,16 @@ export const clearCart = async (): Promise<void> => {
   try {
     await apiClient.delete("/cart");
     await clearCartCache();
-  } catch (error) {
+  } catch (error: any) {
+    // Handle authentication errors gracefully
+    if (
+      error?.message?.includes("Forbidden") ||
+      error?.message?.includes("401") ||
+      error?.message?.includes("403")
+    ) {
+      console.warn("User not authenticated, cannot clear cart");
+      throw new Error("Please log in to clear cart");
+    }
     console.error("Error clearing cart:", error);
     throw error;
   }
@@ -105,7 +167,10 @@ export const codCheckout = async (userDetails: any): Promise<any> => {
 
 // Legacy exports for backward compatibility
 export const retrieveCart = getCart;
-export const assignCart = async (cartId: number, customerId: number): Promise<any> => {
+export const assignCart = async (
+  cartId: number,
+  customerId: number
+): Promise<any> => {
   try {
     const result = await apiClient.put("/cart/assign", { cartId, customerId });
     return result || null;

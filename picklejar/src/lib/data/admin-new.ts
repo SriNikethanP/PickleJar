@@ -65,7 +65,7 @@ export const clearDashboardCache = async (): Promise<void> => {
 export const listOrders = async (): Promise<any[]> => {
   try {
     const result = await adminApiClient.get("/admin/orders");
-   return Array.isArray(result) ? result : [];
+    return Array.isArray(result) ? result : [];
   } catch (error) {
     console.error("Error fetching orders:", error);
     return [];
@@ -110,7 +110,7 @@ export const addProduct = async (
       imageUrls,
     };
 
-    const result = await adminApiClient.post("/admin/products", productData);
+    const result = await adminApiClient.post("/products/admin", productData);
     await clearDashboardCache();
     return result;
   } catch (error) {
@@ -139,7 +139,7 @@ export const updateProduct = async (
     };
 
     const result = await adminApiClient.put(
-      `/admin/products/${id}`,
+      `/products/admin/${id}`,
       productData
     );
     await clearDashboardCache();
@@ -152,7 +152,7 @@ export const updateProduct = async (
 
 export const deleteProduct = async (productId: number): Promise<void> => {
   try {
-    await adminApiClient.delete(`/admin/products/${productId}`);
+    await adminApiClient.delete(`/products/admin/${productId}`);
     await clearDashboardCache();
   } catch (error) {
     console.error("Error deleting product:", error);
@@ -165,7 +165,7 @@ export const deleteProductImage = async (
   imageUrl: string
 ): Promise<void> => {
   try {
-    await adminApiClient.delete(`/admin/products/${productId}/images`, {
+    await adminApiClient.delete(`/products/admin/${productId}/images`, {
       imageUrl,
     });
     await clearDashboardCache();
@@ -228,7 +228,7 @@ export const deleteCollection = async (id: number): Promise<void> => {
 export const listCategories = async (): Promise<any[]> => {
   try {
     const result = await adminApiClient.get("/admin/categories");
-   return Array.isArray(result) ? result : [];
+    return Array.isArray(result) ? result : [];
   } catch (error) {
     console.error("Error fetching categories:", error);
     return [];
@@ -338,7 +338,7 @@ export const createTestOrder = async (): Promise<any> => {
 export const listShipments = async (): Promise<any[]> => {
   try {
     const result = await adminApiClient.get("/admin/shipments");
-   return Array.isArray(result) ? result : [];
+    return Array.isArray(result) ? result : [];
   } catch (error) {
     console.error("Error fetching shipments:", error);
     return [];
@@ -347,7 +347,7 @@ export const listShipments = async (): Promise<any[]> => {
 
 export const listInventory = async (): Promise<any[]> => {
   try {
-    const result = await adminApiClient.get("/admin/products");
+    const result = await adminApiClient.get("/products/admin");
     return Array.isArray(result) ? result : [];
   } catch (error) {
     console.error("Error fetching inventory:", error);

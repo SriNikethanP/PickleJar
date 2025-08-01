@@ -4,6 +4,16 @@ import { getAllProducts, getProduct } from "@lib/data/products";
 import { getRegion } from "@lib/data/regions";
 import ProductTemplate from "@modules/products/templates";
 
+// Helper function to generate URL-safe handles
+function generateHandle(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "") // Remove special characters except spaces and hyphens
+    .replace(/\s+/g, "-") // Replace spaces with hyphens
+    .replace(/-+/g, "-") // Replace multiple hyphens with single hyphen
+    .trim(); // Remove leading/trailing spaces
+}
+
 type Props = {
   params: Promise<{ countryCode: string; handle: string }>;
 };
@@ -48,9 +58,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
   const products = await getAllProducts();
 
-  const product = products.find(
-    (p: any) => p.name.toLowerCase().replace(/\s+/g, "-") === handle
-  );
+  const product = products.find((p: any) => generateHandle(p.name) === handle);
 
   if (!product) {
     notFound();
@@ -88,11 +96,20 @@ export default async function ProductPage(props: Props) {
     notFound();
   }
 
-  const product = products.find(
-    (p: any) => p.name.toLowerCase().replace(/\s+/g, "-") === handle
+  // Debug: Log the handle we're looking for and available products
+  console.log("Looking for handle:", handle);
+  console.log(
+    "Available products:",
+    products.map((p: any) => ({
+      name: p.name,
+      generatedHandle: generateHandle(p.name),
+    }))
   );
 
+  const product = products.find((p: any) => generateHandle(p.name) === handle);
+
   if (!product) {
+    console.log("Product not found for handle:", handle);
     notFound();
   }
 

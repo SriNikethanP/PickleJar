@@ -8,7 +8,6 @@ import com.pickle_company.pickle.dto.CODOrderRequestDTO;
 import com.pickle_company.pickle.entity.*;
 import com.pickle_company.pickle.repository.*;
 import com.pickle_company.pickle.mapper.CartMapper;
-import com.pickle_company.pickle.service.PaymentService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 

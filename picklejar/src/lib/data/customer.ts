@@ -86,7 +86,16 @@ export const getCustomer = async (): Promise<any> => {
     try {
       const result = await apiClient.get("/users/me");
       return result || null;
-    } catch (error) {
+    } catch (error: any) {
+      // Handle authentication errors gracefully
+      if (
+        error?.message?.includes("Forbidden") ||
+        error?.message?.includes("401") ||
+        error?.message?.includes("403")
+      ) {
+        console.warn("User not authenticated, returning null");
+        return null;
+      }
       console.error("Error fetching customer:", error);
       return null;
     }
@@ -117,7 +126,16 @@ export const getCustomerAddresses = async (): Promise<any[]> => {
   try {
     const result = await apiClient.get("/users/me/addresses");
     return Array.isArray(result) ? result : [];
-  } catch (error) {
+  } catch (error: any) {
+    // Handle authentication errors gracefully
+    if (
+      error?.message?.includes("Forbidden") ||
+      error?.message?.includes("401") ||
+      error?.message?.includes("403")
+    ) {
+      console.warn("User not authenticated, returning empty addresses");
+      return [];
+    }
     console.error("Error fetching customer addresses:", error);
     return [];
   }
@@ -133,9 +151,15 @@ export const addCustomerAddress = async (addressData: any): Promise<any> => {
   }
 };
 
-export const updateCustomerAddressById = async (addressId: number, addressData: any): Promise<any> => {
+export const updateCustomerAddressById = async (
+  addressId: number,
+  addressData: any
+): Promise<any> => {
   try {
-    const result = await apiClient.put(`/users/me/addresses/${addressId}`, addressData);
+    const result = await apiClient.put(
+      `/users/me/addresses/${addressId}`,
+      addressData
+    );
     return result || null;
   } catch (error) {
     console.error("Error updating customer address:", error);
@@ -143,7 +167,9 @@ export const updateCustomerAddressById = async (addressId: number, addressData: 
   }
 };
 
-export const deleteCustomerAddress = async (addressId: number): Promise<void> => {
+export const deleteCustomerAddress = async (
+  addressId: number
+): Promise<void> => {
   try {
     await apiClient.delete(`/users/me/addresses/${addressId}`);
   } catch (error) {
@@ -156,7 +182,16 @@ export const getCustomerOrders = async (): Promise<any[]> => {
   try {
     const result = await apiClient.get("/users/me/orders");
     return Array.isArray(result) ? result : [];
-  } catch (error) {
+  } catch (error: any) {
+    // Handle authentication errors gracefully
+    if (
+      error?.message?.includes("Forbidden") ||
+      error?.message?.includes("401") ||
+      error?.message?.includes("403")
+    ) {
+      console.warn("User not authenticated, returning empty orders");
+      return [];
+    }
     console.error("Error fetching customer orders:", error);
     return [];
   }

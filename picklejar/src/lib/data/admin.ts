@@ -226,7 +226,7 @@ export const listCollections = async (): Promise<any[]> => {
 
 export const getCollection = async (id: number) => {
   try {
-    const res = await adminApiClient.get(`/collections/${id}`);
+    const res = await adminApiClient.get(`/admin/collections/${id}`);
     return res;
   } catch (error) {
     console.error("Error fetching collection:", error);
@@ -236,7 +236,7 @@ export const getCollection = async (id: number) => {
 
 export const createCollection = async (collection: { title: string }) => {
   try {
-    const res = await adminApiClient.post("/collections", {
+    const res = await adminApiClient.post("/admin/collections", {
       title: collection.title,
     });
     return res;
@@ -251,7 +251,7 @@ export const updateCollection = async (
   collection: { title: string }
 ) => {
   try {
-    const res = await adminApiClient.put(`/collections/${id}`, {
+    const res = await adminApiClient.put(`/admin/collections/${id}`, {
       title: collection.title,
     });
     return res;
@@ -263,7 +263,7 @@ export const updateCollection = async (
 
 export const deleteCollection = async (id: number) => {
   try {
-    const res = await adminApiClient.delete(`/collections/${id}`);
+    const res = await adminApiClient.delete(`/admin/collections/${id}`);
     return res;
   } catch (error) {
     console.error("Error deleting collection:", error);
@@ -283,7 +283,7 @@ export const listCategories = async (): Promise<any[]> => {
 
 export const getCategory = async (id: number) => {
   try {
-    const res = await adminApiClient.get(`/categories/${id}`);
+    const res = await adminApiClient.get(`/admin/categories/${id}`);
     return res;
   } catch (error) {
     console.error("Error fetching category:", error);
@@ -293,7 +293,7 @@ export const getCategory = async (id: number) => {
 
 export const createCategory = async (category: any) => {
   try {
-    const res = await adminApiClient.post("/categories", category);
+    const res = await adminApiClient.post("/admin/categories", category);
     return res;
   } catch (error) {
     console.error("Error creating category:", error);
@@ -303,7 +303,7 @@ export const createCategory = async (category: any) => {
 
 export const updateCategory = async (id: number, category: any) => {
   try {
-    const res = await adminApiClient.put(`/categories/${id}`, category);
+    const res = await adminApiClient.put(`/admin/categories/${id}`, category);
     return res;
   } catch (error) {
     console.error("Error updating category:", error);
@@ -313,7 +313,7 @@ export const updateCategory = async (id: number, category: any) => {
 
 export const deleteCategory = async (id: number) => {
   try {
-    const res = await adminApiClient.delete(`/categories/${id}`);
+    const res = await adminApiClient.delete(`/admin/categories/${id}`);
     return res;
   } catch (error) {
     console.error("Error deleting category:", error);
@@ -333,8 +333,10 @@ export const listPayments = async (): Promise<any[]> => {
 
 export const listShipments = async (): Promise<any[]> => {
   try {
-    const result = await adminApiClient.get("/admin/shipments");
-    return Array.isArray(result) ? result : [];
+    // TODO: Implement shipments endpoint in backend
+    // For now, return empty array since shipments endpoint doesn't exist
+    console.warn("Shipments endpoint not implemented in backend yet");
+    return [];
   } catch (error) {
     console.error("Error fetching shipments:", error);
     return [];
@@ -343,7 +345,7 @@ export const listShipments = async (): Promise<any[]> => {
 
 export const listInventory = async (): Promise<any[]> => {
   try {
-    const result = await adminApiClient.get("/admin/products");
+    const result = await adminApiClient.get("/products/admin");
     return Array.isArray(result) ? result : [];
   } catch (error) {
     console.error("Error fetching inventory:", error);

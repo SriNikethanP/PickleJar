@@ -17,9 +17,11 @@ export const getProducts = async (): Promise<any[]> => {
     }
 
     try {
-      const result = await apiClient.get("/products");
+      // TODO: Use /products endpoint once products are activated
+      // For now, use admin endpoint to get all products including inactive ones
+      const result = await apiClient.get("/products/admin");
       const products = result || [];
-      
+
       // Cache the result
       productsCache = products;
       productsCacheTime = now;
@@ -48,7 +50,9 @@ export const getProduct = async (handle: string): Promise<any> => {
   }
 };
 
-export const getProductsByCategory = async (categoryId: number): Promise<any[]> => {
+export const getProductsByCategory = async (
+  categoryId: number
+): Promise<any[]> => {
   try {
     const result = await apiClient.get(`/categories/${categoryId}/products`);
     return Array.isArray(result) ? result : [];
@@ -58,7 +62,9 @@ export const getProductsByCategory = async (categoryId: number): Promise<any[]> 
   }
 };
 
-export const getProductsByCollection = async (collectionId: number): Promise<any[]> => {
+export const getProductsByCollection = async (
+  collectionId: number
+): Promise<any[]> => {
   try {
     const result = await apiClient.get(`/collections/${collectionId}/products`);
     return Array.isArray(result) ? result : [];
@@ -70,7 +76,9 @@ export const getProductsByCollection = async (collectionId: number): Promise<any
 
 export const searchProducts = async (query: string): Promise<any[]> => {
   try {
-    const result = await apiClient.get(`/products/search?q=${encodeURIComponent(query)}`);
+    const result = await apiClient.get(
+      `/products/search?q=${encodeURIComponent(query)}`
+    );
     return Array.isArray(result) ? result : [];
   } catch (error) {
     console.error("Error searching products:", error);
@@ -98,9 +106,15 @@ export const getProductReviews = async (productId: number): Promise<any[]> => {
   }
 };
 
-export const addProductReview = async (productId: number, review: any): Promise<any> => {
+export const addProductReview = async (
+  productId: number,
+  review: any
+): Promise<any> => {
   try {
-    const result = await apiClient.post(`/products/${productId}/reviews`, review);
+    const result = await apiClient.post(
+      `/products/${productId}/reviews`,
+      review
+    );
     return result || null;
   } catch (error) {
     console.error("Error adding product review:", error);

@@ -2,7 +2,6 @@ package com.pickle_company.pickle.controller.v1;
 
 import com.pickle_company.pickle.dto.OrderDTO;
 import com.pickle_company.pickle.entity.Order;
-import com.pickle_company.pickle.entity.User;
 import com.pickle_company.pickle.service.OrderService;
 import com.pickle_company.pickle.service.UserService;
 import org.springframework.web.bind.annotation.*;
